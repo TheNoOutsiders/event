@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The No Outsiders</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Math:wght@700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <style>
+    :root {
+      --red-1: #4a1272;
+      --red-2: #4a1772;
+      --red-3: #3b0764;
+      --red-4: #2e1065;
+      --black-1: #050506;
+      --black-2: #0b0b0d;
+      --black-3: #07040e;
+      --white: rgba(255,255,255,0.96);
+      --white-soft: rgba(255,255,255,0.78);
+      --border: rgba(255,255,255,0.14);
+      --glass: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+      --glass-strong: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05));
+      --shadow-red: 0 0 35px rgba(88,28,135,0.24);
+      --shadow-deep: 0 24px 70px rgba(0,0,0,0.55);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Noto Sans Math', 'Inter', sans-serif;
+      color: var(--white);
+      background:
+        radial-gradient(circle at 12% 22%, rgba(55,20,110,0.22), transparent 30%),
+        radial-gradient(circle at 82% 18%, rgba(55,20,110,0.22), transparent 32%),
+        linear-gradient(135deg, #060606 0%, #070210 42%, #0a0418 100%);
+      overflow-x: hidden;
+    }
+
+    #particles {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      opacity: 0.75;
+      mix-blend-mode: screen;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.46) 38%, rgba(0,0,0,0.2) 100%),
+        radial-gradient(circle at center, rgba(55,20,110,0.16), transparent 42%);
+      z-index: -3;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.58)),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0 1px, transparent 1px 120px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .admin-toggle-wrap {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 20;
+      display: none;
+    }
+
+    .admin-toggle-wrap.unlocked {
+      display: block;
+    }
+
+    .admin-toggle,
+    .editor-btn {
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 14px;
+      background: linear-gradient(135deg, #0f0520 0%, #3b0764 42%, #4a1772 100%);
+      color: #fff;
+      padding: 12px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.28), 0 0 24px rgba(88,28,135,0.2);
+    }
+
+    .event-editor {
+      position: fixed;
+      top: 70px;
+      right: 16px;
+      width: min(380px, calc(100vw - 32px));
+      max-height: calc(100vh - 90px);
+      overflow: auto;
+      z-index: 20;
+      display: none;
+    }
+
+    .event-editor.open {
+      display: block;
+    }
+
+    .editor-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(8,4,20,0.92), rgba(4,2,12,0.88));
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 26px rgba(88,28,135,0.18);
+    }
+
+    .editor-card h3 {
+      margin: 0 0 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      letter-spacing: 0.8px;
+      color: rgba(255,255,255,0.95);
+    }
+
+    .editor-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .editor-label {
+      display: grid;
+      gap: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: rgba(255,255,255,0.82);
+      letter-spacing: 0.3px;
+    }
+
+    .editor-input {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+    }
+
+    .editor-textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .editor-actions {
+      margin-top: 14px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .dashboard-card {
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 28px rgba(0,0,0,0.22);
+    }
+
+    .dashboard-title {
+      margin: 0 0 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .dashboard-stat {
+      padding: 12px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(35,5,75,0.7), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .dashboard-stat-value {
+      display: block;
+      font-family: 'Noto Sans Math', sans-serif;
+      font-size: 22px;
+      color: rgba(255,255,255,0.96);
+    }
+
+    .dashboard-stat-label {
+      display: block;
+      margin-top: 4px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .dashboard-list {
+      display: grid;
+      gap: 8px;
+      max-height: 220px;
+      overflow: auto;
+    }
+
+    .dashboard-item {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .dashboard-item strong {
+      display: block;
+      color: rgba(255,255,255,0.92);
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+
+    .dashboard-item span {
+      display: block;
+      color: rgba(255,255,255,0.62);
+      font-size: 11px;
+    }
+
+    .ticket-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 30;
+      background: rgba(0,0,0,0.68);
+      backdrop-filter: blur(10px);
+    }
+
+    .ticket-modal.open {
+      display: flex;
+    }
+
+    .ticket-card {
+      width: min(420px, 100%);
+      padding: 22px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(10,4,22,0.96), rgba(4,2,12,0.94));
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.45), 0 0 34px rgba(88,28,135,0.24);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ticket-card h3 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      background: linear-gradient(180deg, #fff, #c084fc 52%, #4a1772 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .ticket-card p {
+      margin: 0 0 16px;
+      font-family: 'Inter', sans-serif;
+      color: rgba(255,255,255,0.72);
+      line-height: 1.6;
+    }
+
+    .ticket-qr-wrap {
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      margin-bottom: 14px;
+    }
+
+    #ticketQr {
+      background: #fff;
+      padding: 10px;
+      border-radius: 14px;
+    }
+
+    .ticket-code {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 1.4px;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    .ticket-meta {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    .ticket-meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .ticket-close {
+      width: 100%;
+    }
+
+    .layout-shell {
+      min-height: 100vh;
+      width: 100%;
+      display: grid;
+      align-items: center;
+      gap: clamp(28px, 5vw, 96px);
+      padding: clamp(18px, 3vw, 34px);
+    }
+
+    .wrapper,
+    .hero-panel {
+      opacity: 0;
+      filter: blur(14px);
+    }
+
+    .wrapper {
+      animation: panelIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .hero-panel {
+      animation: heroIn 1.25s cubic-bezier(0.16, 1, 0.3, 1) 0.18s forwards;
+    }
+
+    .card {
+      position: relative;
+      padding: clamp(22px, 3vw, 32px);
+      border-radius: 30px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.13), rgba(255,255,255,0.035)),
+        linear-gradient(135deg, rgba(107,33,168,0.11), rgba(0,0,0,0.08) 46%, rgba(88,28,135,0.08));
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(24px) saturate(125%);
+      -webkit-backdrop-filter: blur(24px) saturate(125%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.2),
+        inset 0 -1px 0 rgba(255,255,255,0.04),
+        var(--shadow-deep),
+        var(--shadow-red);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .card::before,
+    .hero-stat::before,
+    .hero-feature::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(130deg, rgba(255,255,255,0.22), transparent 36%, transparent 62%, rgba(107,33,168,0.1));
+      pointer-events: none;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.24), rgba(88,28,135,0.32), rgba(255,255,255,0.08));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .card-shine {
+      position: absolute;
+      inset: -20% auto auto -40%;
+      width: 60%;
+      height: 180%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.17), transparent);
+      transform: rotate(14deg);
+      animation: shineSweep 6.5s linear infinite;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    h2,
+    .hero-kicker,
+    .hero-title,
+    .hero-stat-value,
+    label,
+    button,
+    .success,
+    .hero-meta-pill,
+    .hero-feature-title,
+    .hero-feature-value {
+      background: linear-gradient(180deg, #fff 0%, #c084fc 18%, #7e22ce 52%, #4a1272 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow:
+        0 1px 0 rgba(255,255,255,0.18),
+        0 10px 24px rgba(0,0,0,0.34),
+        0 0 14px rgba(88,28,135,0.18);
+    }
+
+    h2 {
+      margin: 0 0 20px;
+      text-align: center;
+      font-size: clamp(24px, 4vw, 34px);
+      line-height: 1.05;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .field {
+      transition: transform 0.3s ease, filter 0.3s ease;
+      will-change: transform;
+    }
+
+    .field:hover,
+    .field:focus-within,
+    .field.filled {
+      transform: translateY(-7px);
+      filter: drop-shadow(0 14px 26px rgba(0,0,0,0.2));
+    }
+
+    label {
+      display: inline-block;
+      margin: 0 0 8px;
+      font-size: 12px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      position: relative;
+    }
+
+    label::after {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 1px;
+      margin-top: 5px;
+      background: linear-gradient(90deg, rgba(107,33,168,0.9), rgba(255,255,255,0.35), transparent);
+      box-shadow: 0 0 14px rgba(88,28,135,0.36);
+      opacity: 0.85;
+    }
+
+    .input-shell {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .input-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 34%, rgba(88,28,135,0.08));
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    input {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      min-height: 56px;
+      padding: 16px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(135deg, rgba(8,4,20,0.74), rgba(0,0,0,0.36));
+      color: rgba(255,255,255,0.98);
+      font-family: 'Noto Sans Math', 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      outline: none;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        inset 0 -1px 0 rgba(255,255,255,0.03),
+        0 10px 24px rgba(0,0,0,0.18);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, transform 0.25s ease;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input::placeholder {
+      color: rgba(255,220,228,0.78);
+    }
+
+    input:focus {
+      border-color: rgba(255,255,255,0.24);
+      background: linear-gradient(135deg, rgba(30,10,62,0.88), rgba(8,4,14,0.5));
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.12),
+        0 0 24px rgba(107,33,168,0.22),
+        0 0 46px rgba(88,28,135,0.28),
+        0 18px 34px rgba(0,0,0,0.26),
+        inset 0 1px 0 rgba(255,255,255,0.15),
+        inset 18px 0 30px rgba(88,28,135,0.12),
+        inset -18px 0 24px rgba(255,255,255,0.03);
+      animation: inputPulse 2s ease-in-out infinite;
+    }
+
+    .stepper {
+      display: grid;
+      grid-template-columns: 48px 1fr 48px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .step-btn {
+      min-height: 56px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(35,5,75,0.95), rgba(15,6,28,0.88));
+      color: #ffd6de;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 24px rgba(0,0,0,0.24), 0 0 18px rgba(88,28,135,0.16);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .step-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.24);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 16px 30px rgba(0,0,0,0.28), 0 0 24px rgba(88,28,135,0.26);
+    }
+
+    .step-btn:active {
+      transform: translateY(0);
+    }
+
+    button[type="submit"] {
+      position: relative;
+      overflow: hidden;
+      min-height: 58px;
+      margin-top: 4px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 20px;
+      background: linear-gradient(135deg, #0f0520 0%, #3b0764 42%, #4a1772 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.16),
+        0 16px 34px rgba(0,0,0,0.34),
+        0 0 30px rgba(88,28,135,0.26);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.24s ease, box-shadow 0.24s ease, filter 0.24s ease;
+    }
+
+    button[type="submit"]::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: translateX(-100%);
+      animation: buttonSweep 3.8s linear infinite;
+    }
+
+    button[type="submit"]:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.18),
+        0 22px 40px rgba(0,0,0,0.42),
+        0 0 42px rgba(88,28,135,0.34);
+      filter: saturate(1.08);
+    }
+
+    .success {
+      display: none;
+      margin-top: 14px;
+      text-align: center;
+      font-size: 14px;
+      letter-spacing: 0.8px;
+    }
+
+    .hero-panel {
+      display: none;
+      gap: 20px;
+    }
+
+    .hero-kicker {
+      font-size: 14px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      margin: 0;
+      max-width: 7ch;
+      font-size: clamp(46px, 6vw, 92px);
+      line-height: 0.9;
+      text-transform: uppercase;
+    }
+
+    .hero-copy {
+      margin: 0;
+      max-width: 42ch;
+      color: rgba(255,240,244,0.82);
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(15px, 1.45vw, 18px);
+      line-height: 1.75;
+      text-shadow: 0 10px 24px rgba(0,0,0,0.28);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(180px, 220px));
+      gap: 16px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .hero-stat,
+    .hero-feature {
+      position: relative;
+      border-radius: 24px;
+      padding: 18px;
+      background: var(--glass);
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.15),
+        0 16px 34px rgba(0,0,0,0.28),
+        0 0 22px rgba(88,28,135,0.12);
+      overflow: hidden;
+    }
+
+    .hero-stat-value {
+      display: block;
+      font-size: clamp(28px, 3vw, 40px);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .hero-stat-label,
+    .hero-feature-title {
+      display: block;
+      margin-top: 8px;
+      color: rgba(255,239,243,0.72);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .hero-feature-value {
+      display: block;
+      margin-top: 10px;
+      font-size: 18px;
+      letter-spacing: 0.4px;
+    }
+
+    .hero-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero-meta-pill {
+      padding: 11px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(135deg, rgba(20,4,55,0.72), rgba(255,255,255,0.04));
+      backdrop-filter: blur(14px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 26px rgba(0,0,0,0.2);
+      font-size: 12px;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+    }
+
+    .countdown {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      max-width: 440px;
+    }
+
+    .count-box {
+      min-width: 92px;
+      padding: 14px 14px 12px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 14px 30px rgba(0,0,0,0.22), 0 0 18px rgba(88,28,135,0.1);
+      text-align: center;
+      backdrop-filter: blur(16px);
+    }
+
+    .count-value {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+      background: linear-gradient(180deg, #fff, #c084fc 55%, #4a1772 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 16px rgba(88,28,135,0.22);
+    }
+
+    .count-label {
+      display: block;
+      margin-top: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: rgba(255,240,244,0.72);
+    }
+
+    .spots-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(55,20,110,0.74), rgba(0,0,0,0.26));
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 28px rgba(0,0,0,0.22), 0 0 18px rgba(88,28,135,0.14);
+      color: rgba(255,235,240,0.9);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.4px;
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #4a1272;
+      box-shadow: 0 0 0 rgba(107,33,168,0.6);
+      animation: pulseDot 1.8s infinite;
+    }
+
+    @keyframes pulseDot {
+      0% { box-shadow: 0 0 0 0 rgba(107,33,168,0.45); }
+      70% { box-shadow: 0 0 0 14px rgba(107,33,168,0); }
+      100% { box-shadow: 0 0 0 0 rgba(107,33,168,0); }
+    }
+
+    @keyframes panelIn {
+      0% { opacity: 0; transform: translateY(48px) scale(0.95); filter: blur(18px); }
+      100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+
+    @keyframes heroIn {
+      0% { opacity: 0; transform: translateX(46px); filter: blur(18px); }
+      100% { opacity: 1; transform: translateX(0); filter: blur(0); }
+    }
+
+    @keyframes shineSweep {
+      0% { transform: translateX(-20%) rotate(14deg); }
+      100% { transform: translateX(260%) rotate(14deg); }
+    }
+
+    @keyframes buttonSweep {
+      0% { transform: translateX(-110%); }
+      100% { transform: translateX(140%); }
+    }
+
+    @keyframes inputPulse {
+      0%, 100% {
+        box-shadow:
+          0 0 0 1px rgba(255,255,255,0.12),
+          0 0 20px rgba(107,33,168,0.16),
+          0 0 40px rgba(88,28,135,0.22),
+          0 18px 34px rgba(0,0,0,0.26),
+          inset 0 1px 0 rgba(255,255,255,0.15),
+          inset 18px 0 30px rgba(88,28,135,0.1),
+          inset -18px 0 24px rgba(255,255,255,0.03);
+      }
+      50% {
+        box-shadow:
+          0 0 0 1px rgba(255,255,255,0.16),
+          0 0 28px rgba(107,33,168,0.24),
+          0 0 52px rgba(88,28,135,0.32),
+          0 22px 38px rgba(0,0,0,0.3),
+          inset 0 1px 0 rgba(255,255,255,0.18),
+          inset 22px 0 34px rgba(88,28,135,0.14),
+          inset -20px 0 28px rgba(255,255,255,0.04);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .layout-shell {
+        grid-template-columns: minmax(360px, 450px) minmax(460px, 1fr);
+        padding-left: clamp(40px, 6vw, 110px);
+        padding-right: clamp(24px, 4vw, 60px);
+      }
+
+      .hero-panel {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 20px;
+        max-width: 620px;
+      }
+    }
+
+    @media (max-width: 1023px) {
+      .layout-shell {
+        display: block;
+        padding: 16px;
+      }
+
+      .hero-panel {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        min-height: calc(100vh - 32px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 18px 16px;
+        border-radius: 24px;
+      }
+
+      h2 {
+        font-size: 26px;
+      }
+
+      .field:hover,
+      .field:focus-within,
+      .field.filled {
+        transform: translateY(-4px);
+      }
+
+      input,
+      .step-btn,
+      button[type="submit"] {
+        min-height: 54px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .wrapper,
+      .hero-panel {
+        opacity: 1;
+        filter: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particles"></canvas>
+
+  <div class="admin-toggle-wrap">
+    <button type="button" id="toggleEditor" class="admin-toggle">Edit Event Details</button>
+  </div>
+
+  <aside class="event-editor" id="eventEditor">
+    <div class="editor-card">
+      <h3>Event Controls</h3>
+      <div class="editor-grid">
+        <label class="editor-label">Brand Name
+          <input class="editor-input" id="editBrand" type="text" />
+        </label>
+        <label class="editor-label">Hero Heading
+          <input class="editor-input" id="editHeroTitle" type="text" />
+        </label>
+        <label class="editor-label">Description
+          <textarea class="editor-input editor-textarea" id="editHeroCopy"></textarea>
+        </label>
+        <label class="editor-label">Spots Remaining Text
+          <input class="editor-input" id="editSpotsText" type="text" />
+        </label>
+        <label class="editor-label">Max Tickets
+          <input class="editor-input" id="editMaxTickets" type="number" min="1" max="20" />
+        </label>
+        <label class="editor-label">Doors Open
+          <input class="editor-input" id="editDoorsOpen" type="text" />
+        </label>
+        <label class="editor-label">Venue Name
+          <input class="editor-input" id="editVenue" type="text" />
+        </label>
+        <label class="editor-label">Event Date & Time
+          <input class="editor-input" id="editEventDate" type="datetime-local" />
+        </label>
+      </div>
+      <div class="editor-actions">
+        <button type="button" id="applyEditor" class="editor-btn">Apply Changes</button>
+      </div>
+    </div>
+        <div class="dashboard-card">
+        <h4 class="dashboard-title">Live Dashboard</h4>
+        <div class="dashboard-stats">
+          <div class="dashboard-stat">
+            <span class="dashboard-stat-value" id="dashboardEntries">0</span>
+            <span class="dashboard-stat-label">Entries</span>
+          </div>
+          <div class="dashboard-stat">
+            <span class="dashboard-stat-value" id="dashboardTickets">0</span>
+            <span class="dashboard-stat-label">Tickets</span>
+          </div>
+        </div>
+        <div class="dashboard-list" id="dashboardList">
+          <div class="dashboard-item"><strong>No entries yet</strong><span>New submissions will appear here.</span></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="ticket-modal" id="ticketModal">
+    <div class="ticket-card">
+      <h3>Your QR Ticket</h3>
+      <p>Show this QR code at check-in. You can screenshot it after submission.</p>
+      <div class="ticket-code" id="ticketCode">TNO-000000</div>
+      <div class="ticket-qr-wrap">
+        <canvas id="ticketQr"></canvas>
+      </div>
+      <div class="ticket-meta">
+        <div class="ticket-meta-row"><span>Name</span><strong id="ticketName">-</strong></div>
+        <div class="ticket-meta-row"><span>Tickets</span><strong id="ticketCount">-</strong></div>
+        <div class="ticket-meta-row"><span>Venue</span><strong id="ticketVenue">-</strong></div>
+      </div>
+      <button type="button" class="editor-btn ticket-close" id="closeTicketModal">Close Ticket</button>
+    </div>
+  </div>
+
+
+  <div class="layout-shell">
+    <div class="wrapper">
+      <div class="card" id="card">
+        <div class="card-shine"></div>
+        <h2>Reserve Your Entry</h2>
+
+        <form id="dataForm">
+          <div class="field">
+            <label for="name">Name</label>
+            <div class="input-shell">
+              <input type="text" id="name" placeholder="Your full name" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone</label>
+            <div class="input-shell">
+              <input type="tel" id="phone" placeholder="01XXXXXXXXX" pattern="^01[3-9][0-9]{8}$" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <div class="input-shell">
+              <input type="email" id="email" placeholder="Your email address" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="payment">Last 3 digits of payment number</label>
+            <div class="input-shell">
+              <input type="text" id="payment" placeholder="e.g. 123" pattern="[0-9]{3}" maxlength="3" required />
+            </div>
+            <div style="margin-top:8px;display:grid;gap:4px;">
+              <span style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,220,228,0.65);letter-spacing:0.4px;">Bkash number : 01713388273</span>
+              <span style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,220,228,0.65);letter-spacing:0.4px;">Nagad number : 01642301836</span>
+              <span style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:0.4px;font-weight:700;background:linear-gradient(180deg,#fff,#c084fc 40%,#7e22ce 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 14px rgba(88,28,135,0.3);">⚠ MAKE SURE TO USE SEND MONEY</span>
+            </div>
+          </div>
+
+          <div style="height:8px;"></div>
+
+          <div class="field">
+            <label for="tickets">How many tickets did you buy?</label>
+            <div class="stepper">
+              <button class="step-btn" type="button" id="decreaseTickets" aria-label="Decrease tickets">-</button>
+              <div class="input-shell">
+                <input type="number" id="tickets" placeholder="1 to 5" min="1" max="5" step="1" required value="1" />
+              </div>
+              <button class="step-btn" type="button" id="increaseTickets" aria-label="Increase tickets">+</button>
+            </div>
+          </div>
+
+          <div style="margin-top:4px;padding:12px 14px;border-radius:14px;background:rgba(88,28,135,0.1);border:1px solid rgba(88,28,135,0.3);">
+            <span style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,200,210,0.9);letter-spacing:0.3px;line-height:1.6;">⚠ <strong style="color:rgba(255,220,228,0.95);">Important:</strong> You must complete your payment before clicking "Confirm" — your spot will not be secured without a successful payment.</span>
+          </div>
+
+          <button type="submit" id="submitBtn">Confirm</button>
+        </form>
+
+        <div class="success" id="successMsg">✔ Entry request submitted</div>
+        <div class="success" id="errorMsg" style="display:none;color:#ff9fb3;background:none;-webkit-text-fill-color:initial;">✖ Submission failed</div>
+      </div>
+    </div>
+
+    <section class="hero-panel">
+      <div class="hero-kicker" id="brandName">THE NO OUTSIDERS</div>
+      <h1 class="hero-title" id="heroTitle">Own the Night. Lock Your Entry.</h1>
+      <p class="hero-copy" id="heroCopy">A red-black cinematic arrival page built for premium access, fast guest capture, and a high-end event impression before attendees even step inside.</p>
+
+      <div class="spots-pill">
+        <span class="pulse-dot"></span>
+        <span id="spotsText">Only 23 priority spots remaining tonight</span>
+      </div>
+
+      <div class="countdown" aria-label="Event countdown">
+        <div class="count-box">
+          <span class="count-value" id="days">12</span>
+          <span class="count-label">Days</span>
+        </div>
+        <div class="count-box">
+          <span class="count-value" id="hours">08</span>
+          <span class="count-label">Hours</span>
+        </div>
+        <div class="count-box">
+          <span class="count-value" id="minutes">42</span>
+          <span class="count-label">Minutes</span>
+        </div>
+        <div class="count-box">
+          <span class="count-value" id="seconds">18</span>
+          <span class="count-label">Seconds</span>
+        </div>
+      </div>
+
+      <div class="hero-grid">
+        <div class="hero-stat">
+          <span class="hero-stat-value" id="maxTicketsDisplay">05</span>
+          <span class="hero-stat-label">Maximum tickets per form</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-value">Live</span>
+          <span class="hero-stat-label">Instant request capture</span>
+        </div>
+        <div class="hero-feature">
+          <span class="hero-feature-title">Doors Open</span>
+          <span class="hero-feature-value" id="doorsOpenDisplay">08:00 PM</span>
+        </div>
+        <div class="hero-feature">
+          <span class="hero-feature-title">Venue Mood</span>
+          <span class="hero-feature-value" id="venueDisplay">Red Room Entry</span>
+        </div>
+      </div>
+
+      <div class="hero-meta-row">
+        <div class="hero-meta-pill">Limited Seats</div>
+        <div class="hero-meta-pill">Premium Entry</div>
+        <div class="hero-meta-pill">Fast Check-In</div>
+        <div class="hero-meta-pill">Black & Red Theme</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const EVENT_CONFIG = {
+      brandName: 'THE NO OUTSIDERS',
+      heroTitle: 'Own the Night. Lock Your Entry.',
+      heroCopy: 'A red-black cinematic arrival page built for premium access, fast guest capture, and a high-end event impression before attendees even step inside.',
+      spotsText: 'Only 23 priority spots remaining tonight',
+      maxTickets: 5,
+      doorsOpen: '08:00 PM',
+      venue: 'Red Room Entry',
+      eventDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000 + 42 * 60 * 1000 + 18 * 1000)
+    };
+
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function createParticles() {
+      particles = [];
+      const count = window.innerWidth < 768 ? 48 : 88;
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 2.4 + 0.6,
+          dx: (Math.random() - 0.5) * 0.45,
+          dy: (Math.random() - 0.5) * 0.45,
+          a: Math.random() * 0.45 + 0.18
+        });
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p) => {
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < -10 || p.x > canvas.width + 10) p.dx *= -1;
+        if (p.y < -10 || p.y > canvas.height + 10) p.dy *= -1;
+
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 6);
+        grad.addColorStop(0, `rgba(168, 85, 247, ${p.a})`);
+        grad.addColorStop(0.45, `rgba(124, 58, 237, ${p.a * 0.55})`);
+        grad.addColorStop(1, 'rgba(88,28,135,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * 6, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+
+    resizeCanvas();
+    createParticles();
+    animateParticles();
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      createParticles();
+    });
+
+    const STORAGE_KEY = 'tno_dashboard_entries';
+
+    const form = document.getElementById('dataForm');
+    const fields = document.querySelectorAll('.field input');
+    const btn = document.getElementById('submitBtn');
+    const successMsg = document.getElementById('successMsg');
+    const errorMsg = document.getElementById('errorMsg');
+    const ticketsInput = document.getElementById('tickets');
+    const decBtn = document.getElementById('decreaseTickets');
+    const incBtn = document.getElementById('increaseTickets');
+
+    function syncFilledState() {
+      fields.forEach((input) => {
+        const field = input.closest('.field');
+        field.classList.toggle('filled', input.value.trim() !== '');
+      });
+    }
+
+    function clampTickets() {
+      let value = parseInt(ticketsInput.value || '1', 10);
+      if (Number.isNaN(value)) value = 1;
+      value = Math.max(1, Math.min(EVENT_CONFIG.maxTickets, value));
+      ticketsInput.value = value;
+      syncFilledState();
+    }
+
+    decBtn.addEventListener('click', () => {
+      ticketsInput.value = Math.max(1, parseInt(ticketsInput.value || '1', 10) - 1);
+      clampTickets();
+    });
+
+    incBtn.addEventListener('click', () => {
+      ticketsInput.value = Math.min(EVENT_CONFIG.maxTickets, parseInt(ticketsInput.value || '1', 10) + 1);
+      clampTickets();
+    });
+
+    fields.forEach((input) => {
+      input.addEventListener('input', () => {
+        if (input === ticketsInput) clampTickets();
+        syncFilledState();
+      });
+      input.addEventListener('blur', () => {
+        if (input === ticketsInput) clampTickets();
+        syncFilledState();
+      });
+    });
+
+    syncFilledState();
+    clampTickets();
+
+    const daysEl = document.getElementById('days');
+    const hoursEl = document.getElementById('hours');
+    const minutesEl = document.getElementById('minutes');
+    const secondsEl = document.getElementById('seconds');
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = Math.max(0, EVENT_CONFIG.eventDate - now);
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
+      if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+      if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+      if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    const toggleEditorBtn = document.getElementById('toggleEditor');
+    const eventEditor = document.getElementById('eventEditor');
+    const editBrand = document.getElementById('editBrand');
+    const editHeroTitle = document.getElementById('editHeroTitle');
+    const editHeroCopy = document.getElementById('editHeroCopy');
+    const editSpotsText = document.getElementById('editSpotsText');
+    const editMaxTickets = document.getElementById('editMaxTickets');
+    const editDoorsOpen = document.getElementById('editDoorsOpen');
+    const editVenue = document.getElementById('editVenue');
+    const editEventDate = document.getElementById('editEventDate');
+    const applyEditorBtn = document.getElementById('applyEditor');
+    const dashboardEntries = document.getElementById('dashboardEntries');
+    const dashboardTickets = document.getElementById('dashboardTickets');
+    const dashboardList = document.getElementById('dashboardList');
+    const ticketModal = document.getElementById('ticketModal');
+    const ticketCodeEl = document.getElementById('ticketCode');
+    const ticketNameEl = document.getElementById('ticketName');
+    const ticketCountEl = document.getElementById('ticketCount');
+    const ticketVenueEl = document.getElementById('ticketVenue');
+    const closeTicketModal = document.getElementById('closeTicketModal');
+    let ticketQr = null;
+
+    function formatDateTimeLocal(date) {
+      const d = new Date(date);
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function populateEditor() {
+      editBrand.value = EVENT_CONFIG.brandName;
+      editHeroTitle.value = EVENT_CONFIG.heroTitle;
+      editHeroCopy.value = EVENT_CONFIG.heroCopy;
+      editSpotsText.value = EVENT_CONFIG.spotsText;
+      editMaxTickets.value = EVENT_CONFIG.maxTickets;
+      editDoorsOpen.value = EVENT_CONFIG.doorsOpen;
+      editVenue.value = EVENT_CONFIG.venue;
+      editEventDate.value = formatDateTimeLocal(EVENT_CONFIG.eventDate);
+    }
+
+    function applyEventConfig() {
+      document.getElementById('brandName').textContent = EVENT_CONFIG.brandName;
+      document.getElementById('heroTitle').textContent = EVENT_CONFIG.heroTitle;
+      document.getElementById('heroCopy').textContent = EVENT_CONFIG.heroCopy;
+      document.getElementById('spotsText').textContent = EVENT_CONFIG.spotsText;
+      document.getElementById('maxTicketsDisplay').textContent = String(EVENT_CONFIG.maxTickets).padStart(2, '0');
+      document.getElementById('doorsOpenDisplay').textContent = EVENT_CONFIG.doorsOpen;
+      document.getElementById('venueDisplay').textContent = EVENT_CONFIG.venue;
+      ticketsInput.max = String(EVENT_CONFIG.maxTickets);
+      ticketsInput.placeholder = `1 to ${EVENT_CONFIG.maxTickets}`;
+      clampTickets();
+      updateCountdown();
+    }
+
+    function getSavedEntries() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function saveEntry(entry) {
+      const entries = getSavedEntries();
+      entries.unshift(entry);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(0, 25)));
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      const entries = getSavedEntries();
+      const totalTickets = entries.reduce((sum, item) => sum + (parseInt(item.tickets, 10) || 0), 0);
+      dashboardEntries.textContent = String(entries.length);
+      dashboardTickets.textContent = String(totalTickets);
+
+      if (!entries.length) {
+        dashboardList.innerHTML = '<div class="dashboard-item"><strong>No entries yet</strong><span>New submissions will appear here.</span></div>';
+        return;
+      }
+
+      dashboardList.innerHTML = entries.map((item) => `
+        <div class="dashboard-item">
+          <strong>${item.name} · ${item.ticketCode}</strong>
+          <span>${item.tickets} ticket(s) · ${item.phone}</span>
+        </div>
+      `).join('');
+    }
+
+    function buildTicketCode() {
+      const seed = Math.random().toString(36).slice(2, 8).toUpperCase();
+      return `TNO-${seed}`;
+    }
+
+    function showTicket(entry) {
+      ticketCodeEl.textContent = entry.ticketCode;
+      ticketNameEl.textContent = entry.name;
+      ticketCountEl.textContent = `${entry.tickets} ticket(s)`;
+      ticketVenueEl.textContent = EVENT_CONFIG.venue;
+      ticketModal.classList.add('open');
+
+      if (!ticketQr) {
+        ticketQr = new QRious({
+          element: document.getElementById('ticketQr'),
+          value: entry.ticketCode,
+          size: 220,
+          background: 'white',
+          foreground: 'black'
+        });
+      }
+
+      ticketQr.set({
+        value: JSON.stringify({
+          ticketCode: entry.ticketCode,
+          name: entry.name,
+          phone: entry.phone,
+          email: entry.email,
+          tickets: entry.tickets,
+          venue: EVENT_CONFIG.venue,
+          doorsOpen: EVENT_CONFIG.doorsOpen
+        })
+      });
+    }
+
+    const ADMIN_PASSWORD = 'THE NOOUTSIDERS';
+    const adminToggleWrap = document.querySelector('.admin-toggle-wrap');
+    let adminUnlocked = false;
+
+    if (new URLSearchParams(window.location.search).has('admin')) {
+      const pwd = prompt('Enter admin password:');
+      if (pwd === ADMIN_PASSWORD) {
+        adminToggleWrap.classList.add('unlocked');
+        adminUnlocked = true;
+      } else if (pwd !== null) {
+        alert('Incorrect password.');
+      }
+    }
+
+    toggleEditorBtn.addEventListener('click', () => {
+      eventEditor.classList.toggle('open');
+      if (eventEditor.classList.contains('open')) populateEditor();
+    });
+
+    applyEditorBtn.addEventListener('click', () => {
+      EVENT_CONFIG.brandName = editBrand.value.trim() || EVENT_CONFIG.brandName;
+      EVENT_CONFIG.heroTitle = editHeroTitle.value.trim() || EVENT_CONFIG.heroTitle;
+      EVENT_CONFIG.heroCopy = editHeroCopy.value.trim() || EVENT_CONFIG.heroCopy;
+      EVENT_CONFIG.spotsText = editSpotsText.value.trim() || EVENT_CONFIG.spotsText;
+      EVENT_CONFIG.maxTickets = Math.max(1, Math.min(20, parseInt(editMaxTickets.value || EVENT_CONFIG.maxTickets, 10)));
+      EVENT_CONFIG.doorsOpen = editDoorsOpen.value.trim() || EVENT_CONFIG.doorsOpen;
+      EVENT_CONFIG.venue = editVenue.value.trim() || EVENT_CONFIG.venue;
+      EVENT_CONFIG.eventDate = editEventDate.value ? new Date(editEventDate.value) : EVENT_CONFIG.eventDate;
+      applyEventConfig();
+    });
+
+    populateEditor();
+    applyEventConfig();
+    renderDashboard();
+
+    closeTicketModal.addEventListener('click', () => {
+      ticketModal.classList.remove('open');
+    });
+
+    ticketModal.addEventListener('click', (e) => {
+      if (e.target === ticketModal) ticketModal.classList.remove('open');
+    });
+
+    const APPS_SCRIPT_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      clampTickets();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const payload = {
+        name: document.getElementById('name').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        payment: document.getElementById('payment').value.trim(),
+        tickets: ticketsInput.value.trim(),
+        submittedAt: new Date().toISOString(),
+        ticketCode: buildTicketCode()
+      };
+
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+      successMsg.style.display = 'none';
+      errorMsg.style.display = 'none';
+
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const resultText = await response.text();
+
+        if (!response.ok || !resultText.toLowerCase().includes('success')) {
+          throw new Error('Request failed');
+        }
+
+        successMsg.style.display = 'block';
+        saveEntry(payload);
+        showTicket(payload);
+        form.reset();
+        ticketsInput.value = '1';
+        populateEditor();
+        syncFilledState();
+      } catch (error) {
+        errorMsg.style.display = 'block';
+        console.error(error);
+      } finally {
+        btn.textContent = 'Confirm';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

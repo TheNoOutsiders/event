@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TNO · Door Scanner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+  <style>
+    :root {
+      --purple: #4a1272;
+      --purple-mid: #7e22ce;
+      --purple-light: #c084fc;
+      --bg: #07040e;
+      --card: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.12);
+      --white: rgba(255,255,255,0.96);
+      --muted: rgba(255,255,255,0.6);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #060606 0%, #070210 42%, #0a0418 100%);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 40px;
+    }
+
+    .top-bar {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #fff, #c084fc 50%, #7e22ce 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .door-badge {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(88,28,135,0.22);
+      color: rgba(255,220,228,0.9);
+    }
+
+    .sheet-setup {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 24px;
+    }
+    .sheet-setup h3 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255,220,228,0.9);
+      margin-bottom: 10px;
+    }
+    .sheet-row {
+      display: flex;
+      gap: 10px;
+    }
+    .sheet-input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      outline: none;
+    }
+    .sheet-input:focus { border-color: rgba(255,255,255,0.26); }
+    .sheet-btn {
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: linear-gradient(135deg, #3b0764, #4a1772);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .sheet-hint {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .sheet-status {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .sheet-status.ok { color: #86efac; }
+    .sheet-status.err { color: #fca5a5; }
+
+    .scanner-box {
+      width: 100%;
+      max-width: 480px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #000;
+      position: relative;
+      aspect-ratio: 1/1;
+      margin-bottom: 20px;
+    }
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .scan-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .scan-frame {
+      width: 58%;
+      aspect-ratio: 1/1;
+      border: 2px solid rgba(192,132,252,0.7);
+      border-radius: 18px;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.45);
+    }
+    .scan-line {
+      position: absolute;
+      left: 21%;
+      right: 21%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #c084fc, transparent);
+      animation: scanMove 2s ease-in-out infinite;
+      border-radius: 2px;
+    }
+    @keyframes scanMove {
+      0%   { top: 22%; }
+      50%  { top: 72%; }
+      100% { top: 22%; }
+    }
+    .scan-label {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+      letter-spacing: 1px;
+      white-space: nowrap;
+      background: rgba(0,0,0,0.5);
+      padding: 5px 14px;
+      border-radius: 999px;
+    }
+
+    .cam-btn {
+      width: 100%;
+      max-width: 480px;
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: linear-gradient(135deg, #0f0520, #3b0764, #4a1772);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .result-card {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 24px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .result-card.valid {
+      background: linear-gradient(135deg, rgba(5,46,22,0.85), rgba(20,83,45,0.5));
+      border-color: rgba(134,239,172,0.3);
+    }
+    .result-card.invalid {
+      background: linear-gradient(135deg, rgba(69,10,10,0.85), rgba(127,29,29,0.5));
+      border-color: rgba(252,165,165,0.3);
+    }
+    .result-card.already {
+      background: linear-gradient(135deg, rgba(69,40,5,0.85), rgba(120,53,15,0.5));
+      border-color: rgba(253,186,116,0.3);
+    }
+    .result-icon {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+    .result-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .result-card.valid .result-title { color: #86efac; }
+    .result-card.invalid .result-title { color: #fca5a5; }
+    .result-card.already .result-title { color: #fdba74; }
+    .result-detail {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      text-align: left;
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-row span { color: var(--muted); }
+    .result-row strong { color: var(--white); }
+    .scan-again-btn {
+      margin-top: 16px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .manual-section {
+      width: 100%;
+      max-width: 480px;
+      margin-top: 8px;
+    }
+    .manual-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+    .manual-row {
+      display: flex;
+      gap: 10px;
+    }
+    .manual-input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      outline: none;
+    }
+    .manual-input:focus { border-color: rgba(255,255,255,0.26); }
+    .manual-check-btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: linear-gradient(135deg, #3b0764, #4a1772);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    canvas { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <span class="brand">The No Outsiders</span>
+    <span class="door-badge">Door Check</span>
+  </div>
+
+  <div class="sheet-setup" id="sheetSetup">
+    <h3>Connect Google Sheet</h3>
+    <div class="sheet-row">
+      <input class="sheet-input" id="scriptUrl" type="text" placeholder="Paste your Apps Script Web App URL" />
+      <button class="sheet-btn" onclick="saveScriptUrl()">Save</button>
+    </div>
+    <p class="sheet-hint">This is the same URL you put in index.html. Once saved it will be remembered on this device.</p>
+    <p class="sheet-status" id="sheetStatus"></p>
+  </div>
+
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="canvas"></canvas>
+
+  <div class="scanner-box" id="scannerBox" style="display:none;">
+    <video id="videoFeed" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+    <div class="scan-overlay">
+      <div class="scan-frame"></div>
+      <div class="scan-line"></div>
+    </div>
+    <span class="scan-label">Point camera at QR code</span>
+  </div>
+
+  <button class="cam-btn" id="startBtn" onclick="startCamera()">Start Camera Scanner</button>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-icon" id="resultIcon"></div>
+    <div class="result-title" id="resultTitle"></div>
+    <div class="result-detail" id="resultDetail"></div>
+    <div id="resultMeta"></div>
+    <button class="scan-again-btn" onclick="resetScanner()">Scan Next Person</button>
+  </div>
+
+  <div class="manual-section">
+    <span class="manual-label">Or enter ticket code manually</span>
+    <div class="manual-row">
+      <input class="manual-input" id="manualCode" type="text" placeholder="TNO-XXXXXX" />
+      <button class="manual-check-btn" onclick="checkManual()">Check</button>
+    </div>
+  </div>
+
+  <canvas id="qrCanvas" style="display:none;"></canvas>
+
+  <script>
+    const STORAGE_KEY = 'tno_scanner_script_url';
+    const VALIDATED_KEY = 'tno_validated_codes';
+    let scriptUrl = '';
+    let scanning = false;
+    let stream = null;
+    let animFrame = null;
+    let validatedLocally = {};
+
+    function loadValidated() {
+      try { validatedLocally = JSON.parse(localStorage.getItem(VALIDATED_KEY) || '{}'); }
+      catch { validatedLocally = {}; }
+    }
+    function saveValidated() {
+      localStorage.setItem(VALIDATED_KEY, JSON.stringify(validatedLocally));
+    }
+    loadValidated();
+
+    function saveScriptUrl() {
+      const val = document.getElementById('scriptUrl').value.trim();
+      if (!val.startsWith('https://')) {
+        document.getElementById('sheetStatus').textContent = 'Please paste a valid https:// URL.';
+        document.getElementById('sheetStatus').className = 'sheet-status err';
+        return;
+      }
+      scriptUrl = val;
+      localStorage.setItem(STORAGE_KEY, val);
+      document.getElementById('sheetStatus').textContent = 'URL saved. Scanner is ready.';
+      document.getElementById('sheetStatus').className = 'sheet-status ok';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        scriptUrl = saved;
+        document.getElementById('scriptUrl').value = saved;
+        document.getElementById('sheetStatus').textContent = 'URL loaded from memory.';
+        document.getElementById('sheetStatus').className = 'sheet-status ok';
+      }
+    });
+
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+        const videoFeed = document.getElementById('videoFeed');
+        videoFeed.srcObject = stream;
+        document.getElementById('scannerBox').style.display = 'block';
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('resultCard').style.display = 'none';
+        scanning = true;
+        videoFeed.addEventListener('loadedmetadata', scanLoop);
+      } catch (err) {
+        alert('Camera access denied. Please allow camera permission and try again.');
+      }
+    }
+
+    function scanLoop() {
+      if (!scanning) return;
+      const video = document.getElementById('videoFeed');
+      const canvas = document.getElementById('qrCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+      if (code && code.data) {
+        scanning = false;
+        handleScan(code.data);
+      } else {
+        animFrame = requestAnimationFrame(scanLoop);
+      }
+    }
+
+    function checkManual() {
+      const code = document.getElementById('manualCode').value.trim().toUpperCase();
+      if (!code) return;
+      handleScan(code);
+    }
+
+    async function handleScan(raw) {
+      let ticketCode = raw;
+      let parsedData = null;
+
+      try {
+        parsedData = JSON.parse(raw);
+        ticketCode = parsedData.ticketCode || raw;
+      } catch {
+        ticketCode = raw.toUpperCase();
+      }
+
+      if (!ticketCode.startsWith('TNO-')) {
+        showResult('invalid', '❌', 'Invalid QR Code', 'This QR code was not issued by The No Outsiders system.', null);
+        return;
+      }
+
+      if (validatedLocally[ticketCode]) {
+        const prev = validatedLocally[ticketCode];
+        showResult('already', '⚠️', 'Already Checked In', `This ticket was already scanned at ${prev.time}.`, prev);
+        return;
+      }
+
+      if (!scriptUrl) {
+        if (parsedData) {
+          validatedLocally[ticketCode] = { ...parsedData, time: new Date().toLocaleTimeString() };
+          saveValidated();
+          showResult('valid', '✅', 'Valid Ticket', 'No Google Sheet connected — validated locally only.', parsedData);
+        } else {
+          showResult('invalid', '❌', 'No Sheet Connected', 'Please paste your Apps Script URL above to validate against the sheet.', null);
+        }
+        return;
+      }
+
+      try {
+        const res = await fetch(`${scriptUrl}?action=validate&code=${encodeURIComponent(ticketCode)}`);
+        const data = await res.json();
+
+        if (data.status === 'valid') {
+          validatedLocally[ticketCode] = { ...data, time: new Date().toLocaleTimeString() };
+          saveValidated();
+          showResult('valid', '✅', 'Valid Ticket — Let Them In', '', data);
+        } else if (data.status === 'already_used') {
+          showResult('already', '⚠️', 'Already Checked In', `First scanned at ${data.validatedAt || 'earlier'}.`, data);
+        } else {
+          showResult('invalid', '❌', 'Invalid Ticket', 'This code was not found in the registration sheet.', null);
+        }
+      } catch {
+        if (parsedData) {
+          validatedLocally[ticketCode] = { ...parsedData, time: new Date().toLocaleTimeString() };
+          saveValidated();
+          showResult('valid', '✅', 'Valid (offline fallback)', 'Sheet unreachable — validated from QR data.', parsedData);
+        } else {
+          showResult('invalid', '❌', 'Connection Failed', 'Could not reach Google Sheet. Check your URL and internet.', null);
+        }
+      }
+    }
+
+    function showResult(type, icon, title, detail, data) {
+      stopCamera();
+      const card = document.getElementById('resultCard');
+      card.className = `result-card ${type}`;
+      card.style.display = 'block';
+      document.getElementById('resultIcon').textContent = icon;
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultDetail').textContent = detail;
+      document.getElementById('startBtn').style.display = 'block';
+
+      let meta = '';
+      if (data) {
+        const rows = [
+          ['Name', data.name],
+          ['Tickets', data.tickets ? `${data.tickets} ticket(s)` : null],
+          ['Phone', data.phone],
+          ['Code', data.ticketCode],
+        ];
+        meta = rows.filter(r => r[1]).map(r =>
+          `<div class="result-row"><span>${r[0]}</span><strong>${r[1]}</strong></div>`
+        ).join('');
+      }
+      document.getElementById('resultMeta').innerHTML = meta;
+    }
+
+    function stopCamera() {
+      scanning = false;
+      if (animFrame) cancelAnimationFrame(animFrame);
+      if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+      document.getElementById('scannerBox').style.display = 'none';
+    }
+
+    function resetScanner() {
+      document.getElementById('resultCard').style.display = 'none';
+      document.getElementById('manualCode').value = '';
+      startCamera();
+    }
+  </script>
+</body>
+</html>
