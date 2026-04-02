@@ -1109,24 +1109,41 @@
       eventDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000 + 42 * 60 * 1000 + 18 * 1000)
     };
 
-    // Fetch config from Google Sheet Config tab on load
-    async function fetchConfig() {
-      try {
-        const res = await fetch(APPS_SCRIPT_URL + '?action=getConfig');
-        const data = await res.json();
-        if (data.status === 'ok') {
-          if (data.brandName)  EVENT_CONFIG.brandName  = data.brandName;
-          if (data.heroTitle)  EVENT_CONFIG.heroTitle  = data.heroTitle;
-          if (data.heroCopy)   EVENT_CONFIG.heroCopy   = data.heroCopy;
-          if (data.spotsText)  EVENT_CONFIG.spotsText  = data.spotsText;
-          if (data.maxTickets) EVENT_CONFIG.maxTickets = parseInt(data.maxTickets, 10);
-          if (data.doorsOpen)  EVENT_CONFIG.doorsOpen  = data.doorsOpen;
-          if (data.venue)      EVENT_CONFIG.venue      = data.venue;
-          if (data.eventDate)  EVENT_CONFIG.eventDate  = new Date(data.eventDate);
-        }
-      } catch (e) {
-        console.log('Config fetch failed, using defaults.');
-      }
+    // Fetch config from Google Sheet Config tab on load using JSONP
+    function fetchConfig() {
+      return new Promise((resolve) => {
+        const callbackName = 'tnoConfigCallback';
+        const timeout = setTimeout(() => {
+          console.log('Config fetch failed, using defaults.');
+          delete window[callbackName];
+          resolve();
+        }, 5000);
+
+        window[callbackName] = function(data) {
+          clearTimeout(timeout);
+          delete window[callbackName];
+          if (data.status === 'ok') {
+            if (data.brandName)  EVENT_CONFIG.brandName  = data.brandName;
+            if (data.heroTitle)  EVENT_CONFIG.heroTitle  = data.heroTitle;
+            if (data.heroCopy)   EVENT_CONFIG.heroCopy   = data.heroCopy;
+            if (data.spotsText)  EVENT_CONFIG.spotsText  = data.spotsText;
+            if (data.maxTickets) EVENT_CONFIG.maxTickets = parseInt(data.maxTickets, 10);
+            if (data.doorsOpen)  EVENT_CONFIG.doorsOpen  = data.doorsOpen;
+            if (data.venue)      EVENT_CONFIG.venue      = data.venue;
+            if (data.eventDate)  EVENT_CONFIG.eventDate  = new Date(data.eventDate);
+          }
+          resolve();
+        };
+
+        const script = document.createElement('script');
+        script.src = APPS_SCRIPT_URL + '?action=getConfig&callback=' + callbackName;
+        script.onerror = () => {
+          clearTimeout(timeout);
+          console.log('Config fetch failed, using defaults.');
+          resolve();
+        };
+        document.head.appendChild(script);
+      });
     }
 
     const canvas = document.getElementById('particles');
