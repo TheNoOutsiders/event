@@ -360,7 +360,7 @@
   <canvas id="qrCanvas" style="display:none;"></canvas>
 
   <script>
-    const APPS_SCRIPT_DEFAULT = 'https://script.google.com/macros/s/AKfycbxnpUn1mH4pifBSMRPhCkxYWUUdaVe_zzUURhuoFbQn-zLo7fTEYfHKHOBfhuLS8unZ7w/exec';
+    const APPS_SCRIPT_DEFAULT = 'https://script.google.com/macros/s/AKfycbzhBvXmQ5mcd3WREwPSfjA8BCXuMavyA26rbWOKklueZeA0gDCS2EAQxdEumdH4HzWRCw/exec';
     const STORAGE_KEY = 'tno_scanner_script_url';
     const VALIDATED_KEY = 'tno_validated_codes';
     let scriptUrl = '';
@@ -478,7 +478,9 @@
         if (data.status === 'valid') {
           validatedLocally[ticketCode] = { ...data, time: new Date().toLocaleTimeString() };
           saveValidated();
-          showResult('valid', '✅', 'Valid Ticket — Let Them In', '', data);
+          showResult('valid', '✅', 'Valid — Let Them In', '', data);
+        } else if (data.status === 'not_verified') {
+          showResult('invalid', '💳', 'Payment Not Verified', 'This person\'s payment has not been confirmed yet. Do NOT let them in.', data);
         } else if (data.status === 'already_used') {
           showResult('already', '⚠️', 'Already Checked In', `First scanned at ${data.validatedAt || 'earlier'}.`, data);
         } else {

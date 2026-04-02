@@ -971,7 +971,7 @@
     <div class="wrapper">
       <div class="card" id="card">
         <div class="card-shine"></div>
-        <h2>Reserve Your Entry</h2>
+        <h2>GET YOUR TICKETS NOW!!!</h2>
 
         <form id="dataForm">
           <div class="field">
@@ -996,14 +996,22 @@
           </div>
 
           <div class="field">
-            <label for="payment">Last 3 digits of payment number</label>
+            <label for="payment">Bkash / Nagad Transaction ID</label>
             <div class="input-shell">
-              <input type="text" id="payment" placeholder="e.g. 123" pattern="[0-9]{3}" maxlength="3" required />
+              <input type="text" id="payment" placeholder="e.g. 8HG23KL9OP" minlength="8" maxlength="20" required style="text-transform:uppercase;" />
             </div>
             <div style="margin-top:8px;display:grid;gap:4px;">
               <span style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,220,228,0.65);letter-spacing:0.4px;">Bkash number : 01713388273</span>
               <span style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,220,228,0.65);letter-spacing:0.4px;">Nagad number : 01642301836</span>
               <span style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:0.4px;font-weight:700;background:linear-gradient(180deg,#fff,#c084fc 40%,#7e22ce 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 14px rgba(88,28,135,0.3);">⚠ MAKE SURE TO USE SEND MONEY</span>
+              <span style="font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,220,228,0.65);letter-spacing:0.4px;">Enter the TrxID from your bKash/Nagad SMS after payment</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="paymentNumber">Last 3 digits of your payment number</label>
+            <div class="input-shell">
+              <input type="text" id="paymentNumber" placeholder="e.g. 123" pattern="[0-9]{3}" maxlength="3" required />
             </div>
           </div>
 
@@ -1393,7 +1401,7 @@
     });
 
     // ── PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW ──
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnpUn1mH4pifBSMRPhCkxYWUUdaVe_zzUURhuoFbQn-zLo7fTEYfHKHOBfhuLS8unZ7w/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzhBvXmQ5mcd3WREwPSfjA8BCXuMavyA26rbWOKklueZeA0gDCS2EAQxdEumdH4HzWRCw/exec';
 
     function submitViaIframe(payload) {
       return new Promise((resolve) => {
@@ -1444,11 +1452,13 @@
         name: document.getElementById('name').value.trim(),
         phone: document.getElementById('phone').value.trim(),
         email: document.getElementById('email').value.trim(),
-        payment: document.getElementById('payment').value.trim(),
+        trxID: document.getElementById('payment').value.trim().toUpperCase(),
+        paymentNumber: document.getElementById('paymentNumber').value.trim(),
         tickets: ticketsInput.value.trim(),
         submittedAt: new Date().toISOString(),
         ticketCode: buildTicketCode(),
-        validated: 'NO'
+        verified: 'NO',
+        validatedAt: ''
       };
 
       btn.disabled = true;
