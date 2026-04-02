@@ -1392,7 +1392,8 @@
       if (e.target === ticketModal) ticketModal.classList.remove('open');
     });
 
-    const APPS_SCRIPT_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+    // ── PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW ──
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwv62g49XrH6prgydrDqhqzpV9x0JyJNYn7UDUEHmb6FkWDGK3DWT-xAucMwXCZStgMxA/exec';
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1411,7 +1412,8 @@
         payment: document.getElementById('payment').value.trim(),
         tickets: ticketsInput.value.trim(),
         submittedAt: new Date().toISOString(),
-        ticketCode: buildTicketCode()
+        ticketCode: buildTicketCode(),
+        validated: 'NO'
       };
 
       btn.disabled = true;
@@ -1420,19 +1422,12 @@
       errorMsg.style.display = 'none';
 
       try {
-        const response = await fetch(APPS_SCRIPT_URL, {
+        await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
-          },
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
-
-        const resultText = await response.text();
-
-        if (!response.ok || !resultText.toLowerCase().includes('success')) {
-          throw new Error('Request failed');
-        }
 
         successMsg.style.display = 'block';
         saveEntry(payload);
