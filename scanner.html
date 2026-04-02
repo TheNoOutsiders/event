@@ -360,6 +360,7 @@
   <canvas id="qrCanvas" style="display:none;"></canvas>
 
   <script>
+    const APPS_SCRIPT_DEFAULT = 'https://script.google.com/macros/s/AKfycbx8bBw1CzrSuKErayjWXAIEP0kgruaCHTWhDOqcngekimGSa1Yn0hxCq0O5WhmxJFGv/exec';
     const STORAGE_KEY = 'tno_scanner_script_url';
     const VALIDATED_KEY = 'tno_validated_codes';
     let scriptUrl = '';
@@ -391,13 +392,11 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        scriptUrl = saved;
-        document.getElementById('scriptUrl').value = saved;
-        document.getElementById('sheetStatus').textContent = 'URL loaded from memory.';
-        document.getElementById('sheetStatus').className = 'sheet-status ok';
-      }
+      const saved = localStorage.getItem(STORAGE_KEY) || APPS_SCRIPT_DEFAULT;
+      scriptUrl = saved;
+      document.getElementById('scriptUrl').value = saved;
+      document.getElementById('sheetStatus').textContent = 'URL ready.';
+      document.getElementById('sheetStatus').className = 'sheet-status ok';
     });
 
     async function startCamera() {
