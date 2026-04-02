@@ -1143,6 +1143,8 @@
   </div>
 
   <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKluZTb7MrMn0YJg4oHK2MgQNDhqhOVRwIHQAnuVJyiaJiN61TQZAZ4x0GUhER4Suvfg/exec';
+
     const EVENT_CONFIG = {
       brandName: 'THE NO OUTSIDERS',
       heroTitle: 'Own the Night. Lock Your Entry.',
@@ -1484,8 +1486,6 @@
     ticketModal.addEventListener('click', (e) => {
       if (e.target === ticketModal) ticketModal.classList.remove('open');
     });
-
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKluZTb7MrMn0YJg4oHK2MgQNDhqhOVRwIHQAnuVJyiaJiN61TQZAZ4x0GUhER4Suvfg/exec';
 
     function submitViaIframe(payload) {
       return new Promise((resolve) => {
