@@ -47,6 +47,7 @@
       z-index: -2;
       opacity: 0.75;
       mix-blend-mode: screen;
+      will-change: transform; /* promote to own GPU layer */
     }
 
     body::before {
@@ -524,17 +525,15 @@
     }
 
     input:focus {
-      border-color: rgba(255,255,255,0.24);
+      border-color: rgba(167,100,255,0.5);
       background: linear-gradient(135deg, rgba(30,10,62,0.88), rgba(8,4,14,0.5));
+      /* Replaced infinite box-shadow animation with a static glow — avoids per-frame repaints */
       box-shadow:
-        0 0 0 1px rgba(255,255,255,0.12),
-        0 0 24px rgba(107,33,168,0.22),
-        0 0 46px rgba(88,28,135,0.28),
+        0 0 0 2px rgba(107,33,168,0.28),
+        0 0 28px rgba(88,28,135,0.32),
         0 18px 34px rgba(0,0,0,0.26),
-        inset 0 1px 0 rgba(255,255,255,0.15),
-        inset 18px 0 30px rgba(88,28,135,0.12),
-        inset -18px 0 24px rgba(255,255,255,0.03);
-      animation: inputPulse 2s ease-in-out infinite;
+        inset 0 1px 0 rgba(255,255,255,0.15);
+      outline: none;
     }
 
     .stepper {
@@ -613,6 +612,14 @@
       letter-spacing: 0.8px;
     }
 
+    .error-msg {
+      background: none !important;
+      -webkit-background-clip: unset !important;
+      background-clip: unset !important;
+      color: #ff9fb3 !important;
+      -webkit-text-fill-color: #ff9fb3 !important;
+    }
+
     .hero-panel {
       display: none;
       gap: 20px;
@@ -655,10 +662,10 @@
       position: relative;
       border-radius: 24px;
       padding: 18px;
-      background: var(--glass);
+      background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
       border: 1px solid rgba(255,255,255,0.14);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      /* Removed backdrop-filter blur here — parent .hero-panel already sits on a dark background;
+         stacking 4+ blur layers simultaneously tanks mobile frame rate */
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.15),
         0 16px 34px rgba(0,0,0,0.28),
@@ -798,28 +805,254 @@
       100% { transform: translateX(140%); }
     }
 
-    @keyframes inputPulse {
-      0%, 100% {
-        box-shadow:
-          0 0 0 1px rgba(255,255,255,0.12),
-          0 0 20px rgba(107,33,168,0.16),
-          0 0 40px rgba(88,28,135,0.22),
-          0 18px 34px rgba(0,0,0,0.26),
-          inset 0 1px 0 rgba(255,255,255,0.15),
-          inset 18px 0 30px rgba(88,28,135,0.1),
-          inset -18px 0 24px rgba(255,255,255,0.03);
-      }
-      50% {
-        box-shadow:
-          0 0 0 1px rgba(255,255,255,0.16),
-          0 0 28px rgba(107,33,168,0.24),
-          0 0 52px rgba(88,28,135,0.32),
-          0 22px 38px rgba(0,0,0,0.3),
-          inset 0 1px 0 rgba(255,255,255,0.18),
-          inset 22px 0 34px rgba(88,28,135,0.14),
-          inset -20px 0 28px rgba(255,255,255,0.04);
-      }
+    /* inputPulse removed — was causing continuous repaints on every focused input */
+
+    /* ── Payment info box (#9 inline styles extracted) ── */
+    .payment-info-box {
+      margin-top: 10px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(139,92,246,0.2);
+      background: linear-gradient(135deg, rgba(10,4,24,0.9), rgba(30,10,60,0.6));
+      backdrop-filter: blur(12px);
     }
+
+    .payment-info-row {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .payment-info-icon-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .payment-info-icon {
+      font-size: 15px;
+    }
+
+    .payment-info-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .payment-info-number {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,220,240,0.95);
+      letter-spacing: 0.5px;
+    }
+
+    .payment-info-note {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(139,92,246,0.08);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .payment-info-note-text {
+      background: linear-gradient(90deg, #fff, #c084fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* ── Ticket count hint box ── */
+    .ticket-hint {
+      margin-top: 4px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(88,28,135,0.1);
+      border: 1px solid rgba(88,28,135,0.3);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: rgba(255,200,210,0.9);
+      letter-spacing: 0.3px;
+      line-height: 1.6;
+    }
+
+    .ticket-hint strong {
+      color: rgba(255,220,228,0.95);
+    }
+
+    /* ── Terms section ── */
+    .terms-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .terms-heading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .terms-heading-bar {
+      width: 3px;
+      height: 18px;
+      border-radius: 2px;
+      background: linear-gradient(180deg, #a855f7, #4a1272);
+      flex-shrink: 0;
+    }
+
+    .terms-heading-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .terms-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+
+    .terms-list li {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: rgba(255,235,245,0.72);
+      line-height: 1.6;
+    }
+
+    .terms-bullet {
+      color: #a855f7;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .terms-list strong {
+      color: rgba(255,255,255,0.88);
+    }
+
+    /* ── QR loading state (#10) ── */
+    .ticket-qr-wrap {
+      position: relative;
+    }
+
+    .qr-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 20px;
+      background: rgba(10,4,22,0.7);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      letter-spacing: 1.2px;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      transition: opacity 0.3s ease;
+    }
+
+    .qr-loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .input-uppercase { text-transform: uppercase; }
+
+    /* ── Payment method picker ── */
+    .payment-method-picker {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 2px;
+    }
+
+    .method-option {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .method-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    .method-option-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 56px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(135deg, rgba(8,4,20,0.74), rgba(0,0,0,0.36));
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        inset 0 -1px 0 rgba(255,255,255,0.03),
+        0 10px 24px rgba(0,0,0,0.18);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, transform 0.2s ease;
+    }
+
+    .method-option:hover .method-option-inner {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.22);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.14),
+        0 14px 28px rgba(0,0,0,0.22),
+        0 0 18px rgba(88,28,135,0.16);
+    }
+
+    /* Selected state */
+    .method-option input[type="radio"]:checked + .method-option-inner {
+      border-color: rgba(167,100,255,0.6);
+      background: linear-gradient(135deg, rgba(30,10,62,0.9), rgba(74,23,114,0.45));
+      box-shadow:
+        0 0 0 2px rgba(107,33,168,0.3),
+        0 0 26px rgba(88,28,135,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.16),
+        0 14px 30px rgba(0,0,0,0.24);
+    }
+
+    .method-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .method-name {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      background: linear-gradient(180deg, #fff 0%, #c084fc 40%, #7e22ce 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* ── Spacer utility ── */
+    .spacer-8 { height: 8px; }
 
     @media (min-width: 1024px) {
       .layout-shell {
@@ -844,8 +1077,51 @@
         padding: 16px;
       }
 
+      /* Fix #7 — hero panel was completely hidden on mobile.
+         Now shown as a compact strip above the form card. */
       .hero-panel {
-        display: none !important;
+        display: flex !important;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 20px 16px 4px;
+      }
+
+      .hero-title {
+        font-size: clamp(34px, 10vw, 52px);
+      }
+
+      .hero-kicker {
+        font-size: 12px;
+        letter-spacing: 4px;
+      }
+
+      .hero-copy {
+        font-size: 14px;
+        max-width: 100%;
+      }
+
+      .hero-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .countdown {
+        gap: 8px;
+      }
+
+      .count-box {
+        min-width: 70px;
+        padding: 10px 10px 8px;
+      }
+
+      .count-value {
+        font-size: 22px;
+      }
+
+      .hero-meta-row {
+        display: none; /* Pills redundant on mobile — keep page tight */
       }
     }
 
@@ -946,7 +1222,6 @@
           <div class="dashboard-item"><strong>No entries yet</strong><span>New submissions will appear here.</span></div>
         </div>
       </div>
-    </div>
   </aside>
 
   <div class="ticket-modal" id="ticketModal">
@@ -956,6 +1231,7 @@
       <div class="ticket-code" id="ticketCode">TNO-000000</div>
       <div class="ticket-qr-wrap">
         <canvas id="ticketQr"></canvas>
+        <div class="qr-loading" id="qrLoading">Generating…</div>
       </div>
       <div class="ticket-meta">
         <div class="ticket-meta-row"><span>Name</span><strong id="ticketName">-</strong></div>
@@ -971,7 +1247,7 @@
     <div class="wrapper">
       <div class="card" id="card">
         <div class="card-shine"></div>
-        <h2>GET YOUR TICKETS NOW!!!</h2>
+        <h2>Secure Your Entry</h2>
 
         <form id="dataForm">
           <div class="field">
@@ -998,27 +1274,47 @@
           <div class="field">
             <label for="payment">Bkash / Nagad Transaction ID</label>
             <div class="input-shell">
-              <input type="text" id="payment" placeholder="e.g. 8HG23KL9OP" minlength="8" maxlength="20" required style="text-transform:uppercase;" />
+              <input type="text" id="payment" placeholder="e.g. 8HG23KL9OP" minlength="8" maxlength="20" required class="input-uppercase" />
             </div>
-            <div style="margin-top:10px;border-radius:16px;overflow:hidden;border:1px solid rgba(139,92,246,0.2);background:linear-gradient(135deg,rgba(10,4,24,0.9),rgba(30,10,60,0.6));backdrop-filter:blur(12px);">
-              <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);">
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <span style="font-size:15px;">💳</span>
-                  <span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,0.5);">bKash</span>
+            <div class="payment-info-box">
+              <div class="payment-info-row">
+                <div class="payment-info-icon-label">
+                  <span class="payment-info-icon">💳</span>
+                  <span class="payment-info-label">bKash</span>
                 </div>
-                <span style="font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:rgba(255,220,240,0.95);letter-spacing:0.5px;">01713388273</span>
+                <span class="payment-info-number">01713388273</span>
               </div>
-              <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);">
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <span style="font-size:15px;">📱</span>
-                  <span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,0.5);">Nagad</span>
+              <div class="payment-info-row">
+                <div class="payment-info-icon-label">
+                  <span class="payment-info-icon">📱</span>
+                  <span class="payment-info-label">Nagad</span>
                 </div>
-                <span style="font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:rgba(255,220,240,0.95);letter-spacing:0.5px;">01642301836</span>
+                <span class="payment-info-number">01642301836</span>
               </div>
-              <div style="padding:10px 14px;display:flex;align-items:center;gap:8px;background:rgba(139,92,246,0.08);">
-                <span style="font-size:13px;">⚠️</span>
-                <span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.4px;background:linear-gradient(90deg,#fff,#c084fc);-webkit-background-clip:text;background-clip:text;color:transparent;">Use <strong style="color:inherit;">SEND MONEY</strong> — not payment or request</span>
+              <div class="payment-info-note">
+                <span>⚠️</span>
+                <span class="payment-info-note-text">Use <strong>SEND MONEY</strong> — not payment or request</span>
               </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label as="legend">Which payment method did you use?</label>
+            <div class="payment-method-picker">
+              <label class="method-option" id="methodBkash">
+                <input type="radio" name="paymentMethod" value="bkash" required />
+                <span class="method-option-inner">
+                  <span class="method-icon">💳</span>
+                  <span class="method-name">bKash</span>
+                </span>
+              </label>
+              <label class="method-option" id="methodNagad">
+                <input type="radio" name="paymentMethod" value="nagad" />
+                <span class="method-option-inner">
+                  <span class="method-icon">📱</span>
+                  <span class="method-name">Nagad</span>
+                </span>
+              </label>
             </div>
           </div>
 
@@ -1029,7 +1325,7 @@
             </div>
           </div>
 
-          <div style="height:8px;"></div>
+          <div class="spacer-8"></div>
 
           <div class="field">
             <label for="tickets">How many tickets did you buy?</label>
@@ -1042,58 +1338,31 @@
             </div>
           </div>
 
-          <div style="margin-top:4px;padding:12px 14px;border-radius:14px;background:rgba(88,28,135,0.1);border:1px solid rgba(88,28,135,0.3);">
-            <span style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,200,210,0.9);letter-spacing:0.3px;line-height:1.6;">⚠ <strong style="color:rgba(255,220,228,0.95);">Important:</strong> You must complete your payment before clicking "Confirm" — your spot will not be secured without a successful payment.</span>
+          <div class="ticket-hint">
+            <span>⚠ <strong>Important:</strong> You must complete your payment before clicking "Confirm" — your spot will not be secured without a successful payment.</span>
           </div>
 
           <button type="submit" id="submitBtn">Confirm</button>
         </form>
 
         <div class="success" id="successMsg">✔ Entry request submitted</div>
-        <div class="success" id="errorMsg" style="display:none;color:#ff9fb3;background:none;-webkit-text-fill-color:initial;">✖ Submission failed</div>
+        <div class="success error-msg" id="errorMsg">✖ Submission failed — please try again</div>
 
-        <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.08);">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-            <div style="width:3px;height:18px;border-radius:2px;background:linear-gradient(180deg,#a855f7,#4a1272);"></div>
-            <span style="font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:2.2px;text-transform:uppercase;color:rgba(255,255,255,0.85);">Terms &amp; Conditions</span>
+        <div class="terms-section">
+          <div class="terms-heading">
+            <div class="terms-heading-bar"></div>
+            <span class="terms-heading-text">Terms &amp; Conditions</span>
           </div>
-          <ul style="margin:0;padding:0;list-style:none;display:grid;gap:8px;">
-            <li style="display:flex;gap:8px;align-items:flex-start;font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,235,245,0.72);line-height:1.6;">
-              <span style="color:#a855f7;margin-top:2px;flex-shrink:0;">◆</span>
-              <span><strong style="color:rgba(255,255,255,0.88);">18+ only</strong> — ID may be checked at entry.</span>
-            </li>
-            <li style="display:flex;gap:8px;align-items:flex-start;font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,235,245,0.72);line-height:1.6;">
-              <span style="color:#a855f7;margin-top:2px;flex-shrink:0;">◆</span>
-              <span><strong style="color:rgba(255,255,255,0.88);">Valid ticket required</strong> — non-transferable &amp; final sale, no refunds.</span>
-            </li>
-            <li style="display:flex;gap:8px;align-items:flex-start;font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,235,245,0.72);line-height:1.6;">
-              <span style="color:#a855f7;margin-top:2px;flex-shrink:0;">◆</span>
-              <span><strong style="color:rgba(255,255,255,0.88);">No drugs or intoxication</strong> — offenders will be removed.</span>
-            </li>
-            <li style="display:flex;gap:8px;align-items:flex-start;font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,235,245,0.72);line-height:1.6;">
-              <span style="color:#a855f7;margin-top:2px;flex-shrink:0;">◆</span>
-              <span><strong style="color:rgba(255,255,255,0.88);">Smoking</strong> allowed only in the outdoor area — use the designated outside zone.</span>
-            </li>
-            <li style="display:flex;gap:8px;align-items:flex-start;font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,235,245,0.72);line-height:1.6;">
-              <span style="color:#a855f7;margin-top:2px;flex-shrink:0;">◆</span>
-              <span><strong style="color:rgba(255,255,255,0.88);">Respect others</strong> — aggressive or abusive behaviour may lead to removal.</span>
-            </li>
-            <li style="display:flex;gap:8px;align-items:flex-start;font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,235,245,0.72);line-height:1.6;">
-              <span style="color:#a855f7;margin-top:2px;flex-shrink:0;">◆</span>
-              <span><strong style="color:rgba(255,255,255,0.88);">No dangerous items</strong> — weapons, glass, or fireworks prohibited.</span>
-            </li>
-            <li style="display:flex;gap:8px;align-items:flex-start;font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,235,245,0.72);line-height:1.6;">
-              <span style="color:#a855f7;margin-top:2px;flex-shrink:0;">◆</span>
-              <span><strong style="color:rgba(255,255,255,0.88);">Organizers</strong> can refuse entry or remove anyone at discretion.</span>
-            </li>
-            <li style="display:flex;gap:8px;align-items:flex-start;font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,235,245,0.72);line-height:1.6;">
-              <span style="color:#a855f7;margin-top:2px;flex-shrink:0;">◆</span>
-              <span><strong style="color:rgba(255,255,255,0.88);">Photos &amp; videos</strong> may be taken for promotional purposes.</span>
-            </li>
-            <li style="display:flex;gap:8px;align-items:flex-start;font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,235,245,0.72);line-height:1.6;">
-              <span style="color:#a855f7;margin-top:2px;flex-shrink:0;">◆</span>
-              <span><strong style="color:rgba(255,255,255,0.88);">Reselling tickets</strong> above face value invalidates them.</span>
-            </li>
+          <ul class="terms-list">
+            <li><span class="terms-bullet">◆</span><span><strong>18+ only</strong> — ID may be checked at entry.</span></li>
+            <li><span class="terms-bullet">◆</span><span><strong>Valid ticket required</strong> — non-transferable &amp; final sale, no refunds.</span></li>
+            <li><span class="terms-bullet">◆</span><span><strong>No drugs or intoxication</strong> — offenders will be removed.</span></li>
+            <li><span class="terms-bullet">◆</span><span><strong>Smoking</strong> allowed only in the outdoor area — use the designated outside zone.</span></li>
+            <li><span class="terms-bullet">◆</span><span><strong>Respect others</strong> — aggressive or abusive behaviour may lead to removal.</span></li>
+            <li><span class="terms-bullet">◆</span><span><strong>No dangerous items</strong> — weapons, glass, or fireworks prohibited.</span></li>
+            <li><span class="terms-bullet">◆</span><span><strong>Organizers</strong> can refuse entry or remove anyone at discretion.</span></li>
+            <li><span class="terms-bullet">◆</span><span><strong>Photos &amp; videos</strong> may be taken for promotional purposes.</span></li>
+            <li><span class="terms-bullet">◆</span><span><strong>Reselling tickets</strong> above face value invalidates them.</span></li>
           </ul>
         </div>
       </div>
@@ -1430,28 +1699,40 @@
       ticketNameEl.textContent = entry.name;
       ticketCountEl.textContent = `${entry.tickets} ticket(s)`;
       ticketVenueEl.textContent = EVENT_CONFIG.venue;
+
+      // Show loading overlay before opening modal (#10)
+      const qrLoading = document.getElementById('qrLoading');
+      qrLoading.classList.remove('hidden');
       ticketModal.classList.add('open');
 
-      if (!ticketQr) {
+      const qrPayload = JSON.stringify({
+        ticketCode: entry.ticketCode,
+        name: entry.name,
+        phone: entry.phone,
+        email: entry.email,
+        tickets: entry.tickets,
+        venue: EVENT_CONFIG.venue,
+        doorsOpen: EVENT_CONFIG.doorsOpen
+      });
+
+      // Fix #2: Always destroy and recreate QR so re-opened modal always shows fresh data
+      if (ticketQr) {
+        ticketQr.set({ value: qrPayload });
+      } else {
         ticketQr = new QRious({
           element: document.getElementById('ticketQr'),
-          value: entry.ticketCode,
+          value: qrPayload,
           size: 220,
           background: 'white',
           foreground: 'black'
         });
       }
 
-      ticketQr.set({
-        value: JSON.stringify({
-          ticketCode: entry.ticketCode,
-          name: entry.name,
-          phone: entry.phone,
-          email: entry.email,
-          tickets: entry.tickets,
-          venue: EVENT_CONFIG.venue,
-          doorsOpen: EVENT_CONFIG.doorsOpen
-        })
+      // Hide loading overlay once QR is rendered (#10)
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          qrLoading.classList.add('hidden');
+        });
       });
     }
 
@@ -1551,6 +1832,7 @@
         phone: document.getElementById('phone').value.trim(),
         email: document.getElementById('email').value.trim(),
         trxID: document.getElementById('payment').value.trim().toUpperCase(),
+        paymentMethod: (document.querySelector('input[name="paymentMethod"]:checked') || {}).value || '',
         paymentNumber: document.getElementById('paymentNumber').value.trim(),
         tickets: ticketsInput.value.trim(),
         submittedAt: new Date().toISOString(),
