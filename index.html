@@ -222,8 +222,7 @@ footer::before{content:'';position:absolute;top:0;left:clamp(32px,9vw,140px);rig
 #wipe.on{clip-path:inset(0 0% 0 0);pointer-events:all;}
 
 /* RESPONSIVE */
-@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr);}.nright .nlink{display:none;}}
-@media(max-width:600px){.cards{grid-template-columns:1fr;}#cd,#cr,#ct{display:none;}body{cursor:auto;}.hatmo,.hatmo2{display:none;}.stxt,.str{display:none;}#sdots{display:none;}}
+
 /* ── LUXURY LOADER ─────────────────────────────────── */
 #ldr{position:fixed;inset:0;z-index:3000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;pointer-events:none;transition:opacity .9s var(--ease-io),visibility .9s;}
 #ldr.out{opacity:0;visibility:hidden;}
@@ -271,7 +270,52 @@ footer::before{content:'';position:absolute;top:0;left:clamp(32px,9vw,140px);rig
 
 /* ── RESPONSIVE ────────────────────────────────────── */
 @media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr);}.nright .nlink{display:none;}.sect-num{display:none;}}
-@media(max-width:600px){.cards{grid-template-columns:1fr;}#cd,#cr,#ct{display:none;}body{cursor:auto;}.hatmo,.hatmo2{display:none;}.stxt,.str{display:none;}#sdots{display:none;}#badge{display:none;}.hnum{display:none;}}
+@media(max-width:600px){
+  .cards{grid-template-columns:1fr;}
+  #cd,#cr,#ct{display:none;}
+  body{cursor:auto;}
+  .hatmo,.hatmo2{display:none;}
+  .stxt,.str{display:none;}
+  #sdots{display:none;}
+  #badge{display:none;}
+  .hnum{display:none;}
+
+  /* NAV */
+  #nav{padding:0 20px;height:60px;}
+  .nlogo{font-size:13px;letter-spacing:2px;}
+  .nbtn{font-size:6px;letter-spacing:3px;padding:8px 14px;}
+
+  /* HERO */
+  #hero{padding:0 20px;padding-top:80px;justify-content:center;min-height:100vh;}
+  #hero::before{display:none;}
+  .heyebrow{font-size:6px;letter-spacing:5px;margin-bottom:18px;}
+  .hhead{font-size:clamp(52px,16vw,80px);line-height:.9;}
+  .hsub{font-size:14px;margin-top:16px;max-width:100%;}
+  .hact{flex-direction:column;gap:10px;margin-top:28px;width:100%;}
+  .btn{width:100%;justify-content:center;padding:16px 24px;}
+  .btnl{padding:16px 24px;font-size:8px;letter-spacing:4px;}
+
+  /* ABOUT */
+  #about{padding:50px 20px;}
+  .astmt{font-size:clamp(26px,8vw,42px);}
+  .apq{font-size:12px;max-width:100%;padding-left:16px;}
+  .srow{gap:28px;}
+  .sib{font-size:clamp(32px,9vw,52px);}
+
+  /* SHOWCASE */
+  #showcase{padding:50px 20px;}
+  .shhdr{flex-direction:column;align-items:flex-start;gap:16px;margin-bottom:28px;}
+
+  /* CTA */
+  #cta{padding:70px 20px;}
+  .cthead{font-size:clamp(52px,16vw,80px);}
+  .ctsub{font-size:13px;margin-bottom:32px;}
+  .ctbtns{flex-direction:column;width:100%;}
+
+  /* FOOTER */
+  footer{padding:40px 20px;flex-direction:column;gap:24px;}
+  .flinks{gap:20px;}
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
 
 
@@ -327,7 +371,7 @@ h2#cthead .wd span{transform:translateY(0)!important;}
     <div class="hatmo" aria-hidden="true">N</div>
     <div class="hatmo2" aria-hidden="true">OWN THE NIGHT</div>
     <div class="heyebrow" id="hey">An Exclusive Experience &nbsp;·&nbsp; Dhaka &nbsp;·&nbsp; 2026</div>
-    <h1 class="hhead" id="hhd" style="font-family:'Marcellus',serif;letter-spacing:.05em;">
+    <h1 class="hhead" id="hhd">
       <div class="wd"><span>Own</span></div>
       <div class="wd"><span>the</span></div>
       <div class="l2" data-text="Experience"><div class="wd"><span>Experience</span></div></div>
@@ -866,7 +910,11 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click'
 const wipe=document.getElementById('wipe');
 // Reset wipe on load (fixes back-navigation blank screen)
 if(wipe){wipe.classList.remove('on');void wipe.offsetWidth;}
-window.addEventListener('pageshow',function(e){if(wipe){wipe.classList.remove('on');}});
+// Force full reload when navigating back (fixes Three.js/GSAP not reinitializing from bfcache)
+window.addEventListener('pageshow',function(e){
+  if(e.persisted){window.location.reload();}
+  if(wipe){wipe.classList.remove('on');}
+});
 document.querySelectorAll('a[href="main.html"]').forEach(l=>{l.addEventListener('click',e=>{e.preventDefault();wipe.classList.add('on');setTimeout(()=>{window.location.href='main.html';},1150);});});
 
 // Countdown with flip animation
