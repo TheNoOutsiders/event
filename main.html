@@ -2179,40 +2179,33 @@
       if (e.target === ticketModal) ticketModal.classList.remove('open');
     });
 
-    function submitViaIframe(payload) {
-      return new Promise((resolve) => {
-        const iframe = document.createElement('iframe');
-        iframe.name = 'hidden_iframe';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-
-        const hiddenForm = document.createElement('form');
-        hiddenForm.method = 'POST';
-        hiddenForm.action = APPS_SCRIPT_URL;
-        hiddenForm.target = 'hidden_iframe';
-
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'data';
-        input.value = JSON.stringify(payload);
-        hiddenForm.appendChild(input);
-        document.body.appendChild(hiddenForm);
-
-        iframe.onload = () => {
-          document.body.removeChild(iframe);
-          document.body.removeChild(hiddenForm);
-          resolve();
-        };
-
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-          document.body.removeChild(hiddenForm);
-          resolve();
-        }, 5000);
-
-        hiddenForm.submit();
-      });
+    function submitToScript(payload) {
+      return fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      }).then(() => ({ status: 'ok' }));
     }
+
+    // Duplicate check via GET (readable response) before writing the row
+    function checkDuplicate(payload) {
+      const params = new URLSearchParams({
+        action: 'checkDuplicate',
+        phone: payload.phone,
+        email: payload.email,
+        trxID: payload.trxID
+      });
+      return fetch(APPS_SCRIPT_URL + '?' + params.toString())
+        .then(r => r.json())
+        .catch(() => ({ status: 'ok' })); // if check fails, allow through
+    }
+
+    const DUPLICATE_MESSAGES = {
+      phone: '✖ This phone number is already registered.',
+      email: '✖ This email address is already registered.',
+      trxID: '✖ This transaction ID has already been used.'
+    };
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -2237,7 +2230,7 @@
         name: document.getElementById('name').value.trim(),
         phone: document.getElementById('phone').value.trim(),
         email: document.getElementById('email').value.trim(),
-        trxID: document.getElementById('payment').value.trim().toUpperCase(),
+        trxID: document.getElementById('trxID').value.trim().toUpperCase(),
         paymentMethod: (document.querySelector('input[name="paymentMethod"]:checked') || {}).value || '',
         paymentNumber: document.getElementById('paymentNumber').value.trim(),
         tickets: ticketsInput.value.trim(),
@@ -2248,12 +2241,23 @@
       };
 
       btn.disabled = true;
-      btn.textContent = 'Submitting…';
+      btn.textContent = 'Checking…';
       successMsg.style.display = 'none';
       errorMsg.style.display = 'none';
+      errorMsg.textContent = '✖ Submission failed — please try again';
 
       try {
-        await submitViaIframe(payload);
+        // Step 1: check for duplicates
+        const dupCheck = await checkDuplicate(payload);
+        if (dupCheck.status === 'duplicate') {
+          errorMsg.textContent = DUPLICATE_MESSAGES[dupCheck.field] || '✖ You have already registered.';
+          errorMsg.style.display = 'block';
+          return;
+        }
+
+        // Step 2: submit
+        btn.textContent = 'Submitting…';
+        await submitToScript(payload);
         successMsg.style.display = 'block';
         saveEntry(payload);
         showTicket(payload);
