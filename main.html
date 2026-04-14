@@ -1749,7 +1749,7 @@
   </footer>
 
   <script>
-    var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKluZTb7MrMn0YJg4oHK2MgQNDhqhOVRwIHQAnuVJyiaJiN61TQZAZ4x0GUhER4Suvfg/exec';
+    var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2WEysuk9c1mrHS_kQsWq706XZqhMg3ChwgyTr8-S9x3sOqDuuMMwioQpeq78719sk/exec';
 
     const EVENT_CONFIG = {
       brandName: '3 HOURS OF CLUB X BOLLYWOOD',
@@ -1763,58 +1763,71 @@
       eventDate: new Date('2026-04-29T19:30:00')
     };
 
-    // Fetch config from Google Sheet Config tab on load using JSONP
+    // Apply raw config data object into EVENT_CONFIG
+    function applyConfigData(data) {
+      if (data.status !== 'ok') return;
+      if (data.brandName)  EVENT_CONFIG.brandName  = data.brandName;
+      if (data.heroTitle)  EVENT_CONFIG.heroTitle  = data.heroTitle;
+      if (data.heroCopy)   EVENT_CONFIG.heroCopy   = data.heroCopy;
+      if (data.spotsText)  EVENT_CONFIG.spotsText  = data.spotsText;
+      // maxTickets is intentionally not overridden from remote config
+      if (data.doorsOpen) {
+        const raw = String(data.doorsOpen).trim();
+        if (raw.includes('T') || raw.match(/^\d{4}-\d{2}-\d{2}/)) {
+          const d = new Date(raw);
+          EVENT_CONFIG.doorsOpen = d.toLocaleTimeString('en-US', {
+            hour: '2-digit', minute: '2-digit', hour12: true,
+            timeZone: 'Asia/Dhaka'
+          });
+        } else if (raw.match(/^\d{1,2}:\d{2}(:\d{2})?\s*(AM|PM)$/i)) {
+          EVENT_CONFIG.doorsOpen = raw.replace(/:\d{2}(\s*(AM|PM))$/i, '$1').trim();
+        } else {
+          EVENT_CONFIG.doorsOpen = raw;
+        }
+      }
+      if (data.venue)      EVENT_CONFIG.venue      = data.venue;
+      if (data.location)   EVENT_CONFIG.location   = data.location;
+      if (data.eventDate)  EVENT_CONFIG.eventDate  = new Date(data.eventDate);
+      console.log('[Config] Applied remote config:', data);
+    }
+
+    // Fetch config — tries fetch() first, falls back to JSONP
     function fetchConfig() {
-      return new Promise((resolve) => {
-        const callbackName = 'tnoConfigCallback';
-        const timeout = setTimeout(() => {
-          console.log('Config fetch failed, using defaults.');
-          delete window[callbackName];
-          resolve();
-        }, 5000);
+      return fetch(APPS_SCRIPT_URL + '?action=getConfig', { redirect: 'follow' })
+        .then(r => r.json())
+        .then(data => {
+          console.log('[Config] Loaded via fetch():', data);
+          applyConfigData(data);
+        })
+        .catch(fetchErr => {
+          console.warn('[Config] fetch() failed, trying JSONP...', fetchErr);
+          return new Promise((resolve) => {
+            const callbackName = 'tnoConfigCallback_' + Date.now();
+            const timeout = setTimeout(() => {
+              console.warn('[Config] JSONP timed out — using hardcoded defaults.');
+              delete window[callbackName];
+              resolve();
+            }, 6000);
 
-        window[callbackName] = function(data) {
-          clearTimeout(timeout);
-          delete window[callbackName];
-          if (data.status === 'ok') {
-            if (data.brandName)  EVENT_CONFIG.brandName  = data.brandName;
-            if (data.heroTitle)  EVENT_CONFIG.heroTitle  = data.heroTitle;
-            if (data.heroCopy)   EVENT_CONFIG.heroCopy   = data.heroCopy;
-            if (data.spotsText)  EVENT_CONFIG.spotsText  = data.spotsText;
-            if (data.maxTickets) EVENT_CONFIG.maxTickets = parseInt(data.maxTickets, 10);
-            if (data.doorsOpen) {
-              // Apps Script may send a Date serial/ISO string or plain time string
-              const raw = String(data.doorsOpen).trim();
-              if (raw.includes('T') || raw.match(/^\d{4}-\d{2}-\d{2}/)) {
-                // ISO date string from Apps Script date serial — extract time portion
-                const d = new Date(raw);
-                EVENT_CONFIG.doorsOpen = d.toLocaleTimeString('en-US', {
-                  hour: '2-digit', minute: '2-digit', hour12: true,
-                  timeZone: 'Asia/Dhaka'
-                });
-              } else if (raw.match(/^\d{1,2}:\d{2}(:\d{2})?\s*(AM|PM)$/i)) {
-                // Plain time string like "7:30:00 PM" — strip seconds
-                EVENT_CONFIG.doorsOpen = raw.replace(/:\d{2}(\s*(AM|PM))$/i, '$1').trim();
-              } else {
-                EVENT_CONFIG.doorsOpen = raw;
-              }
-            }
-            if (data.venue)      EVENT_CONFIG.venue      = data.venue;
-            if (data.location)   EVENT_CONFIG.location   = data.location;
-            if (data.eventDate)  EVENT_CONFIG.eventDate  = new Date(data.eventDate);
-          }
-          resolve();
-        };
+            window[callbackName] = function(data) {
+              clearTimeout(timeout);
+              delete window[callbackName];
+              console.log('[Config] Loaded via JSONP:', data);
+              applyConfigData(data);
+              resolve();
+            };
 
-        const script = document.createElement('script');
-        script.src = APPS_SCRIPT_URL + '?action=getConfig&callback=' + callbackName;
-        script.onerror = () => {
-          clearTimeout(timeout);
-          console.log('Config fetch failed, using defaults.');
-          resolve();
-        };
-        document.head.appendChild(script);
-      });
+            const script = document.createElement('script');
+            script.src = APPS_SCRIPT_URL + '?action=getConfig&callback=' + callbackName;
+            script.onerror = () => {
+              clearTimeout(timeout);
+              console.error('[Config] JSONP failed — using hardcoded defaults.');
+              delete window[callbackName];
+              resolve();
+            };
+            document.head.appendChild(script);
+          });
+        });
     }
 
     const canvas = document.getElementById('particles');
