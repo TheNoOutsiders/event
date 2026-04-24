@@ -123,7 +123,6 @@
       border-radius: 18px;
     }
 
-    /* html5-qrcode injects its own elements — normalize them */
     #qr-reader {
       width: 100% !important;
       border: none !important;
@@ -136,7 +135,7 @@
     }
 
     #qr-reader__dashboard {
-      display: none !important; /* we use our own controls */
+      display: none !important;
     }
 
     .scanner-placeholder {
@@ -254,7 +253,6 @@
       to   { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* Status banner */
     .status-banner {
       display: flex;
       align-items: center;
@@ -291,7 +289,6 @@
       letter-spacing: 0.2px;
     }
 
-    /* Detail rows */
     .detail-grid {
       display: grid;
       gap: 8px;
@@ -440,15 +437,15 @@
   <!-- Stats -->
   <div class="stats-strip">
     <div class="stat-box">
-      <span class="stat-value" id="statCheckedIn">0</span>
+      <span class="stat-value" id="statCheckedIn">—</span>
       <span class="stat-label">Checked In</span>
     </div>
     <div class="stat-box">
-      <span class="stat-value" id="statTotal">0</span>
+      <span class="stat-value" id="statTotal">—</span>
       <span class="stat-label">Total</span>
     </div>
     <div class="stat-box">
-      <span class="stat-value" id="statTickets">0</span>
+      <span class="stat-value" id="statTickets">—</span>
       <span class="stat-label">Tickets In</span>
     </div>
   </div>
@@ -538,22 +535,37 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKluZTb7MrMn0YJg4oHK2MgQNDhqhOVRwIHQAnuVJyiaJiN61TQZAZ4x0GUhER4Suvfg/exec';
+  // ── UPDATED URL ──────────────────────────────────────────
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2WEysuk9c1mrHS_kQsWq706XZqhMg3ChwgyTr8-S9x3sOqDuuMMwioQpeq78719sk/exec';
 
   let scanner = null;
-  let scanLock = false; // prevent double-fires
+  let scanLock = false;
+
+  // ── CORS-safe fetch ──────────────────────────────────────
+  // Google Apps Script redirects to a different domain.
+  // Using mode:'cors' with redirect:'follow' handles this correctly.
+  async function apsFetch(url) {
+    const res = await fetch(url, {
+      method: 'GET',
+      mode: 'cors',
+      redirect: 'follow'
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
 
   // ── Stats ──────────────────────────────────────────────
   async function loadStats() {
     try {
-      const res = await fetch(APPS_SCRIPT_URL + '?action=getStats');
-      const data = await res.json();
+      const data = await apsFetch(APPS_SCRIPT_URL + '?action=getStats');
       if (data.status === 'ok') {
-        document.getElementById('statCheckedIn').textContent = data.checkedIn ?? '—';
-        document.getElementById('statTotal').textContent     = data.total    ?? '—';
-        document.getElementById('statTickets').textContent   = data.tickets  ?? '—';
+        document.getElementById('statCheckedIn').textContent = data.checkedIn ?? '0';
+        document.getElementById('statTotal').textContent     = data.total    ?? '0';
+        document.getElementById('statTickets').textContent   = data.tickets  ?? '0';
       }
-    } catch { /* stats are non-critical, fail silently */ }
+    } catch {
+      // Stats are non-critical — fail silently, show dashes
+    }
   }
   loadStats();
 
@@ -604,7 +616,6 @@
   function handleScan(raw) {
     let code = raw.trim().toUpperCase();
 
-    // If the QR contains JSON (from the registration page), extract ticketCode
     if (code.startsWith('{')) {
       try {
         const obj = JSON.parse(raw);
@@ -627,18 +638,20 @@
   async function validateCode(code) {
     const checkBtn = document.querySelector('.btn-check');
     checkBtn.classList.add('loading');
+    checkBtn.disabled = true;
 
     try {
-      const res  = await fetch(`${APPS_SCRIPT_URL}?action=validate&code=${encodeURIComponent(code)}`);
-      const data = await res.json();
+      const data = await apsFetch(`${APPS_SCRIPT_URL}?action=validate&code=${encodeURIComponent(code)}`);
       renderResult(data, code);
-    } catch {
-      showToast('❌ Network error — check connection');
+    } catch (err) {
+      showToast('❌ Network error — check connection or re-deploy Apps Script');
+      console.error('Validate error:', err);
     } finally {
       checkBtn.classList.remove('loading');
+      checkBtn.disabled = false;
     }
 
-    loadStats(); // refresh counts after each scan
+    loadStats();
   }
 
   // ── Render result ────────────────────────────────────────
@@ -654,11 +667,9 @@
     const resTix  = document.getElementById('resTickets');
     const resPay  = document.getElementById('resPayment');
 
-    // Reset
     card.classList.remove('show');
     banner.className = 'status-banner';
 
-    // Status
     if (data.status === 'valid') {
       banner.classList.add('valid');
       icon.textContent  = '✅';
@@ -694,7 +705,6 @@
     resPhone.textContent = data.phone       || '—';
     resTix.textContent   = data.tickets ? `${data.tickets} ticket(s)` : '—';
 
-    // Payment method pill
     const method = (data.paymentMethod || '').toLowerCase();
     if (method === 'bkash') {
       resPay.innerHTML = '<span class="method-pill bkash">💳 bKash</span>';
@@ -704,7 +714,7 @@
       resPay.innerHTML = '<span class="method-pill unknown">—</span>';
     }
 
-    void card.offsetWidth; // force reflow so animation re-triggers
+    void card.offsetWidth;
     card.classList.add('show');
   }
 
@@ -715,7 +725,7 @@
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
   }
 </script>
 </body>
