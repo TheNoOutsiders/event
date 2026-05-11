@@ -2202,17 +2202,26 @@
     }
 
     function applyEventConfig() {
-      document.getElementById('brandName').textContent = EVENT_CONFIG.brandName;
-      document.getElementById('heroTitle').textContent = EVENT_CONFIG.heroTitle;
-      document.getElementById('heroCopy').textContent = EVENT_CONFIG.heroCopy;
-      document.getElementById('spotsText').textContent = EVENT_CONFIG.spotsText;
-      document.getElementById('maxTicketsDisplay').textContent = String(EVENT_CONFIG.maxTickets).padStart(2, '0');
-      document.getElementById('doorsOpenDisplay').textContent = EVENT_CONFIG.doorsOpen;
-      document.getElementById('venueDisplay').textContent = EVENT_CONFIG.venue;
-      const locEl = document.getElementById('locationDisplay');
-      if (locEl) locEl.textContent = EVENT_CONFIG.location || '—';
-      ticketsInput.max = String(EVENT_CONFIG.maxTickets);
-      ticketsInput.placeholder = `1 to ${EVENT_CONFIG.maxTickets}`;
+      // Safe setter — skips elements that don't exist so a single missing ID
+      // doesn't kill the rest of the painting.
+      const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+      };
+
+      setText('brandName',         EVENT_CONFIG.brandName);
+      setText('heroTitle',         EVENT_CONFIG.heroTitle);
+      setText('heroCopy',          EVENT_CONFIG.heroCopy);
+      setText('spotsText',         EVENT_CONFIG.spotsText);
+      setText('maxTicketsDisplay', String(EVENT_CONFIG.maxTickets).padStart(2, '0'));
+      setText('doorsOpenDisplay',  EVENT_CONFIG.doorsOpen);
+      setText('venueDisplay',      EVENT_CONFIG.venue);
+      setText('locationDisplay',   EVENT_CONFIG.location || '—');
+
+      if (ticketsInput) {
+        ticketsInput.max = String(EVENT_CONFIG.maxTickets);
+        ticketsInput.placeholder = `1 to ${EVENT_CONFIG.maxTickets}`;
+      }
       clampTickets();
       updateCountdown();
     }
