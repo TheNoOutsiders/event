@@ -758,7 +758,547 @@
     transform: translateY(-2px);
   }
 
-  @media (max-width: 480px) {
+  /* ═══════════════════════════════════════════════════════════════════
+     HERO SECTION
+     ═══════════════════════════════════════════════════════════════════ */
+  .hero-section {
+    text-align: center;
+    padding: 38px 0 56px;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .hero-rule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 22px;
+    color: var(--gold);
+  }
+  .hero-rule-line {
+    flex: 0 0 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-line));
+  }
+  .hero-rule-line:last-child {
+    background: linear-gradient(270deg, transparent, var(--gold-line));
+  }
+  .hero-rule-dot {
+    font-size: 12px;
+    color: var(--gold);
+  }
+
+  .hero-eyebrow {
+    font-family: var(--font-body);
+    font-size: 10px;
+    letter-spacing: 6px;
+    color: var(--gold-soft);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  .hero-headline {
+    font-family: var(--font-display);
+    font-size: clamp(64px, 14vw, 124px);
+    letter-spacing: 10px;
+    line-height: 0.95;
+    margin: 0 0 28px;
+    background: linear-gradient(180deg, #fff 0%, #e8d0fc 30%, #c890ec 60%, #6020a0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 32px rgba(140, 80, 220, 0.35));
+    position: relative;
+  }
+  .hero-apostrophe {
+    color: var(--gold);
+    -webkit-text-fill-color: var(--gold);
+    background: none;
+    margin-left: 4px;
+  }
+
+  .hero-tagline {
+    font-family: var(--font-body);
+    font-size: clamp(14px, 2.2vw, 17px);
+    line-height: 1.55;
+    color: var(--text-2);
+    max-width: 600px;
+    margin: 0 auto 36px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+  }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(20, 5, 35, 0.6), rgba(40, 0, 60, 0.4));
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 14px;
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
+    backdrop-filter: blur(10px);
+  }
+  .hero-meta-item { text-align: center; flex: 1; min-width: 100px; }
+  .hero-meta-label {
+    font-family: var(--font-body);
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--gold-soft);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    font-weight: 600;
+  }
+  .hero-meta-value {
+    font-family: var(--font-display);
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+  .hero-meta-divider {
+    width: 1px;
+    height: 30px;
+    background: linear-gradient(180deg, transparent, rgba(212, 175, 55, 0.35), transparent);
+  }
+
+  .hero-countdown {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-width: 540px;
+    margin: 0 auto 32px;
+  }
+  .hero-cd-cell {
+    background: linear-gradient(135deg, rgba(15, 5, 25, 0.85), rgba(30, 10, 50, 0.6));
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 12px;
+    padding: 16px 8px 12px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 24px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-cd-cell::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+  }
+  .hero-cd-num {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 5vw, 42px);
+    letter-spacing: 1.5px;
+    line-height: 1;
+    color: #fff;
+    background: linear-gradient(180deg, #fff, var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+  }
+  .hero-cd-label {
+    font-family: var(--font-body);
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: var(--gold-soft);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .hero-scroll-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 28px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 999px;
+    color: var(--gold);
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .hero-scroll-cta:hover {
+    background: rgba(212, 175, 55, 0.18);
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.25);
+  }
+  .hero-scroll-arrow {
+    display: inline-block;
+    animation: bounce 1.8s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     SPOTS LEFT BAR
+     ═══════════════════════════════════════════════════════════════════ */
+  .spots-section { margin-bottom: 44px; }
+  .spots-card {
+    background: linear-gradient(135deg, rgba(20, 5, 35, 0.75), rgba(40, 0, 60, 0.5));
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 16px;
+    padding: 24px 26px 22px;
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 36px rgba(0, 0, 0, 0.32);
+    position: relative;
+    overflow: hidden;
+  }
+  .spots-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .spots-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .spots-eyebrow {
+    font-family: var(--font-body);
+    font-size: 10px;
+    letter-spacing: 3.5px;
+    color: var(--gold-soft);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .spots-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-body);
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: rgba(74, 222, 128, 0.9);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .spots-live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: livePulse 1.6s infinite;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
+  }
+  @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .spots-stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .spots-stat-big {
+    font-family: var(--font-display);
+    font-size: clamp(38px, 7vw, 56px);
+    letter-spacing: 2px;
+    line-height: 1;
+    background: linear-gradient(180deg, #fff, var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  .spots-stat-label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .spots-bar {
+    height: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(176, 112, 255, 0.15);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .spots-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6020a0, #8c4ad8, var(--gold));
+    border-radius: 999px;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .spots-bar-fill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmerBar 2s linear infinite;
+  }
+  @keyframes shimmerBar {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .spots-footer {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 1px;
+  }
+  .spots-footer #spotsPercent {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     VENUE SECTION
+     ═══════════════════════════════════════════════════════════════════ */
+  .venue-card {
+    background: linear-gradient(135deg, rgba(20, 5, 35, 0.7), rgba(40, 0, 60, 0.4));
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 18px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 50px rgba(0, 0, 0, 0.4);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  .venue-map-preview {
+    position: relative;
+    min-height: 280px;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(96, 32, 160, 0.3), transparent 60%),
+      linear-gradient(135deg, #0a0014, #1a0028);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .venue-map-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(212, 175, 55, 0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212, 175, 55, 0.12) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: -1px -1px;
+    opacity: 0.5;
+    mask-image: radial-gradient(circle at center, #fff 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at center, #fff 30%, transparent 80%);
+  }
+  .venue-map-pin {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .venue-pin-ring {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    animation: pinPulse 2.2s ease-out infinite;
+  }
+  .venue-pin-ring::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    animation: pinPulse 2.2s ease-out infinite 0.6s;
+  }
+  @keyframes pinPulse {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+  .venue-pin-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, var(--gold), #b08820);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a0028;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 6px 24px rgba(212, 175, 55, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    z-index: 3;
+  }
+  .venue-map-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.4) 100%);
+  }
+  .venue-map-watermark {
+    position: absolute;
+    bottom: 14px;
+    right: 16px;
+    font-size: 22px;
+    opacity: 0.3;
+    filter: grayscale(0.6);
+  }
+
+  .venue-info {
+    padding: 28px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .venue-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 3px;
+    margin: 0 0 6px;
+    background: linear-gradient(180deg, #fff 0%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  .venue-address {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 22px;
+    line-height: 1.5;
+  }
+  .venue-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 22px;
+    background: linear-gradient(135deg, rgba(96, 32, 160, 0.5), rgba(74, 24, 128, 0.4));
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 10px;
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 2.2px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    margin-bottom: 14px;
+    width: fit-content;
+  }
+  .venue-cta:hover {
+    background: linear-gradient(135deg, rgba(140, 80, 220, 0.6), rgba(96, 32, 160, 0.5));
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(212, 175, 55, 0.3);
+  }
+  .venue-cta-icon { font-size: 14px; color: var(--gold); }
+  .venue-helper {
+    font-size: 11px;
+    color: var(--text-3);
+    line-height: 1.5;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     FAQ SECTION
+     ═══════════════════════════════════════════════════════════════════ */
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .faq-item {
+    background: linear-gradient(135deg, rgba(20, 5, 35, 0.6), rgba(40, 0, 60, 0.35));
+    border: 1px solid rgba(176, 112, 255, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: border-color 0.25s ease, background 0.25s ease;
+  }
+  .faq-item:hover {
+    border-color: rgba(212, 175, 55, 0.4);
+  }
+  .faq-item[open] {
+    border-color: rgba(212, 175, 55, 0.5);
+    background: linear-gradient(135deg, rgba(30, 10, 50, 0.7), rgba(50, 15, 80, 0.4));
+  }
+  .faq-q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    cursor: pointer;
+    list-style: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-q::marker { display: none; }
+  .faq-q-text {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.3px;
+  }
+  .faq-q-toggle {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--gold);
+    margin-left: 14px;
+    transition: transform 0.3s ease;
+    line-height: 1;
+  }
+  .faq-item[open] .faq-q-toggle {
+    transform: rotate(45deg);
+  }
+  .faq-a {
+    padding: 0 20px 18px;
+    color: var(--text-2);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .faq-a strong {
+    color: var(--gold-soft);
+    font-weight: 600;
+  }
+
+  @media (max-width: 600px) {
+    .venue-card { grid-template-columns: 1fr; }
+    .venue-map-preview { min-height: 200px; }
+    .venue-info { padding: 22px 22px 24px; }
+    .hero-meta { gap: 10px; padding: 14px 16px; }
+    .hero-meta-divider { display: none; }
+    .hero-meta-item { min-width: calc(50% - 10px); flex: 0 0 calc(50% - 10px); }
+    .hero-section { padding: 24px 0 40px; }
+  }
+
+@media (max-width: 480px) {
     .confirm-card { padding: 28px 22px 22px; }
     .confirm-title { font-size: 24px; letter-spacing: 3px; }
     .confirm-actions { grid-template-columns: 1fr; gap: 8px; }
@@ -867,7 +1407,53 @@
 
 <main>
 
-  <!-- THE COLLECTIVE -->
+  <!-- ═══════════════════════════ HERO ═══════════════════════════ -->
+  <section class="hero-section">
+    <div class="hero-rule">
+      <span class="hero-rule-line"></span>
+      <span class="hero-rule-dot">◆</span>
+      <span class="hero-rule-line"></span>
+    </div>
+
+    <div class="hero-eyebrow">A PRIVATE COLLECTIVE PRESENTS</div>
+    <h1 class="hero-headline">WHITE ROOM<span class="hero-apostrophe">'</span></h1>
+
+    <div class="hero-tagline" id="heroTagline">
+      Bollywood breaks meet underground beats. Dhaka's most exclusive night returns. June 10.
+    </div>
+
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Date</div>
+        <div class="hero-meta-value" id="heroDate">JUNE 10 · 2026</div>
+      </div>
+      <div class="hero-meta-divider"></div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Doors</div>
+        <div class="hero-meta-value" id="heroDoors">7:45 PM</div>
+      </div>
+      <div class="hero-meta-divider"></div>
+      <div class="hero-meta-item">
+        <div class="hero-meta-label">Venue</div>
+        <div class="hero-meta-value" id="heroVenue">Aloki Glass House</div>
+      </div>
+    </div>
+
+    <!-- Countdown -->
+    <div class="hero-countdown" id="heroCountdown">
+      <div class="hero-cd-cell"><div class="hero-cd-num" id="cdDays">00</div><div class="hero-cd-label">DAYS</div></div>
+      <div class="hero-cd-cell"><div class="hero-cd-num" id="cdHours">00</div><div class="hero-cd-label">HOURS</div></div>
+      <div class="hero-cd-cell"><div class="hero-cd-num" id="cdMinutes">00</div><div class="hero-cd-label">MINUTES</div></div>
+      <div class="hero-cd-cell"><div class="hero-cd-num" id="cdSeconds">00</div><div class="hero-cd-label">SECONDS</div></div>
+    </div>
+
+    <a href="#entry-tiers" class="hero-scroll-cta">
+      <span>BOOK YOUR EXPERIENCE</span>
+      <span class="hero-scroll-arrow">↓</span>
+    </a>
+  </section>
+
+  <!-- ═══════════════════════════ THE COLLECTIVE ═══════════════════════════ -->
   <section class="section">
     <div class="section-label">PREVIEW · WHO'S BEHIND THE DECKS</div>
     <h2 class="section-title">THE COLLECTIVE</h2>
@@ -880,12 +1466,120 @@
     </div>
   </section>
 
-  <!-- ENTRY TIERS -->
-  <section class="section">
+  <!-- ═══════════════════════════ SPOTS LEFT ═══════════════════════════ -->
+  <section class="section spots-section">
+    <div class="spots-card">
+      <div class="spots-header">
+        <div class="spots-eyebrow">LIVE · LIMITED CAPACITY</div>
+        <div class="spots-live"><span class="spots-live-dot"></span>UPDATING</div>
+      </div>
+      <div class="spots-stat-row">
+        <div class="spots-stat-big" id="spotsLeftBig">—</div>
+        <div class="spots-stat-label">SPOTS LEFT</div>
+      </div>
+      <div class="spots-bar">
+        <div class="spots-bar-fill" id="spotsBarFill" style="width:0%"></div>
+      </div>
+      <div class="spots-footer">
+        <span><span id="spotsClaimed">—</span> / <span id="spotsTotal">400</span> claimed</span>
+        <span id="spotsPercent">—%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ ENTRY TIERS ═══════════════════════════ -->
+  <section class="section" id="entry-tiers">
     <div class="section-label">CHOOSE YOUR EXPERIENCE</div>
     <h2 class="section-title">ENTRY TIERS</h2>
     <div class="tier-grid loading" id="tierGrid">
       <!-- Populated by JS -->
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ VENUE ═══════════════════════════ -->
+  <section class="section">
+    <div class="section-label">WHERE IT ALL HAPPENS</div>
+    <h2 class="section-title">THE VENUE</h2>
+    <div class="venue-card">
+      <div class="venue-map-preview" id="venueMapPreview">
+        <div class="venue-map-grid">
+          <div class="venue-map-pin">
+            <div class="venue-pin-ring"></div>
+            <div class="venue-pin-dot">◆</div>
+          </div>
+        </div>
+        <div class="venue-map-overlay">
+          <div class="venue-map-watermark">📍</div>
+        </div>
+      </div>
+      <div class="venue-info">
+        <div class="venue-name" id="venueName">Aloki Glass House</div>
+        <div class="venue-address" id="venueAddress">Dhaka, Bangladesh</div>
+        <a href="https://maps.app.goo.gl/t6Uk6hjjPuvQa2U38" target="_blank" rel="noopener" class="venue-cta">
+          <span class="venue-cta-icon">↗</span>
+          <span>OPEN IN GOOGLE MAPS</span>
+        </a>
+        <div class="venue-helper">
+          Click the button above for directions, parking info, and exact location.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ FAQ ═══════════════════════════ -->
+  <section class="section">
+    <div class="section-label">EVERYTHING YOU NEED TO KNOW</div>
+    <h2 class="section-title">FAQ</h2>
+    <div class="faq-list">
+
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span class="faq-q-text">What's the dress code?</span>
+          <span class="faq-q-toggle">+</span>
+        </summary>
+        <div class="faq-a">Anything you want — just look fly. The vibe is exclusive and elevated, so dress for the moment. Whether that's smart casual, glam, or your boldest fit, come ready to be photographed.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span class="faq-q-text">Is there an age limit?</span>
+          <span class="faq-q-toggle">+</span>
+        </summary>
+        <div class="faq-a"><strong>18+ only.</strong> Valid government-issued photo ID required at the door. No exceptions. Please don't bring underage guests — they will be turned away and no refunds will be issued.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span class="faq-q-text">What's the refund policy?</span>
+          <span class="faq-q-toggle">+</span>
+        </summary>
+        <div class="faq-a"><strong>No refunds — all sales final.</strong> Tickets are non-transferable. We curate the room carefully, so please only book if you're committed to attending.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span class="faq-q-text">Is re-entry allowed?</span>
+          <span class="faq-q-toggle">+</span>
+        </summary>
+        <div class="faq-a">Yes — re-entry is allowed with your wristband. Keep it secure throughout the night. Wristband loss means re-entry will be refused.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span class="faq-q-text">How do I get there? Is there parking?</span>
+          <span class="faq-q-toggle">+</span>
+        </summary>
+        <div class="faq-a">Parking is limited at the venue. We strongly recommend using <strong>Uber, Pathao, or a cab</strong> for the smoothest arrival. Check the venue section above for the Google Maps link.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">
+          <span class="faq-q-text">What happens after I book?</span>
+          <span class="faq-q-toggle">+</span>
+        </summary>
+        <div class="faq-a">You'll receive a unique QR code immediately after registration. Screenshot it or save it — that's your entry pass. At the door, present your QR code along with valid ID matching your booking name.</div>
+      </details>
+
     </div>
   </section>
 
@@ -1405,10 +2099,218 @@
       });
   }
 
+  // ════════════════════════════════════════════════════════════════════════
+  // EVENT CONFIG (hero + venue + countdown) — pulled from same Apps Script
+  // ════════════════════════════════════════════════════════════════════════
+  const EVENT_CONFIG = {
+    eventDate: new Date('2026-06-10T19:45:00+06:00'),
+    doorsOpen: '7:45 PM',
+    venueName: 'Aloki Glass House',
+    venueAddress: 'Dhaka, Bangladesh',
+    mapUrl: 'https://maps.app.goo.gl/t6Uk6hjjPuvQa2U38',
+    tagline: "Bollywood breaks meet underground beats. Dhaka's most exclusive night returns. June 10.",
+    capacity: 400
+  };
+
+  function applyEventConfig(data) {
+    if (!data || data.status !== 'ok') return;
+
+    if (data.eventDate) {
+      const d = new Date(data.eventDate);
+      if (!isNaN(d)) EVENT_CONFIG.eventDate = d;
+    }
+    if (data.doorsOpen) EVENT_CONFIG.doorsOpen = String(data.doorsOpen).trim();
+    if (data.venue) EVENT_CONFIG.venueName = String(data.venue).trim();
+    if (data.location) EVENT_CONFIG.venueAddress = String(data.location).trim();
+
+    // Tagline comes from heroCopy (matches main.html config + the description below the title)
+    if (data.heroCopy) EVENT_CONFIG.tagline = String(data.heroCopy).trim();
+    if (data.tagline) EVENT_CONFIG.tagline = String(data.tagline).trim(); // fallback if you also add `tagline`
+
+    // Optional hero title override (otherwise stays "WHITE ROOM'")
+    if (data.heroTitle) EVENT_CONFIG.heroTitle = String(data.heroTitle).trim();
+
+    // Brand kicker (the small uppercase text above the headline)
+    if (data.brandName) EVENT_CONFIG.brandName = String(data.brandName).trim();
+
+    if (data.capacity) {
+      const c = parseInt(data.capacity, 10);
+      if (Number.isFinite(c) && c > 0) EVENT_CONFIG.capacity = c;
+    }
+
+    renderHeroFromConfig();
+  }
+
+  function renderHeroFromConfig() {
+    // Tagline (the line below the headline)
+    const taglineEl = document.getElementById('heroTagline');
+    if (taglineEl) taglineEl.textContent = EVENT_CONFIG.tagline;
+
+    // Hero title override (rare \u2014 only if heroTitle is set in sheet)
+    if (EVENT_CONFIG.heroTitle) {
+      const titleEl = document.querySelector('.hero-headline');
+      if (titleEl) {
+        // Preserve the apostrophe styling if present
+        const apostropheIndex = EVENT_CONFIG.heroTitle.indexOf("'");
+        if (apostropheIndex > -1) {
+          const before = EVENT_CONFIG.heroTitle.slice(0, apostropheIndex);
+          const apostrophe = EVENT_CONFIG.heroTitle.slice(apostropheIndex);
+          titleEl.innerHTML = before + '<span class="hero-apostrophe">' + apostrophe + '</span>';
+        } else {
+          titleEl.textContent = EVENT_CONFIG.heroTitle;
+        }
+      }
+    }
+
+    // Brand kicker (small uppercase line above the headline)
+    if (EVENT_CONFIG.brandName) {
+      const eyebrowEl = document.querySelector('.hero-eyebrow');
+      if (eyebrowEl) eyebrowEl.textContent = EVENT_CONFIG.brandName;
+    }
+
+    // Date (format: MONTH DAY · YEAR)
+    const dateEl = document.getElementById('heroDate');
+    if (dateEl && EVENT_CONFIG.eventDate) {
+      const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+      const d = EVENT_CONFIG.eventDate;
+      dateEl.textContent = months[d.getMonth()] + ' ' + d.getDate() + ' · ' + d.getFullYear();
+    }
+
+    // Doors
+    const doorsEl = document.getElementById('heroDoors');
+    if (doorsEl) doorsEl.textContent = EVENT_CONFIG.doorsOpen;
+
+    // Venue (hero meta)
+    const venueEl = document.getElementById('heroVenue');
+    if (venueEl) venueEl.textContent = EVENT_CONFIG.venueName;
+
+    // Venue section
+    const venueNameEl = document.getElementById('venueName');
+    const venueAddrEl = document.getElementById('venueAddress');
+    if (venueNameEl) venueNameEl.textContent = EVENT_CONFIG.venueName;
+    if (venueAddrEl) venueAddrEl.textContent = EVENT_CONFIG.venueAddress;
+
+    // Total spots (capacity)
+    const spotsTotalEl = document.getElementById('spotsTotal');
+    if (spotsTotalEl) spotsTotalEl.textContent = EVENT_CONFIG.capacity;
+  }
+
+  // ── Fetch config (reuses the same Apps Script endpoint as main.html) ──
+  function fetchConfig() {
+    return fetch(APPS_SCRIPT_URL + '?action=getConfig', { redirect: 'follow' })
+      .then(r => r.json())
+      .then(applyEventConfig)
+      .catch(() => new Promise((resolve) => {
+        const cbName = 'tnoConfigCb_' + Date.now();
+        const t = setTimeout(() => { delete window[cbName]; resolve(); }, 6000);
+        window[cbName] = function (data) {
+          clearTimeout(t); delete window[cbName];
+          applyEventConfig(data); resolve();
+        };
+        const s = document.createElement('script');
+        s.src = APPS_SCRIPT_URL + '?action=getConfig&callback=' + cbName;
+        s.onerror = () => { clearTimeout(t); delete window[cbName]; resolve(); };
+        document.head.appendChild(s);
+      }));
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // COUNTDOWN TIMER
+  // ════════════════════════════════════════════════════════════════════════
+  function updateCountdown() {
+    const target = EVENT_CONFIG.eventDate;
+    if (!target) return;
+    const now = new Date();
+    const diff = target.getTime() - now.getTime();
+
+    if (diff <= 0) {
+      ['cdDays','cdHours','cdMinutes','cdSeconds'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '00';
+      });
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const mins = Math.floor((diff / (1000 * 60)) % 60);
+    const secs = Math.floor((diff / 1000) % 60);
+
+    const set = (id, v) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = String(v).padStart(2, '0');
+    };
+    set('cdDays', days);
+    set('cdHours', hours);
+    set('cdMinutes', mins);
+    set('cdSeconds', secs);
+  }
+
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
+
+  // ════════════════════════════════════════════════════════════════════════
+  // LIVE SPOTS — fetches the # of registrations from Apps Script
+  // ════════════════════════════════════════════════════════════════════════
+  function renderSpots(claimed, total) {
+    const claimedNum = Math.max(0, Number(claimed) || 0);
+    const totalNum = Math.max(1, Number(total) || EVENT_CONFIG.capacity);
+    const left = Math.max(0, totalNum - claimedNum);
+    const percent = Math.min(100, Math.round((claimedNum / totalNum) * 100));
+
+    const bigEl = document.getElementById('spotsLeftBig');
+    const claimedEl = document.getElementById('spotsClaimed');
+    const totalEl = document.getElementById('spotsTotal');
+    const percentEl = document.getElementById('spotsPercent');
+    const fillEl = document.getElementById('spotsBarFill');
+
+    if (bigEl) bigEl.textContent = left.toLocaleString('en-IN');
+    if (claimedEl) claimedEl.textContent = claimedNum;
+    if (totalEl) totalEl.textContent = totalNum;
+    if (percentEl) percentEl.textContent = percent + '%';
+    if (fillEl) fillEl.style.width = percent + '%';
+  }
+
+  function fetchSpots() {
+    return fetch(APPS_SCRIPT_URL + '?action=getStats', { redirect: 'follow' })
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.status === 'ok') {
+          // Count both checked-in and total registrations as "claimed"
+          // (better than just verified count for landing-page urgency)
+          renderSpots(data.total || 0, EVENT_CONFIG.capacity);
+        }
+      })
+      .catch(() => new Promise((resolve) => {
+        const cbName = 'tnoStatsCb_' + Date.now();
+        const t = setTimeout(() => { delete window[cbName]; resolve(); }, 6000);
+        window[cbName] = function (data) {
+          clearTimeout(t); delete window[cbName];
+          if (data && data.status === 'ok') {
+            renderSpots(data.total || 0, EVENT_CONFIG.capacity);
+          }
+          resolve();
+        };
+        const s = document.createElement('script');
+        s.src = APPS_SCRIPT_URL + '?action=getStats&callback=' + cbName;
+        s.onerror = () => { clearTimeout(t); delete window[cbName]; resolve(); };
+        document.head.appendChild(s);
+      }));
+  }
+
+  // Render initial defaults so the page never looks empty
+  renderHeroFromConfig();
+  renderSpots(0, EVENT_CONFIG.capacity);
+
+  // Refresh live spots every 30 seconds
+  setInterval(fetchSpots, 30000);
+
   // ── Bootstrap ──
   fetchTiers().then(() => {
     renderTiers();
   });
+  fetchConfig();
+  fetchSpots();
 
   // Render defaults immediately so the page never looks empty
   setTimeout(() => {
