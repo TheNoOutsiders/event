@@ -373,6 +373,134 @@
       animation: heroIn 1.25s cubic-bezier(0.16, 1, 0.3, 1) 0.18s forwards;
     }
 
+    /* ═══════════════════════════════════════════════════════════════════
+       COMPACT EVENT STRIP (replaces the old hero panel on main.html)
+       ═══════════════════════════════════════════════════════════════════ */
+    .event-strip {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 14px;
+      max-width: 1100px;
+      margin: 24px auto 0;
+      padding: 18px 22px;
+      background: linear-gradient(135deg, rgba(20, 5, 35, 0.85), rgba(40, 8, 60, 0.5));
+      border: 1px solid rgba(212, 175, 55, 0.28);
+      border-radius: 16px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06),
+                  0 14px 36px rgba(0, 0, 0, 0.35),
+                  0 0 28px rgba(96, 32, 160, 0.18);
+      animation: heroIn 1.25s cubic-bezier(0.16, 1, 0.3, 1) 0.18s forwards;
+      opacity: 0;
+      filter: blur(14px);
+    }
+    .event-strip::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.55), transparent);
+    }
+
+    .event-strip-back,
+    .event-strip-change {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: rgba(220, 200, 255, 0.7);
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: background 0.18s ease, color 0.18s ease;
+      white-space: nowrap;
+    }
+    .event-strip-back {
+      width: 38px;
+      height: 38px;
+      font-size: 18px;
+      padding: 0;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      background: rgba(212, 175, 55, 0.06);
+      color: var(--gold, #d4af37);
+    }
+    .event-strip-back:hover {
+      background: rgba(212, 175, 55, 0.16);
+      border-color: rgba(212, 175, 55, 0.5);
+      transform: translateX(-2px);
+    }
+    .event-strip-change:hover {
+      background: rgba(176, 112, 255, 0.12);
+      color: #fff;
+    }
+
+    .event-strip-content {
+      text-align: center;
+      min-width: 0;
+    }
+    .event-strip-brand {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      color: rgba(212, 175, 55, 0.78);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .event-strip-title {
+      font-family: 'Bebas Neue', 'Inter', sans-serif;
+      font-size: clamp(22px, 4vw, 32px);
+      letter-spacing: 4px;
+      line-height: 1;
+      background: linear-gradient(180deg, #fff 0%, #c890ec 60%, #6020a0 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .event-strip-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      color: rgba(220, 200, 255, 0.85);
+      text-transform: uppercase;
+    }
+    .event-strip-meta-divider {
+      color: rgba(212, 175, 55, 0.5);
+      font-weight: 700;
+    }
+
+    @media (max-width: 700px) {
+      .event-strip {
+        grid-template-columns: auto 1fr;
+        gap: 10px;
+        padding: 14px 16px;
+      }
+      .event-strip-change {
+        grid-column: 1 / -1;
+        justify-self: center;
+        font-size: 11px;
+        padding-top: 6px;
+        border-top: 1px dashed rgba(212, 175, 55, 0.18);
+        width: 100%;
+        margin-top: 4px;
+      }
+      .event-strip-meta { font-size: 10px; letter-spacing: 1px; }
+    }
+
     .card {
       position: relative;
       padding: clamp(22px, 3vw, 32px);
@@ -1563,6 +1691,29 @@
   </div>
 
 
+  <section class="event-strip">
+    <a href="index.html" class="event-strip-back" aria-label="Back to landing page">←</a>
+    <div class="event-strip-content">
+      <div class="event-strip-brand" id="brandName">3 HOURS OF CLUB X BOLLYWOOD</div>
+      <div class="event-strip-title" id="heroTitle">WHITE ROOM'</div>
+      <div class="event-strip-meta">
+        <span class="event-strip-meta-item" id="eventStripDate">JUN 10 · 2026</span>
+        <span class="event-strip-meta-divider">·</span>
+        <span class="event-strip-meta-item" id="eventStripDoors">7:45 PM</span>
+        <span class="event-strip-meta-divider">·</span>
+        <span class="event-strip-meta-item" id="venueDisplay">Aloki Glass House</span>
+      </div>
+    </div>
+    <a href="index.html" class="event-strip-change">Change tier ↗</a>
+    <!-- Hidden but kept for any JS that still references these IDs -->
+    <span id="heroCopy" hidden></span>
+    <span id="days" hidden>00</span><span id="hours" hidden>00</span>
+    <span id="minutes" hidden>00</span><span id="seconds" hidden>00</span>
+    <span id="maxTicketsDisplay" hidden></span>
+    <span id="locationDisplay" hidden></span>
+    <span id="doorsOpenDisplay" hidden></span>
+  </section>
+
   <div class="layout-shell">
     <div class="wrapper">
       <div class="above-card-brand">
@@ -1746,114 +1897,6 @@
         </div>
       </div>
     </div>
-
-    <section class="hero-panel">
-      <div class="hero-kicker" id="brandName">3 HOURS OF CLUB X BOLLYWOOD</div>
-      <h1 class="hero-title" id="heroTitle">WHITE ROOM'</h1>
-      <p class="hero-copy" id="heroCopy">Get ready for a night of nonstop beats, electric vibes, and unforgettable energy. Join us for a rave party filled with neon lights, bass drops, and a dance floor that never sleeps.</p>
-
-
-
-      <div class="countdown" aria-label="Event countdown">
-        <div class="count-box">
-          <span class="count-value" id="days">12</span>
-          <span class="count-label">Days</span>
-        </div>
-        <div class="count-box">
-          <span class="count-value" id="hours">08</span>
-          <span class="count-label">Hours</span>
-        </div>
-        <div class="count-box">
-          <span class="count-value" id="minutes">42</span>
-          <span class="count-label">Minutes</span>
-        </div>
-        <div class="count-box">
-          <span class="count-value" id="seconds">18</span>
-          <span class="count-label">Seconds</span>
-        </div>
-      </div>
-
-      <div class="hero-grid">
-        <div class="hero-stat">
-          <span class="hero-stat-value" id="maxTicketsDisplay">05</span>
-          <span class="hero-stat-label">Maximum tickets per form</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-value" id="locationDisplay" style="font-size: clamp(14px, 1.6vw, 20px); line-height: 1.2;">Level 4, Khan ABC Tradeplex, House 37, Road 2, Dhanmondi, Dhaka, Bangladesh</span>
-          <span class="hero-stat-label">Location</span>
-        </div>
-        <div class="hero-feature">
-          <span class="hero-feature-title">Door Close</span>
-          <span class="hero-feature-value" id="doorsOpenDisplay">07:30 PM</span>
-        </div>
-        <div class="hero-feature">
-          <span class="hero-feature-title">Venue</span>
-          <span class="hero-feature-value" id="venueDisplay">Bruncha Cafe</span>
-        </div>
-      </div>
-
-      <div class="hero-meta-row">
-        <div class="hero-meta-pill">Limited Seats</div>
-        <div class="hero-meta-pill">Premium Entry</div>
-        <div class="hero-meta-pill">Fast Check-In</div>
-      </div>
-
-      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <a href="https://www.instagram.com/the.nooutsiders/" target="_blank" rel="noopener noreferrer" style="
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          text-decoration: none;
-          padding: 12px 22px;
-          border-radius: 999px;
-          border: 1px solid rgba(255,255,255,0.12);
-          background: linear-gradient(135deg, rgba(24,0,16,0.72), rgba(255,255,255,0.04));
-          backdrop-filter: blur(14px);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 12px 26px rgba(0,0,0,0.2), 0 0 18px rgba(96,32,160,0.14);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='inset 0 1px 0 rgba(255,255,255,0.14), 0 16px 30px rgba(0,0,0,0.28), 0 0 24px rgba(96,32,160,0.26)'"
-           onmouseout="this.style.transform='';this.style.boxShadow='inset 0 1px 0 rgba(255,255,255,0.1), 0 12px 26px rgba(0,0,0,0.2), 0 0 18px rgba(96,32,160,0.14)'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#igGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <defs>
-              <linearGradient id="igGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#fff"/>
-                <stop offset="50%" stop-color="#8c4ad8"/>
-                <stop offset="100%" stop-color="#4a1880"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-          </svg>
-          <span style="font-size: 13px; font-weight: 600; letter-spacing: 1.2px; background: linear-gradient(90deg, #c890ec, #4a1880, #2a0848); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">@the.nooutsiders</span>
-        </a>
-
-        <a href="https://www.tiktok.com/@the.no.outsiders" target="_blank" rel="noopener noreferrer" style="
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          text-decoration: none;
-          padding: 12px 22px;
-          border-radius: 999px;
-          border: 1px solid rgba(255,255,255,0.12);
-          background: linear-gradient(135deg, rgba(24,0,16,0.72), rgba(255,255,255,0.04));
-          backdrop-filter: blur(14px);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 12px 26px rgba(0,0,0,0.2), 0 0 18px rgba(96,32,160,0.14);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='inset 0 1px 0 rgba(255,255,255,0.14), 0 16px 30px rgba(0,0,0,0.28), 0 0 24px rgba(96,32,160,0.26)'"
-           onmouseout="this.style.transform='';this.style.boxShadow='inset 0 1px 0 rgba(255,255,255,0.1), 0 12px 26px rgba(0,0,0,0.2), 0 0 18px rgba(96,32,160,0.14)'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="url(#ttGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <defs>
-              <linearGradient id="ttGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#fff"/>
-                <stop offset="50%" stop-color="#8c4ad8"/>
-                <stop offset="100%" stop-color="#4a1880"/>
-              </linearGradient>
-            </defs>
-            <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/>
-          </svg>
-          <span style="font-size: 13px; font-weight: 600; letter-spacing: 1.2px; background: linear-gradient(90deg, #c890ec, #4a1880, #2a0848); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">@the.no.outsiders</span>
-        </a>
-      </div>
-    </section>
   </div>
 
   <footer style="
@@ -2543,6 +2586,14 @@
       setText('doorsOpenDisplay',  EVENT_CONFIG.doorsOpen);
       setText('venueDisplay',      EVENT_CONFIG.venue);
       setText('locationDisplay',   EVENT_CONFIG.location || '—');
+
+      // New event strip elements (compact header replacing the old hero panel)
+      setText('eventStripDoors',   EVENT_CONFIG.doorsOpen);
+      if (EVENT_CONFIG.eventDate instanceof Date && !isNaN(EVENT_CONFIG.eventDate)) {
+        const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+        const d = EVENT_CONFIG.eventDate;
+        setText('eventStripDate', months[d.getMonth()] + ' ' + d.getDate() + ' · ' + d.getFullYear());
+      }
 
       if (ticketsInput) {
         ticketsInput.max = String(EVENT_CONFIG.maxTickets);
