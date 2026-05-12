@@ -535,6 +535,237 @@
     text-transform: uppercase;
   }
 
+  /* ── Confirmation Modal ── */
+  .confirm-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+    padding: 20px;
+  }
+  .confirm-modal.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .confirm-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .confirm-card {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    background: linear-gradient(135deg, rgba(20, 5, 35, 0.95) 0%, rgba(35, 10, 60, 0.95) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 20px;
+    padding: 32px 28px 26px;
+    text-align: center;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 30px 80px rgba(0, 0, 0, 0.6),
+      0 0 60px rgba(96, 32, 160, 0.3),
+      0 0 30px rgba(212, 175, 55, 0.18);
+    overflow: hidden;
+    transform: scale(0.92) translateY(20px);
+    transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .confirm-modal.open .confirm-card {
+    transform: scale(1) translateY(0);
+  }
+  .confirm-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .confirm-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.08), transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(140, 80, 220, 0.12), transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .confirm-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    color: rgba(220, 200, 255, 0.7);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 2;
+    transition: all 0.18s ease;
+    padding: 0;
+  }
+  .confirm-close:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--gold);
+    color: #fff;
+    transform: rotate(90deg);
+  }
+  .confirm-mark {
+    position: relative;
+    z-index: 1;
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, rgba(212, 175, 55, 0.35), rgba(96, 32, 160, 0.2));
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 22px;
+    box-shadow: 0 0 24px rgba(212, 175, 55, 0.3);
+  }
+  .confirm-eyebrow {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .confirm-title {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 4px;
+    margin: 0 0 22px;
+    background: linear-gradient(180deg, #fff 0%, #c890ec 70%, #6020a0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+  }
+  .confirm-breakdown {
+    position: relative;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    text-align: left;
+  }
+  .confirm-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .confirm-row:last-child {
+    border-bottom: none;
+  }
+  .confirm-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .confirm-value {
+    font-size: 13px;
+    color: var(--text-2);
+    font-weight: 500;
+  }
+  .confirm-total-row {
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(212, 175, 55, 0.3) !important;
+  }
+  .confirm-total {
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: 1.5px;
+    background: linear-gradient(180deg, #fff, var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  .confirm-question {
+    position: relative;
+    z-index: 1;
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 22px;
+    line-height: 1.5;
+  }
+  .confirm-actions {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 10px;
+  }
+  .confirm-btn {
+    padding: 13px 16px;
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    letter-spacing: 2px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    border: 1px solid transparent;
+  }
+  .confirm-cancel {
+    background: transparent;
+    border-color: rgba(176, 112, 255, 0.4);
+    color: rgba(220, 200, 255, 0.85);
+  }
+  .confirm-cancel:hover {
+    background: rgba(176, 112, 255, 0.1);
+    border-color: rgba(176, 112, 255, 0.7);
+    color: #fff;
+  }
+  .confirm-go {
+    background: linear-gradient(135deg, #6020a0, #4a1880);
+    border-color: rgba(212, 175, 55, 0.5);
+    color: #fff;
+  }
+  .confirm-go:hover {
+    background: linear-gradient(135deg, #7030b0, #5a2090);
+    border-color: var(--gold);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 480px) {
+    .confirm-card { padding: 28px 22px 22px; }
+    .confirm-title { font-size: 24px; letter-spacing: 3px; }
+    .confirm-actions { grid-template-columns: 1fr; gap: 8px; }
+    .confirm-cancel { order: 2; }
+    .confirm-go { order: 1; }
+  }
+
   /* ── Loading state ── */
   .tier-grid.loading .tier {
     opacity: 0.4;
@@ -583,6 +814,44 @@
 <body>
 
 <canvas id="particles"></canvas>
+
+<!-- ── Confirmation modal (shown before redirecting to main.html) ── -->
+<div id="confirmModal" class="confirm-modal" aria-hidden="true">
+  <div class="confirm-backdrop" data-confirm-cancel></div>
+  <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <button type="button" class="confirm-close" data-confirm-cancel aria-label="Close">×</button>
+
+    <div class="confirm-mark">◆</div>
+    <div class="confirm-eyebrow">Confirm your order</div>
+    <h3 class="confirm-title" id="confirmTitle">VIP × 1 PERSON</h3>
+
+    <div class="confirm-breakdown">
+      <div class="confirm-row">
+        <span class="confirm-label">Tier</span>
+        <span class="confirm-value" id="confirmTier">VIP</span>
+      </div>
+      <div class="confirm-row">
+        <span class="confirm-label">People</span>
+        <span class="confirm-value" id="confirmPeople">1</span>
+      </div>
+      <div class="confirm-row">
+        <span class="confirm-label">Per person</span>
+        <span class="confirm-value" id="confirmPerPerson">৳1,800</span>
+      </div>
+      <div class="confirm-row confirm-total-row">
+        <span class="confirm-label">Total</span>
+        <span class="confirm-total" id="confirmTotal">৳1,800</span>
+      </div>
+    </div>
+
+    <div class="confirm-question">Are you sure you want to continue?</div>
+
+    <div class="confirm-actions">
+      <button type="button" class="confirm-btn confirm-cancel" data-confirm-cancel>Cancel</button>
+      <button type="button" class="confirm-btn confirm-go" id="confirmGo">Yes, Continue →</button>
+    </div>
+  </div>
+</div>
 
 <div id="wipe">
   <div class="wipe-content">
@@ -911,18 +1180,129 @@
       }
     });
 
-    // Wire SELECT buttons to the page-wipe transition
+    // Wire SELECT buttons → show confirmation modal first
     grid.querySelectorAll('.tier-cta').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
-        const tierName = btn.getAttribute('data-tier-name');
+        const tierId = btn.getAttribute('data-tier');
         const href = btn.getAttribute('href');
-        document.getElementById('wipeText').textContent = 'SECURING YOUR ' + tierName + ' EXPERIENCE';
-        document.getElementById('wipe').classList.add('on');
-        setTimeout(() => { window.location.href = href; }, 900);
+        const tier = TIERS.find(t => t.id === tierId);
+        if (!tier) {
+          // Fallback: if for some reason we can't find the tier, just go
+          window.location.href = href;
+          return;
+        }
+        showConfirmModal(tier, href);
       });
     });
   }
+
+  // ────────────────────────────────────────────────────────────────────────
+  // CONFIRMATION MODAL
+  // ────────────────────────────────────────────────────────────────────────
+  let _pendingHref = null;
+
+  function getSizeFromHref(href) {
+    try {
+      const url = new URL(href, window.location.href);
+      const size = parseInt(url.searchParams.get('size') || '1', 10);
+      return Number.isFinite(size) && size > 0 ? size : 1;
+    } catch (_) {
+      return 1;
+    }
+  }
+
+  function showConfirmModal(tier, href) {
+    _pendingHref = href;
+    const modal = document.getElementById('confirmModal');
+    if (!modal) {
+      // No modal in DOM — just navigate
+      window.location.href = href;
+      return;
+    }
+
+    // Compute count, per-person, total based on tier type
+    let count, perPerson, total, peopleLabel;
+
+    if (tier.id === 'couple') {
+      count = 2;
+      perPerson = Math.round((Number(tier.price) || 0) / 2);
+      total = Number(tier.price) || 0;
+      peopleLabel = '2 PEOPLE (Couple)';
+    } else if ((tier.type === 'squad') || (tier.id === 'squad') ||
+               (tier.pricePerSize && Object.keys(tier.pricePerSize).length > 0)) {
+      count = getSizeFromHref(href);
+      perPerson = (tier.pricePerSize && tier.pricePerSize[count]) || Number(tier.price) || 0;
+      total = perPerson * count;
+      peopleLabel = count + ' ' + (count === 1 ? 'PERSON' : 'PEOPLE') + ' (Squad)';
+    } else {
+      // Regular / VIP
+      count = getSizeFromHref(href);
+      perPerson = Number(tier.price) || 0;
+      total = perPerson * count;
+      peopleLabel = count + ' ' + (count === 1 ? 'PERSON' : 'PEOPLE');
+    }
+
+    // Populate modal
+    document.getElementById('confirmTitle').textContent =
+      tier.name + ' × ' + count + ' ' + (count === 1 ? 'PERSON' : 'PEOPLE');
+    document.getElementById('confirmTier').textContent = tier.name;
+    document.getElementById('confirmPeople').textContent = peopleLabel;
+    document.getElementById('confirmPerPerson').textContent = formatPrice(perPerson);
+    document.getElementById('confirmTotal').textContent = formatPrice(total);
+
+    // Show modal
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+
+    // Focus the continue button for accessibility
+    setTimeout(() => {
+      const goBtn = document.getElementById('confirmGo');
+      if (goBtn) goBtn.focus();
+    }, 100);
+  }
+
+  function hideConfirmModal() {
+    const modal = document.getElementById('confirmModal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    _pendingHref = null;
+  }
+
+  function confirmAndProceed() {
+    if (!_pendingHref) {
+      hideConfirmModal();
+      return;
+    }
+    const href = _pendingHref;
+
+    // Get the tier name for the wipe text
+    const url = new URL(href, window.location.href);
+    const tierId = (url.searchParams.get('tier') || '').toLowerCase();
+    const tier = TIERS.find(t => t.id === tierId);
+    const tierName = tier ? tier.name : 'EXPERIENCE';
+
+    // Close modal, then trigger the wipe + redirect
+    hideConfirmModal();
+    document.getElementById('wipeText').textContent = 'SECURING YOUR ' + tierName + ' EXPERIENCE';
+    document.getElementById('wipe').classList.add('on');
+    setTimeout(() => { window.location.href = href; }, 900);
+  }
+
+  // Wire modal buttons (once at load — they're static elements)
+  document.querySelectorAll('[data-confirm-cancel]').forEach((el) => {
+    el.addEventListener('click', hideConfirmModal);
+  });
+  document.getElementById('confirmGo').addEventListener('click', confirmAndProceed);
+
+  // ESC key closes the modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('confirmModal');
+      if (modal && modal.classList.contains('open')) hideConfirmModal();
+    }
+  });
 
   // ── Update the Collective card ──
   function renderCollective(data) {
