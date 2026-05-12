@@ -1014,6 +1014,131 @@
       color: rgba(255,220,228,0.95);
     }
 
+    /* ── Tier banner (shows selected tier from index.html) ── */
+    .tier-banner {
+      margin-bottom: 22px;
+      padding: 18px 18px 16px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(30,10,50,0.9), rgba(60,20,90,0.55));
+      border: 1px solid rgba(212,175,55,0.4);
+      backdrop-filter: blur(10px);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        0 12px 28px rgba(0,0,0,0.35),
+        0 0 24px rgba(212,175,55,0.12);
+      position: relative;
+      overflow: hidden;
+    }
+    .tier-banner::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent);
+    }
+    .tier-banner-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .tier-banner-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(212,175,55,0.85);
+    }
+    .tier-banner-change {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      color: rgba(220,200,255,0.7);
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+    .tier-banner-change:hover {
+      background: rgba(176,112,255,0.15);
+      color: #fff;
+    }
+    .tier-banner-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .tier-banner-name {
+      font-family: 'Bebas Neue', 'Inter', sans-serif;
+      font-size: 26px;
+      letter-spacing: 4px;
+      background: linear-gradient(180deg, #fff 0%, #c890ec 70%, #6020a0 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+    .tier-banner-line {
+      font-size: 12px;
+      color: rgba(220,200,255,0.75);
+      letter-spacing: 0.5px;
+    }
+    .tier-banner-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-top: 8px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(212,175,55,0.25);
+    }
+    .tier-banner-total-label {
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(220,200,255,0.55);
+      font-weight: 600;
+    }
+    .tier-banner-total-value {
+      font-family: 'Bebas Neue', 'Inter', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1.5px;
+      color: #fff;
+      background: linear-gradient(180deg, #fff, #d4af37);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ── No-tier hint (fallback when user lands on main.html directly) ── */
+    .no-tier-hint {
+      margin-bottom: 18px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(176,112,255,0.12);
+      border: 1px solid rgba(176,112,255,0.3);
+      text-align: center;
+    }
+    .no-tier-hint a {
+      color: rgba(220,200,255,0.95);
+      text-decoration: none;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      font-weight: 500;
+    }
+    .no-tier-hint a:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+
+    /* ── Hide tickets field for tiers with locked count ── */
+    .tickets-locked {
+      display: none !important;
+    }
+
     /* ── Terms section ── */
     .terms-section {
       margin-top: 24px;
@@ -1458,6 +1583,27 @@
         </h2>
 
         <form id="dataForm">
+          <!-- ── Selected tier banner (populated by JS based on URL ?tier=) ── -->
+          <div id="tierBanner" class="tier-banner" style="display:none">
+            <div class="tier-banner-header">
+              <span class="tier-banner-eyebrow">You're booking</span>
+              <a href="index.html" class="tier-banner-change">← Change tier</a>
+            </div>
+            <div class="tier-banner-body">
+              <div class="tier-banner-name" id="tierBannerName">REGULAR</div>
+              <div class="tier-banner-line" id="tierBannerLine">৳800 × 1 person</div>
+              <div class="tier-banner-total">
+                <span class="tier-banner-total-label">Total to pay</span>
+                <span class="tier-banner-total-value" id="tierBannerTotal">৳800</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── No-tier-selected hint (shown if user lands here without ?tier=) ── -->
+          <div id="noTierHint" class="no-tier-hint" style="display:none">
+            <a href="index.html">← Choose your tier on the home page</a>
+          </div>
+
           <div class="field">
             <label for="name">Name</label>
             <div class="input-shell">
@@ -1568,16 +1714,8 @@
 
           <div class="spacer-8"></div>
 
-          <div class="field">
-            <label for="tickets">How many tickets did you buy?</label>
-            <div class="stepper">
-              <button class="step-btn" type="button" id="decreaseTickets" aria-label="Decrease tickets">-</button>
-              <div class="input-shell">
-                <input type="number" id="tickets" min="1" max="5" step="1" required value="1" readonly style="cursor:default;" />
-              </div>
-              <button class="step-btn" type="button" id="increaseTickets" aria-label="Increase tickets">+</button>
-            </div>
-          </div>
+          <!-- Hidden tickets field — count comes from URL ?size= via SELECTED_TIER -->
+          <input type="hidden" id="tickets" value="1" />
 
           <div class="ticket-hint">
             <span>⚠ <strong>Important:</strong> You must complete your payment before clicking "Confirm" — your spot will not be secured without a successful payment.</span>
@@ -1982,6 +2120,188 @@
         });
     }
 
+    // ════════════════════════════════════════════════════════════════════════
+    // TIER SYNC — reads tier choice from URL (?tier=vip or ?tier=squad&size=7)
+    // Fetches tier prices from the same Apps Script (Tiers sheet)
+    // ════════════════════════════════════════════════════════════════════════
+
+    // Default tier definitions (fallback if sheet is unreachable)
+    const DEFAULT_TIERS = {
+      regular: { id: 'regular', name: 'REGULAR', price: 800, type: 'standard', lockedSize: null, maxSize: 5 },
+      vip:     { id: 'vip',     name: 'VIP',     price: 1800, type: 'standard', lockedSize: null, maxSize: 5 },
+      couple:  { id: 'couple',  name: 'COUPLE',  price: 1500, type: 'standard', lockedSize: 2 },
+      squad:   {
+        id: 'squad', name: 'SQUAD', type: 'squad',
+        minSize: 5, maxSize: 10, defaultSize: 5,
+        pricePerSize: { 5: 750, 6: 720, 7: 700, 8: 680, 9: 660, 10: 650 }
+      }
+    };
+    let TIER_LIBRARY = JSON.parse(JSON.stringify(DEFAULT_TIERS));
+
+    // Will hold the user's chosen tier + size after URL parsing
+    var SELECTED_TIER = null;
+
+    // ── Read ?tier= and ?size= from the URL ──
+    function readTierFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const tierId = (params.get('tier') || '').trim().toLowerCase();
+      const sizeRaw = parseInt(params.get('size') || '', 10);
+      if (!tierId || !TIER_LIBRARY[tierId]) return null;
+
+      const def = TIER_LIBRARY[tierId];
+      const result = { id: def.id, name: def.name, type: def.type || 'standard' };
+
+      if (def.type === 'squad') {
+        // Clamp size to [minSize, maxSize], default to defaultSize
+        const min = def.minSize || 5;
+        const max = def.maxSize || 10;
+        const size = Number.isFinite(sizeRaw) && sizeRaw >= min && sizeRaw <= max
+          ? sizeRaw
+          : (def.defaultSize || min);
+        const perPerson = (def.pricePerSize && def.pricePerSize[size]) || def.price || 0;
+        result.size = size;
+        result.perPerson = perPerson;
+        result.total = perPerson * size;
+        result.lockedTickets = size;
+      } else if (def.lockedSize) {
+        // Couple = locked to 2 people
+        result.size = def.lockedSize;
+        result.perPerson = def.price;
+        result.total = def.price;
+        result.lockedTickets = 1;
+      } else {
+        // Regular / VIP — size from URL (since the field is now on index.html)
+        const max = Number(def.maxSize) || 5;
+        const size = Number.isFinite(sizeRaw) && sizeRaw >= 1 && sizeRaw <= max ? sizeRaw : 1;
+        result.size = size;
+        result.perPerson = def.price;
+        result.total = def.price * size;
+        result.lockedTickets = size;
+      }
+      return result;
+    }
+
+    function formatBdt(n) {
+      const num = Number(n);
+      if (!Number.isFinite(num)) return '৳0';
+      return '৳' + num.toLocaleString('en-IN');
+    }
+
+    // ── Render the tier banner based on SELECTED_TIER ──
+    function renderTierBanner() {
+      const banner = document.getElementById('tierBanner');
+      const hint = document.getElementById('noTierHint');
+      if (!SELECTED_TIER) {
+        if (banner) banner.style.display = 'none';
+        if (hint) hint.style.display = 'block';
+        return;
+      }
+      if (hint) hint.style.display = 'none';
+      if (!banner) return;
+      banner.style.display = 'block';
+
+      document.getElementById('tierBannerName').textContent = SELECTED_TIER.name;
+
+      let lineText;
+      if (SELECTED_TIER.type === 'squad') {
+        lineText = formatBdt(SELECTED_TIER.perPerson) + ' × ' + SELECTED_TIER.size + ' people';
+      } else if (SELECTED_TIER.id === 'couple') {
+        lineText = formatBdt(SELECTED_TIER.perPerson) + ' for 2 people';
+      } else {
+        // Regular / VIP — count from URL
+        const count = SELECTED_TIER.size;
+        lineText = formatBdt(SELECTED_TIER.perPerson) + ' × ' + count +
+                   (count === 1 ? ' person' : ' people');
+      }
+
+      document.getElementById('tierBannerLine').textContent = lineText;
+      document.getElementById('tierBannerTotal').textContent = formatBdt(SELECTED_TIER.total);
+    }
+
+    // ── Apply locked-tickets behaviour to the form's tickets field ──
+    function applyTierToTicketsField() {
+      const ticketsField = ticketsInput ? ticketsInput.closest('.field') : null;
+      if (!ticketsField || !ticketsInput) return;
+
+      if (SELECTED_TIER && SELECTED_TIER.lockedTickets !== null) {
+        ticketsInput.value = String(SELECTED_TIER.lockedTickets);
+        ticketsField.classList.add('tickets-locked');
+      } else {
+        ticketsField.classList.remove('tickets-locked');
+      }
+    }
+
+    // ── Parse the Tiers sheet response into TIER_LIBRARY ──
+    function applyTiersData(data) {
+      if (!data || data.status !== 'ok' || !Array.isArray(data.tiers) || data.tiers.length === 0) {
+        console.warn('[Tiers] No valid tier data, using defaults');
+        return;
+      }
+      const next = {};
+      data.tiers.forEach((t) => {
+        const id = String(t.id || '').trim().toLowerCase();
+        if (!id) return;
+        const isSquad = String(t.type || '').toLowerCase() === 'squad' || id === 'squad';
+        const tier = {
+          id: id,
+          name: String(t.name || id.toUpperCase()).trim(),
+          price: Number(t.price) || 0,
+          type: isSquad ? 'squad' : 'standard',
+          lockedSize: id === 'couple' ? 2 : null
+        };
+        if (isSquad) {
+          tier.minSize = Number(t.minSize) || 5;
+          tier.maxSize = Number(t.maxSize) || 10;
+          tier.defaultSize = Number(t.defaultSize) || tier.minSize;
+          tier.pricePerSize = {};
+          for (let n = tier.minSize; n <= tier.maxSize; n++) {
+            const v = t['price' + n];
+            if (v !== undefined && v !== null && String(v).trim() !== '') {
+              tier.pricePerSize[n] = Number(v);
+            }
+          }
+        }
+        next[id] = tier;
+      });
+      // Merge: keep defaults for any tier not in sheet
+      Object.keys(next).forEach((k) => { TIER_LIBRARY[k] = next[k]; });
+      console.log('[Tiers] Loaded', Object.keys(next).length, 'tiers from sheet:', TIER_LIBRARY);
+    }
+
+    // ── Fetch tiers — fetch() first, JSONP fallback ──
+    function fetchTiers() {
+      return fetch(APPS_SCRIPT_URL + '?action=getTiers', { redirect: 'follow' })
+        .then((r) => r.json())
+        .then((data) => { applyTiersData(data); })
+        .catch(() => {
+          return new Promise((resolve) => {
+            const cbName = 'tnoTiersCb_' + Date.now();
+            const timeout = setTimeout(() => {
+              delete window[cbName]; resolve();
+            }, 6000);
+            window[cbName] = function (data) {
+              clearTimeout(timeout); delete window[cbName];
+              applyTiersData(data); resolve();
+            };
+            const s = document.createElement('script');
+            s.src = APPS_SCRIPT_URL + '?action=getTiers&callback=' + cbName;
+            s.onerror = () => { clearTimeout(timeout); delete window[cbName]; resolve(); };
+            document.head.appendChild(s);
+          });
+        });
+    }
+
+    // ── Wire the standard tickets stepper to refresh the banner total ──
+    function wireBannerUpdatesOnTicketsChange() {
+      ['input', 'change', 'click'].forEach((ev) => {
+        const dec = document.getElementById('decreaseTickets');
+        const inc = document.getElementById('increaseTickets');
+        if (ticketsInput) ticketsInput.addEventListener(ev, renderTierBanner);
+        if (dec) dec.addEventListener(ev, () => setTimeout(renderTierBanner, 0));
+        if (inc) inc.addEventListener(ev, () => setTimeout(renderTierBanner, 0));
+      });
+    }
+
     const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -2083,6 +2403,12 @@
     }
 
     function clampTickets() {
+      // If a tier has locked the ticket count, honour the lock.
+      if (typeof SELECTED_TIER !== 'undefined' && SELECTED_TIER && SELECTED_TIER.lockedTickets !== null) {
+        ticketsInput.value = String(SELECTED_TIER.lockedTickets);
+        syncFilledState();
+        return;
+      }
       let value = parseInt(ticketsInput.value || '1', 10);
       if (Number.isNaN(value)) value = 1;
       value = Math.max(1, Math.min(EVENT_CONFIG.maxTickets, value));
@@ -2090,12 +2416,12 @@
       syncFilledState();
     }
 
-    decBtn.addEventListener('click', () => {
+    decBtn && decBtn.addEventListener('click', () => {
       ticketsInput.value = Math.max(1, parseInt(ticketsInput.value || '1', 10) - 1);
       clampTickets();
     });
 
-    incBtn.addEventListener('click', () => {
+    incBtn && incBtn.addEventListener('click', () => {
       ticketsInput.value = Math.min(EVENT_CONFIG.maxTickets, parseInt(ticketsInput.value || '1', 10) + 1);
       clampTickets();
     });
@@ -2268,7 +2594,19 @@
     function showTicket(entry) {
       ticketCodeEl.textContent = entry.ticketCode;
       ticketNameEl.textContent = entry.name;
-      ticketCountEl.textContent = `${entry.tickets} ticket(s)`;
+
+      // Compose the count line: tier-aware
+      let countLine;
+      if (entry.tier === 'squad' && entry.squadSize) {
+        countLine = `SQUAD of ${entry.squadSize} · ${entry.tickets} entr${entry.squadSize === 1 ? 'y' : 'ies'}`;
+      } else if (entry.tier === 'couple') {
+        countLine = `COUPLE · 2 entries`;
+      } else if (entry.tierName) {
+        countLine = `${entry.tierName} · ${entry.tickets} ticket(s)`;
+      } else {
+        countLine = `${entry.tickets} ticket(s)`;
+      }
+      ticketCountEl.textContent = countLine;
       ticketVenueEl.textContent = EVENT_CONFIG.venue;
 
       // Show loading overlay before opening modal (#10)
@@ -2282,6 +2620,9 @@
         phone: entry.phone,
         email: entry.email,
         tickets: entry.tickets,
+        tier: entry.tier || '',
+        squadSize: entry.squadSize || '',
+        amount: entry.amount || '',
         venue: EVENT_CONFIG.venue,
         doorsOpen: EVENT_CONFIG.doorsOpen
       });
@@ -2346,6 +2687,15 @@
       applyEventConfig();
       populateEditor();
       renderDashboard();
+    });
+
+    // Load tiers from sheet, then resolve the selected tier from URL,
+    // apply locked-tickets behaviour, render the banner, and wire updates.
+    fetchTiers().then(() => {
+      SELECTED_TIER = readTierFromUrl();
+      applyTierToTicketsField();
+      renderTierBanner();
+      wireBannerUpdatesOnTicketsChange();
     });
 
     closeTicketModal.addEventListener('click', () => {
@@ -2435,6 +2785,10 @@
         paymentMethod: (document.querySelector('input[name="paymentMethod"]:checked') || {}).value || '',
         paymentNumber: document.getElementById('paymentNumber').value.trim(),
         tickets: ticketsInput.value.trim(),
+        tier: SELECTED_TIER ? SELECTED_TIER.id : '',
+        tierName: SELECTED_TIER ? SELECTED_TIER.name : '',
+        squadSize: (SELECTED_TIER && SELECTED_TIER.type === 'squad') ? SELECTED_TIER.size : '',
+        amount: SELECTED_TIER ? SELECTED_TIER.total : '',
         submittedAt: new Date().toISOString(),
         ticketCode: buildTicketCode(),
         verified: 'NO',
@@ -2465,7 +2819,11 @@
         saveEntry(payload);
         showTicket(payload);
         form.reset();
-        ticketsInput.value = '1';
+        ticketsInput.value = (SELECTED_TIER && SELECTED_TIER.lockedTickets !== null)
+          ? String(SELECTED_TIER.lockedTickets)
+          : '1';
+        applyTierToTicketsField();
+        renderTierBanner();
         populateEditor();
         syncFilledState();
       } catch (error) {
