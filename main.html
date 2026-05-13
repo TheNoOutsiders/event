@@ -528,6 +528,33 @@
       top: 0; left: 0; right: 0;
       height: 1px;
       background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.6), transparent);
+      z-index: 3;
+    }
+    /* Generative art layer — lives behind the QR, derived from ticketCode hash.
+       Tier-tinted via data-tier on the stub-side. */
+    .ticket-stub-art {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.85;
+    }
+    .ticket-stub-art svg { width: 100%; height: 100%; display: block; }
+    /* All content inside the stub sits above the art */
+    .ticket-stub-side > *:not(.ticket-stub-art) { position: relative; z-index: 2; }
+
+    /* Tier-tinted glow ring on the QR — applied via data-tier on stub-side */
+    .ticket-stub-side[data-tier="regular"] .ticket-qr-wrap {
+      box-shadow: 0 0 0 1px rgba(176, 112, 255, 0.55), 0 0 24px rgba(176, 112, 255, 0.35);
+    }
+    .ticket-stub-side[data-tier="vip"] .ticket-qr-wrap {
+      box-shadow: 0 0 0 1px rgba(244, 207, 87, 0.7), 0 0 28px rgba(244, 207, 87, 0.40);
+    }
+    .ticket-stub-side[data-tier="couple"] .ticket-qr-wrap {
+      box-shadow: 0 0 0 1px rgba(255, 140, 180, 0.6), 0 0 26px rgba(255, 140, 180, 0.35);
+    }
+    .ticket-stub-side[data-tier="squad"] .ticket-qr-wrap {
+      box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.6), 0 0 26px rgba(212, 175, 55, 0.30);
     }
 
     .ticket-stub-eyebrow {
@@ -541,13 +568,13 @@
     }
     .ticket-stub-code {
       font-family: 'Bebas Neue', Impact, sans-serif;
-      font-size: 16px;
-      letter-spacing: 2px;
+      font-size: 18px;
+      letter-spacing: 2.5px;
       color: #fff;
-      margin-bottom: 12px;
-      padding: 4px 10px;
-      background: rgba(212, 175, 55, 0.1);
-      border: 1px dashed rgba(212, 175, 55, 0.4);
+      margin-bottom: 14px;
+      padding: 5px 12px;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px dashed rgba(212, 175, 55, 0.5);
       border-radius: 6px;
     }
     .ticket-qr-wrap {
@@ -586,29 +613,6 @@
       color: rgba(220, 200, 255, 0.6);
       text-transform: uppercase;
       margin-bottom: 12px;
-    }
-
-    .ticket-stub-serial {
-      width: 100%;
-      padding-top: 10px;
-      border-top: 1px dashed rgba(212, 175, 55, 0.25);
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .ticket-serial-label {
-      font-family: 'Inter', sans-serif;
-      font-size: 8px;
-      letter-spacing: 2.5px;
-      color: rgba(212, 175, 55, 0.7);
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-    .ticket-serial-value {
-      font-family: 'Courier New', monospace;
-      font-size: 11px;
-      letter-spacing: 1px;
-      color: #fff;
     }
 
     /* ACTIONS — outside the stub so it screenshots clean */
@@ -2349,7 +2353,8 @@
       </div>
 
       <!-- RIGHT: Stub with QR code -->
-      <div class="ticket-stub-side">
+      <div class="ticket-stub-side" id="ticketStubSide">
+        <div class="ticket-stub-art" id="ticketStubArt" aria-hidden="true"></div>
         <div class="ticket-stub-eyebrow">YOUR PASS</div>
         <div class="ticket-stub-code" id="ticketCode">TNO-000000</div>
         <div class="ticket-qr-wrap">
@@ -2357,10 +2362,6 @@
           <div class="qr-loading" id="qrLoading">Generating…</div>
         </div>
         <div class="ticket-stub-hint">Show at the door</div>
-        <div class="ticket-stub-serial">
-          <span class="ticket-serial-label">Serial</span>
-          <span class="ticket-serial-value" id="ticketSerial">———————</span>
-        </div>
       </div>
 
       <!-- Actions (outside the stub so it screenshots cleanly) -->
@@ -3619,6 +3620,134 @@
       return `TNO-${seed}`;
     }
 
+    // ════════════════════════════════════════════════════════════════════
+    // GENERATIVE TICKET ART
+    // Returns SVG markup deterministically seeded from ticketCode.
+    // Each tier has its own visual language; pattern details (positions,
+    // sizes, rotations) vary per booker but are stable per ticketCode.
+    // ════════════════════════════════════════════════════════════════════
+    function generateTicketArt(ticketCode, tier) {
+      // Mulberry32 PRNG seeded from a string hash → deterministic per code
+      function strHash(str) {
+        let h = 1779033703 ^ str.length;
+        for (let i = 0; i < str.length; i++) {
+          h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+          h = (h << 13) | (h >>> 19);
+        }
+        return (h >>> 0);
+      }
+      const seed = strHash(String(ticketCode));
+      let s = seed;
+      function rand() {
+        s |= 0; s = (s + 0x6D2B79F5) | 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      }
+      function r(min, max) { return min + rand() * (max - min); }
+      function ri(min, max) { return Math.floor(r(min, max + 1)); }
+
+      // Tier palettes — match the holographic tier card identities
+      const palettes = {
+        regular: { primary: '#b070ff', secondary: '#c890ec', accent: '#d4af37' },
+        vip:     { primary: '#d4af37', secondary: '#f4cf57', accent: '#fff8c4' },
+        couple:  { primary: '#ff6b9d', secondary: '#ffb4d2', accent: '#d4af37' },
+        squad:   { primary: '#d4af37', secondary: '#b070ff', accent: '#ffffff' }
+      };
+      const p = palettes[tier] || palettes.regular;
+
+      const W = 200, H = 280; // matches roughly the stub aspect
+      const cx = W / 2, cy = H / 2;
+      let parts = '';
+
+      // ── REGULAR: concentric circles + radial axes + scattered violet particles ──
+      if (tier === 'regular' || !palettes[tier]) {
+        const rings = ri(4, 6);
+        for (let i = 1; i <= rings; i++) {
+          const radius = 30 + i * r(14, 20);
+          parts += `<circle cx="${cx}" cy="${cy}" r="${radius.toFixed(1)}" fill="none" stroke="${p.primary}" stroke-width="0.5" opacity="${(0.55 - i * 0.05).toFixed(2)}"/>`;
+        }
+        const axes = ri(4, 6);
+        for (let i = 0; i < axes; i++) {
+          const a = (Math.PI * 2 * i) / axes + r(-0.2, 0.2);
+          const x1 = cx + Math.cos(a) * 100, y1 = cy + Math.sin(a) * 130;
+          const x2 = cx - Math.cos(a) * 100, y2 = cy - Math.sin(a) * 130;
+          parts += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${p.accent}" stroke-width="0.4" opacity="0.5"/>`;
+        }
+        const particles = ri(10, 16);
+        for (let i = 0; i < particles; i++) {
+          parts += `<circle cx="${r(10, W-10).toFixed(1)}" cy="${r(10, H-10).toFixed(1)}" r="${r(1, 2.5).toFixed(1)}" fill="${p.secondary}" opacity="${r(0.5, 0.9).toFixed(2)}"/>`;
+        }
+      }
+      // ── VIP: nested gold diamonds + cardinal stars ──
+      else if (tier === 'vip') {
+        const layers = ri(4, 6);
+        for (let i = 1; i <= layers; i++) {
+          const d = 20 + i * r(15, 22);
+          parts += `<path d="M ${cx},${(cy-d).toFixed(1)} L ${(cx+d).toFixed(1)},${cy} L ${cx},${(cy+d).toFixed(1)} L ${(cx-d).toFixed(1)},${cy} Z" fill="none" stroke="${p.primary}" stroke-width="${(0.6 - i*0.06).toFixed(2)}" opacity="${(0.8 - i * 0.08).toFixed(2)}"/>`;
+        }
+        const stars = ri(4, 8);
+        for (let i = 0; i < stars; i++) {
+          const a = r(0, Math.PI * 2);
+          const dist = r(40, 130);
+          const sx = cx + Math.cos(a) * dist;
+          const sy = cy + Math.sin(a) * dist;
+          parts += `<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${r(1.2, 2.5).toFixed(1)}" fill="${p.accent}" opacity="${r(0.6, 0.95).toFixed(2)}"/>`;
+        }
+        const sparkles = ri(8, 14);
+        for (let i = 0; i < sparkles; i++) {
+          parts += `<circle cx="${r(10, W-10).toFixed(1)}" cy="${r(10, H-10).toFixed(1)}" r="${r(0.6, 1.4).toFixed(1)}" fill="${p.secondary}" opacity="${r(0.4, 0.75).toFixed(2)}"/>`;
+        }
+      }
+      // ── COUPLE: intertwined rose curves + twin centers ──
+      else if (tier === 'couple') {
+        // Concentric loose oval rings
+        const rings = ri(3, 4);
+        for (let i = 1; i <= rings; i++) {
+          const rx = 40 + i * r(18, 28);
+          const ry = 55 + i * r(20, 32);
+          const rot = ri(-15, 15);
+          parts += `<ellipse cx="${cx}" cy="${cy}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="none" stroke="${p.primary}" stroke-width="${(0.55 - i*0.08).toFixed(2)}" opacity="${(0.65 - i*0.1).toFixed(2)}" transform="rotate(${rot} ${cx} ${cy})"/>`;
+        }
+        // Twin centers
+        parts += `<circle cx="${(cx - 6).toFixed(1)}" cy="${cy}" r="2.2" fill="${p.secondary}" opacity="0.9"/>`;
+        parts += `<circle cx="${(cx + 6).toFixed(1)}" cy="${cy}" r="2.2" fill="${p.secondary}" opacity="0.9"/>`;
+        // Floating petals/dots
+        const petals = ri(8, 14);
+        for (let i = 0; i < petals; i++) {
+          const useAccent = rand() > 0.6;
+          parts += `<circle cx="${r(10, W-10).toFixed(1)}" cy="${r(10, H-10).toFixed(1)}" r="${r(1, 2).toFixed(1)}" fill="${useAccent ? p.accent : p.secondary}" opacity="${r(0.5, 0.85).toFixed(2)}"/>`;
+        }
+      }
+      // ── SQUAD: constellation of nodes connected by thin lines ──
+      else if (tier === 'squad') {
+        const nodeCount = ri(7, 11);
+        const nodes = [];
+        for (let i = 0; i < nodeCount; i++) {
+          nodes.push({ x: r(20, W - 20), y: r(25, H - 25) });
+        }
+        // Draw connections — each node to its 1-2 nearest
+        nodes.forEach((n, i) => {
+          const distances = nodes
+            .map((m, j) => ({ j, d: i === j ? Infinity : Math.hypot(n.x - m.x, n.y - m.y) }))
+            .sort((a, b) => a.d - b.d)
+            .slice(0, 2);
+          distances.forEach(({ j }) => {
+            const m = nodes[j];
+            parts += `<line x1="${n.x.toFixed(1)}" y1="${n.y.toFixed(1)}" x2="${m.x.toFixed(1)}" y2="${m.y.toFixed(1)}" stroke="${p.accent}" stroke-width="0.25" opacity="0.35"/>`;
+          });
+        });
+        // Draw nodes — alternating gold and violet
+        nodes.forEach((n, i) => {
+          const color = i % 2 === 0 ? p.primary : p.secondary;
+          parts += `<circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${r(2, 3.2).toFixed(1)}" fill="${color}" opacity="0.92"/>`;
+        });
+      }
+
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">${parts}</svg>`;
+    }
+
+
     function showTicket(entry) {
       ticketCodeEl.textContent = entry.ticketCode;
       ticketNameEl.textContent = entry.name;
@@ -3658,12 +3787,13 @@
       const doorsStub = document.getElementById('ticketDoorsStub');
       if (doorsStub) doorsStub.textContent = EVENT_CONFIG.doorsOpen || '—';
 
-      // Serial number: derive from ticketCode (last 8 chars, dashed)
-      const serialEl = document.getElementById('ticketSerial');
-      if (serialEl) {
-        const codeOnly = String(entry.ticketCode || '').replace(/[^A-Z0-9]/gi, '');
-        const last8 = codeOnly.slice(-8).toUpperCase().padStart(8, '0');
-        serialEl.textContent = last8.match(/.{1,4}/g).join('-');
+      // ── Tier-tinted stub + generative art (seeded by ticketCode) ──
+      const stubSide = document.getElementById('ticketStubSide');
+      if (stubSide) stubSide.setAttribute('data-tier', entry.tier || 'regular');
+
+      const artEl = document.getElementById('ticketStubArt');
+      if (artEl) {
+        artEl.innerHTML = generateTicketArt(entry.ticketCode || 'TNO-000000', entry.tier || 'regular');
       }
 
       // Show loading overlay before opening modal (#10)
