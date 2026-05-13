@@ -321,8 +321,129 @@
   }
   .tier:hover .tier-glow { opacity: 1; }
 
-  /* Keep content above the glow */
-  .tier > *:not(.tier-glow) { position: relative; z-index: 2; }
+  /* ── HOLOGRAPHIC SHIMMER LAYER ──
+     Sits inside .tier (not as ::before, to keep .tier.featured::before
+     and .tier.squad::before free for their badges).
+     Auto-drifts on all devices; on mobile gets gyroscope offset via --hx/--hy.
+     overflow:hidden lives on this layer only — the parent .tier stays
+     overflow-visible so the MOST POPULAR badge at top:-11px renders intact. */
+  .tier-holo {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+    --hx: 0%;
+    --hy: 0%;
+    /* Defaults — each tier overrides */
+    --holo-c1: rgba(212, 175, 55, 0.55);
+    --holo-c2: rgba(176, 112, 255, 0.55);
+    --holo-c3: rgba(255, 255, 255, 0.30);
+    --holo-edge: rgba(212, 175, 55, 0.45);
+  }
+  /* Sweeping diagonal shimmer — the main "rainbow foil" effect */
+  .tier-holo::before {
+    content: "";
+    position: absolute;
+    inset: -50%;
+    background: linear-gradient(
+      115deg,
+      transparent 25%,
+      var(--holo-c1) 40%,
+      var(--holo-c3) 50%,
+      var(--holo-c2) 60%,
+      transparent 75%
+    );
+    transform: translate(calc(-30% + var(--hx)), calc(-20% + var(--hy)));
+    animation: holoDrift 5.5s ease-in-out infinite;
+    mix-blend-mode: screen;
+    filter: blur(1px);
+  }
+  /* Saturated underglow — gives each tier its signature color identity */
+  .tier-holo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        ellipse 80% 90% at calc(25% + var(--hx) * 0.5) calc(30% + var(--hy) * 0.5),
+        var(--holo-c2),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 70% 80% at calc(80% - var(--hx) * 0.5) calc(75% - var(--hy) * 0.5),
+        var(--holo-c1),
+        transparent 55%
+      );
+    opacity: 0.95;
+    mix-blend-mode: screen;
+    transition: opacity 0.4s ease;
+  }
+  .tier:hover .tier-holo::after { opacity: 1; }
+
+  /* Iridescent edge ring — reads as "shiny rim" on the card */
+  .tier-holo > .tier-holo-edge,
+  .tier .tier-holo-edge {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow:
+      inset 0 0 0 1px var(--holo-edge),
+      inset 0 0 22px -4px var(--holo-edge);
+    opacity: 0.75;
+  }
+
+  @keyframes holoDrift {
+    0%,100% { transform: translate(calc(-35% + var(--hx)), calc(-25% + var(--hy))) rotate(0deg); }
+    50%     { transform: translate(calc(35% + var(--hx)),  calc(25% + var(--hy)))  rotate(0.6deg); }
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     TIER-TINTED PALETTES — each tier has a distinct identity
+     ────────────────────────────────────────────────────────── */
+
+  /* REGULAR — deep violet & lilac (cool mystery) */
+  .tier[data-tier-id="regular"] .tier-holo {
+    --holo-c1: rgba(140, 74, 216, 0.35);
+    --holo-c2: rgba(200, 144, 236, 0.40);
+    --holo-c3: rgba(232, 208, 252, 0.22);
+    --holo-edge: rgba(176, 112, 255, 0.30);
+  }
+
+  /* VIP — champagne gold + warm cream (luxe) */
+  .tier[data-tier-id="vip"] .tier-holo {
+    --holo-c1: rgba(212, 175, 55, 0.45);
+    --holo-c2: rgba(244, 207, 87, 0.38);
+    --holo-c3: rgba(255, 248, 196, 0.30);
+    --holo-edge: rgba(244, 207, 87, 0.40);
+  }
+
+  /* COUPLE — rose pink + magenta + soft gold (romantic blush) */
+  .tier[data-tier-id="couple"] .tier-holo {
+    --holo-c1: rgba(255, 107, 157, 0.42);
+    --holo-c2: rgba(255, 180, 210, 0.38);
+    --holo-c3: rgba(255, 224, 235, 0.28);
+    --holo-edge: rgba(255, 140, 180, 0.36);
+  }
+
+  /* SQUAD — gold + violet split (party energy) */
+  .tier[data-tier-id="squad"] .tier-holo {
+    --holo-c1: rgba(212, 175, 55, 0.40);
+    --holo-c2: rgba(176, 112, 255, 0.40);
+    --holo-c3: rgba(255, 255, 255, 0.24);
+    --holo-edge: rgba(212, 175, 55, 0.34);
+  }
+
+  /* Respect users who don't want motion */
+  @media (prefers-reduced-motion: reduce) {
+    .tier-holo::before { animation: none; }
+  }
+
+
+  /* Keep content above both the glow and holographic layers */
+  .tier > *:not(.tier-glow):not(.tier-holo) { position: relative; z-index: 2; }
 
   .tier:hover {
     transform: translateY(-8px);
@@ -2024,8 +2145,9 @@
     // Couple is locked to 2 — no counter, just a clean display
     if (tier.id === 'couple') {
       return `
-        <div class="tier" data-standard-id="${tier.id}">
+        <div class="tier" data-standard-id="${tier.id}" data-tier-id="${tier.id}">
           <div class="tier-glow"></div>
+          <div class="tier-holo"></div>
           <div class="tier-name">${tier.name}</div>
           <div class="tier-price">${formatPrice(tier.price)}</div>
           <div class="tier-price-label">${tier.priceLabel || 'FOR TWO'}</div>
@@ -2050,8 +2172,9 @@
     const startTotal = (Number(tier.price) || 0) * startCount;
 
     return `
-      <div class="tier${tier.featured ? ' featured' : ''}" data-standard-id="${tier.id}">
+      <div class="tier${tier.featured ? ' featured' : ''}" data-standard-id="${tier.id}" data-tier-id="${tier.id}">
         <div class="tier-glow"></div>
+        <div class="tier-holo"></div>
         <div class="tier-name">${tier.name}</div>
 
         <div class="squad-size-row">
@@ -2130,8 +2253,9 @@
     const startSavings = startRegular - startTotal;
 
     return `
-      <div class="tier squad" data-squad-id="${tier.id}">
+      <div class="tier squad" data-squad-id="${tier.id}" data-tier-id="squad">
         <div class="tier-glow"></div>
+        <div class="tier-holo"></div>
         <div class="tier-name">${tier.name}</div>
 
         <div class="squad-size-row">
@@ -2253,35 +2377,98 @@
   }
 
   // ────────────────────────────────────────────────────────────────────────
-  // ✨ CURSOR SPOTLIGHT — subtle gold glow follows mouse on tier cards
+  // ✨ HOLOGRAPHIC TIER CARDS
+  //    Desktop: cursor controls a spotlight (glow) + a subtle tilt
+  //    Mobile:  device gyroscope drives the holographic shimmer offset
+  //    All devices get the CSS-driven auto-drift shimmer as a baseline.
   // ────────────────────────────────────────────────────────────────────────
   function wireHolographicTiers(container) {
-    // Respect reduced-motion users
     const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) return;
 
-    // Skip on touch-only devices
     const supportsHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
-    if (!supportsHover) return;
+    const cards = container.querySelectorAll('.tier');
 
-    container.querySelectorAll('.tier').forEach((card) => {
-      const glow = card.querySelector('.tier-glow');
-      if (!glow) return;
-      let raf = null;
+    // ── Desktop: cursor-driven spotlight on the glow layer ──
+    if (supportsHover) {
+      cards.forEach((card) => {
+        const glow = card.querySelector('.tier-glow');
+        const holo = card.querySelector('.tier-holo');
+        if (!glow) return;
+        let raf = null;
 
-      function onMove(e) {
-        const rect = card.getBoundingClientRect();
-        const xPct = ((e.clientX - rect.left) / rect.width) * 100;
-        const yPct = ((e.clientY - rect.top) / rect.height) * 100;
-        if (raf) cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(() => {
-          glow.style.setProperty('--sx', xPct + '%');
-          glow.style.setProperty('--sy', yPct + '%');
-        });
-      }
+        function onMove(e) {
+          const rect = card.getBoundingClientRect();
+          const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+          const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+          if (raf) cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(() => {
+            glow.style.setProperty('--sx', xPct + '%');
+            glow.style.setProperty('--sy', yPct + '%');
+            // Subtle cursor-driven holographic offset on desktop too
+            if (holo) {
+              const hx = (xPct - 50) * 0.6; // -30..30%
+              const hy = (yPct - 50) * 0.4; // -20..20%
+              holo.style.setProperty('--hx', hx + '%');
+              holo.style.setProperty('--hy', hy + '%');
+            }
+          });
+        }
+        function onLeave() {
+          if (holo) {
+            holo.style.setProperty('--hx', '0%');
+            holo.style.setProperty('--hy', '0%');
+          }
+        }
+        card.addEventListener('mousemove', onMove);
+        card.addEventListener('mouseleave', onLeave);
+      });
+    }
 
-      card.addEventListener('mousemove', onMove);
-    });
+    // ── Mobile: device gyroscope drives the shimmer ──
+    // iOS 13+ requires explicit permission; we attach a one-time gesture handler.
+    const hasOrientation = typeof window.DeviceOrientationEvent !== 'undefined';
+    if (!hasOrientation) return;
+
+    let gyroActive = false;
+    function startGyro() {
+      if (gyroActive) return;
+      gyroActive = true;
+      window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+    }
+    function handleOrientation(e) {
+      // gamma = left/right tilt (-90..90), beta = front/back (-180..180)
+      const gamma = Math.max(-30, Math.min(30, e.gamma || 0)); // clamp to ±30°
+      const beta  = Math.max(-30, Math.min(30, (e.beta || 0) - 20)); // -20 baseline = phone held tilted up
+      // Map to -25%..25% shimmer offset
+      const hx = (gamma / 30) * 25;
+      const hy = (beta  / 30) * 18;
+      cards.forEach((card) => {
+        const holo = card.querySelector('.tier-holo');
+        if (holo) {
+          holo.style.setProperty('--hx', hx + '%');
+          holo.style.setProperty('--hy', hy + '%');
+        }
+      });
+    }
+
+    // iOS 13+: permission required, must be triggered by a user gesture
+    const needsPermission = typeof DeviceOrientationEvent.requestPermission === 'function';
+    if (needsPermission) {
+      // Ask on first user tap anywhere — keeps it frictionless, no extra UI
+      const askOnce = () => {
+        DeviceOrientationEvent.requestPermission()
+          .then((res) => { if (res === 'granted') startGyro(); })
+          .catch(() => {});
+        document.removeEventListener('touchstart', askOnce);
+        document.removeEventListener('click', askOnce);
+      };
+      document.addEventListener('touchstart', askOnce, { once: true, passive: true });
+      document.addEventListener('click', askOnce, { once: true });
+    } else {
+      // Android / older iOS — just start listening
+      startGyro();
+    }
   }
 
   // ────────────────────────────────────────────────────────────────────────
