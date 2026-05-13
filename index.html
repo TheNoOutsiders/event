@@ -1474,15 +1474,188 @@
     margin: 0 4px;
   }
 
-  /* ── Responsive ── */
-  @media (max-width: 600px) {
-    main { padding: 24px 16px 40px; }
-    .section { margin-bottom: 44px; }
-    .collective-card { padding: 32px 22px 28px; }
-    .silhouette { width: 92px; height: 92px; font-size: 34px; }
-    .tier-grid { gap: 22px; }
-    .tier { padding: 24px 20px 22px; }
+  /* ── Live bookings ticker ── */
+  .ticker-section {
+    position: relative;
+    z-index: 2;
+    padding: 36px 0 8px;
+    margin-top: 16px;
   }
+  .ticker-eyebrow-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 0 22px;
+  }
+  .ticker-eyebrow-line {
+    flex: 0 0 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-line));
+  }
+  .ticker-eyebrow-line.right {
+    background: linear-gradient(270deg, transparent, var(--gold-line));
+  }
+  .ticker-eyebrow {
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    color: var(--gold-soft);
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ticker-pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
+    animation: tickerPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes tickerPulse {
+    0%, 100% { opacity: 0.4; transform: scale(0.85); }
+    50%      { opacity: 1;   transform: scale(1.15); }
+  }
+
+  .ticker-rail {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding: 18px 0;
+    border-top: 1px solid rgba(212, 175, 55, 0.16);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.16);
+    background: linear-gradient(180deg,
+      rgba(20, 5, 35, 0) 0%,
+      rgba(40, 0, 60, 0.22) 50%,
+      rgba(20, 5, 35, 0) 100%);
+  }
+  /* Gold spotlight line, like .gold-top-line */
+  .ticker-rail::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.55;
+  }
+  /* Edge fade masks so entries dissolve in/out */
+  .ticker-rail::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg,
+      var(--purple-4) 0%,
+      rgba(16, 0, 24, 0) 9%,
+      rgba(16, 0, 24, 0) 91%,
+      var(--purple-4) 100%);
+    z-index: 2;
+  }
+
+  .ticker-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    white-space: nowrap;
+    animation: tickerScroll 60s linear infinite;
+    will-change: transform;
+  }
+  .ticker-rail:hover .ticker-track {
+    animation-play-state: paused;
+  }
+  @keyframes tickerScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: rgba(220, 200, 255, 0.78);
+    padding: 0 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ticker-bracket {
+    color: var(--gold);
+    font-weight: 700;
+    opacity: 0.9;
+  }
+  .ticker-name {
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 3px;
+  }
+  .ticker-tier {
+    color: var(--gold-soft);
+    font-weight: 600;
+  }
+  .ticker-time {
+    color: var(--text-3);
+    font-weight: 400;
+    letter-spacing: 1.8px;
+  }
+  .ticker-sep {
+    color: var(--gold);
+    opacity: 0.55;
+    font-size: 9px;
+    padding: 0 4px;
+  }
+
+  /* Empty / loading state — kept understated, hidden if no real bookings */
+  .ticker-section[data-state="empty"] { display: none; }
+  .ticker-section[data-state="loading"] .ticker-rail { opacity: 0.4; }
+
+  /* ── Mobile: vertical fade-in/out instead of horizontal scroll ── */
+  @media (max-width: 600px) {
+    .ticker-rail {
+      padding: 0;
+      height: 56px;
+      overflow: hidden;
+    }
+    .ticker-rail::after {
+      background: linear-gradient(180deg,
+        var(--purple-4) 0%,
+        rgba(16, 0, 24, 0) 30%,
+        rgba(16, 0, 24, 0) 70%,
+        var(--purple-4) 100%);
+    }
+    .ticker-track {
+      display: block;
+      width: 100%;
+      height: 100%;
+      animation: none;
+      position: relative;
+    }
+    .ticker-track .ticker-sep { display: none; }
+    .ticker-track .ticker-item {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      text-align: center;
+      padding: 0 16px;
+      font-size: 11px;
+      letter-spacing: 2px;
+    }
+    .ticker-track .ticker-item.active {
+      opacity: 1;
+    }
+    .ticker-eyebrow-line { flex: 0 0 36px; }
+  }
+
+
 </style>
 </head>
 <body>
@@ -1718,6 +1891,21 @@
   </section>
 
 </main>
+
+<!-- ═══════════════════════════ LIVE TICKER ═══════════════════════════ -->
+<section class="ticker-section" id="tickerSection" aria-label="Recent bookings">
+  <div class="ticker-eyebrow-wrap">
+    <span class="ticker-eyebrow-line"></span>
+    <span class="ticker-eyebrow">
+      <span class="ticker-pulse"></span>
+      Live · The Room Is Filling
+    </span>
+    <span class="ticker-eyebrow-line right"></span>
+  </div>
+  <div class="ticker-rail">
+    <div class="ticker-track" id="tickerTrack"><!-- populated by JS --></div>
+  </div>
+</section>
 
 <footer class="site-footer">
   <div class="footer-inner">
@@ -2523,6 +2711,176 @@
       renderTiers();
     }
   }, 300);
+
+  // ════════════════════════════════════════════════════════════════════════
+  // LIVE BOOKINGS TICKER — synthetic. Bangla names, no real bookings exposed.
+  // Drifts timestamps forward over time so it feels alive without ever
+  // touching the Google Sheet.
+  // ════════════════════════════════════════════════════════════════════════
+  (function () {
+    const section = document.getElementById('tickerSection');
+    const track = document.getElementById('tickerTrack');
+    if (!section || !track) return;
+
+    // Romanized Bangla first names — mix of common and trendy, gender-balanced.
+    const NAMES = [
+      'AARYA','ZARA','RIDOY','FAHIM','NUSAYBA','TANIM','RAISA','SAIF','MEHJABIN',
+      'ARNOB','TASNIA','RAHIM','SUMAIYA','SHEIKH','LAMIA','REDWAN','MAISHA','SAKIB',
+      'NABILA','ARIF','ANIKA','TAHSIN','PROMI','FARHAN','TAMIM','RAHA','ISHRAQ',
+      'NUSRAT','SHADID','PRITHA','ASHIK','RIYA','NAFEES','SHAYAN','TASMIA',
+      'TURJO','MIRA','ZAID','LABIBA','SADMAN','TANISHA','RAYHAN','OISHEE',
+      'JUNAID','SADIA','NIRJHAR','MALIHA','EHSAN','ANANNYA','SAMIN','ZAREEN',
+      'ROHAN','PROCHITA','ANIK','TAHIA','ARUSH','PROTYASHA','SAMI','MAHIR'
+    ];
+
+    const TIER_DEFS = [
+      // Weights chosen so the mix feels right for the night.
+      // Regular most common, VIP second, Squad occasional, Couple rarer.
+      { tier: 'regular', weight: 38, phrase: () => 'REGULAR' },
+      { tier: 'regular', weight: 8,  phrase: () => 'REGULAR × ' + (2 + Math.floor(Math.random() * 3)) }, // x2, x3, x4
+      { tier: 'vip',     weight: 22, phrase: () => 'VIP' },
+      { tier: 'vip',     weight: 6,  phrase: () => 'VIP × 2' },
+      { tier: 'couple',  weight: 12, phrase: () => 'COUPLE' },
+      { tier: 'squad',   weight: 14, phrase: () => 'SQUAD OF ' + (5 + Math.floor(Math.random() * 6)) } // 5..10
+    ];
+    const TIER_WEIGHT_TOTAL = TIER_DEFS.reduce((s, t) => s + t.weight, 0);
+
+    function pickTier() {
+      let r = Math.random() * TIER_WEIGHT_TOTAL;
+      for (const def of TIER_DEFS) {
+        r -= def.weight;
+        if (r <= 0) return def;
+      }
+      return TIER_DEFS[0];
+    }
+
+    function shuffled(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // Build a set of bookings with timestamps spread across the last ~3 hours.
+    // Earlier entries get older timestamps; newest entry "JUST NOW".
+    function generateBookings(count) {
+      const names = shuffled(NAMES).slice(0, count);
+      const now = Date.now();
+      const bookings = [];
+      // First entry: under a minute ago. Then gaps of 1-18 mins between entries.
+      let cursor = now - Math.floor(Math.random() * 45) * 1000; // 0-45s ago
+      for (let i = 0; i < count; i++) {
+        const def = pickTier();
+        bookings.push({
+          name: names[i],
+          tier: def.tier,
+          phrase: def.phrase(),
+          ts: cursor
+        });
+        cursor -= (60 * 1000) * (1 + Math.floor(Math.random() * 18)); // step back 1-18 min
+      }
+      return bookings;
+    }
+
+    function formatRelativeTime(ts) {
+      const diffMs = Date.now() - ts;
+      const mins = Math.max(0, Math.floor(diffMs / 60000));
+      if (mins < 1)   return 'JUST NOW';
+      if (mins === 1) return '1 MIN AGO';
+      if (mins < 60)  return mins + ' MIN AGO';
+      const hrs = Math.floor(mins / 60);
+      if (hrs === 1)  return '1 HR AGO';
+      return hrs + ' HRS AGO';
+    }
+
+    function escapeHTML(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[c]));
+    }
+
+    function buildItemHTML(b) {
+      const time = formatRelativeTime(b.ts);
+      return (
+        '<span class="ticker-item">' +
+          '<span class="ticker-bracket">⟨</span> ' +
+          '<span class="ticker-name">' + escapeHTML(b.name) + '</span>' +
+          ' <span class="ticker-bracket">·</span> ' +
+          '<span class="ticker-tier">' + escapeHTML(b.phrase) + '</span>' +
+          ' <span class="ticker-bracket">·</span> ' +
+          '<span class="ticker-time">' + escapeHTML(time) + '</span>' +
+          ' <span class="ticker-bracket">⟩</span>' +
+        '</span>'
+      );
+    }
+
+    const isMobile = () => window.matchMedia('(max-width: 600px)').matches;
+    let mobileRotateTimer = null;
+    let bookings = generateBookings(16);
+
+    function renderDesktop() {
+      const sep = '<span class="ticker-sep">◆</span>';
+      const strip = bookings.map(buildItemHTML).join(sep);
+      // Duplicate for seamless -50% scroll loop
+      track.innerHTML = strip + sep + strip + sep;
+      const dur = Math.min(120, Math.max(40, bookings.length * 5));
+      track.style.animationDuration = dur + 's';
+    }
+
+    function renderMobile() {
+      track.innerHTML = bookings.map(buildItemHTML).join('');
+      const items = track.querySelectorAll('.ticker-item');
+      if (!items.length) return;
+      if (mobileRotateTimer) clearInterval(mobileRotateTimer);
+      let idx = 0;
+      items[0].classList.add('active');
+      mobileRotateTimer = setInterval(() => {
+        items[idx].classList.remove('active');
+        idx = (idx + 1) % items.length;
+        items[idx].classList.add('active');
+      }, 3000);
+    }
+
+    function render() {
+      section.setAttribute('data-state', 'ready');
+      if (isMobile()) renderMobile();
+      else renderDesktop();
+    }
+
+    // Tick: every 45-90s, prepend a fresh "JUST NOW" booking and drop the oldest.
+    // This is what makes the page feel alive on a long session.
+    function tick() {
+      const used = new Set(bookings.map(b => b.name));
+      const fresh = NAMES.filter(n => !used.has(n));
+      const name = fresh.length
+        ? fresh[Math.floor(Math.random() * fresh.length)]
+        : NAMES[Math.floor(Math.random() * NAMES.length)];
+      const def = pickTier();
+      bookings.unshift({ name: name, tier: def.tier, phrase: def.phrase(), ts: Date.now() });
+      if (bookings.length > 18) bookings.pop();
+      render();
+      setTimeout(tick, 45000 + Math.random() * 45000); // 45s..90s
+    }
+
+    // Re-render on viewport breakpoint change (desktop ↔ mobile)
+    let wasMobile = isMobile();
+    window.addEventListener('resize', () => {
+      const nowMobile = isMobile();
+      if (nowMobile !== wasMobile) {
+        wasMobile = nowMobile;
+        render();
+      }
+    });
+
+    // Boot
+    render();
+    // Refresh the visible "X MIN AGO" labels every 30s so timestamps age naturally
+    setInterval(render, 30000);
+    // Start the live-add cycle
+    setTimeout(tick, 45000 + Math.random() * 45000);
+  })();
 
   // ════════════════════════════════════════════════════════════════════════
   // PARTICLE BACKGROUND (subtle violet glows)
