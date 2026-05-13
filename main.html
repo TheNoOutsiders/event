@@ -522,6 +522,11 @@
       text-align: center;
       overflow: hidden;
     }
+    /* Soft tier-color halo that lifts the art off the dark background */
+    .ticket-stub-side[data-tier="regular"] { background: radial-gradient(ellipse at center, rgba(140, 74, 216, 0.22), transparent 65%), radial-gradient(circle at 80% 0%, rgba(212, 175, 55, 0.12), transparent 50%), linear-gradient(135deg, #200030 0%, #150022 50%, #0a0018 100%); }
+    .ticket-stub-side[data-tier="vip"]     { background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.22), transparent 65%), radial-gradient(circle at 80% 0%, rgba(244, 207, 87, 0.15), transparent 50%), linear-gradient(135deg, #2a1a05 0%, #150d00 50%, #0a0500 100%); }
+    .ticket-stub-side[data-tier="couple"]  { background: radial-gradient(ellipse at center, rgba(255, 107, 157, 0.20), transparent 65%), radial-gradient(circle at 80% 0%, rgba(212, 175, 55, 0.10), transparent 50%), linear-gradient(135deg, #2a0a20 0%, #1a0512 50%, #0a0008 100%); }
+    .ticket-stub-side[data-tier="squad"]   { background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.20), rgba(176, 112, 255, 0.18) 50%, transparent 75%), linear-gradient(135deg, #1f1530 0%, #150d22 50%, #0a0018 100%); }
     .ticket-stub-side::before {
       content: "";
       position: absolute;
@@ -3658,6 +3663,16 @@
 
       const W = 200, H = 280; // matches roughly the stub aspect
       const cx = W / 2, cy = H / 2;
+      // SVG defs: a glow filter that makes strokes shed colored light into the dark bg
+      const defs = `<defs>
+        <filter id="tArtGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="1.6" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>`;
       let parts = '';
 
       // ── REGULAR: concentric circles + radial axes + scattered violet particles ──
@@ -3665,18 +3680,18 @@
         const rings = ri(4, 6);
         for (let i = 1; i <= rings; i++) {
           const radius = 30 + i * r(14, 20);
-          parts += `<circle cx="${cx}" cy="${cy}" r="${radius.toFixed(1)}" fill="none" stroke="${p.primary}" stroke-width="0.9" opacity="${(0.85 - i * 0.07).toFixed(2)}"/>`;
+          parts += `<circle cx="${cx}" cy="${cy}" r="${radius.toFixed(1)}" fill="none" stroke="${p.primary}" stroke-width="1.5" opacity="${(0.95 - i * 0.06).toFixed(2)}" filter="url(#tArtGlow)"/>`;
         }
         const axes = ri(4, 6);
         for (let i = 0; i < axes; i++) {
           const a = (Math.PI * 2 * i) / axes + r(-0.2, 0.2);
           const x1 = cx + Math.cos(a) * 100, y1 = cy + Math.sin(a) * 130;
           const x2 = cx - Math.cos(a) * 100, y2 = cy - Math.sin(a) * 130;
-          parts += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${p.accent}" stroke-width="0.7" opacity="0.75"/>`;
+          parts += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${p.accent}" stroke-width="1" opacity="0.85" filter="url(#tArtGlow)"/>`;
         }
         const particles = ri(10, 16);
         for (let i = 0; i < particles; i++) {
-          parts += `<circle cx="${r(10, W-10).toFixed(1)}" cy="${r(10, H-10).toFixed(1)}" r="${r(1.3, 2.8).toFixed(1)}" fill="${p.secondary}" opacity="${r(0.7, 1).toFixed(2)}"/>`;
+          parts += `<circle cx="${r(10, W-10).toFixed(1)}" cy="${r(10, H-10).toFixed(1)}" r="${r(1.6, 3.2).toFixed(1)}" fill="${p.secondary}" opacity="1" filter="url(#tArtGlow)"/>`;
         }
       }
       // ── VIP: nested gold diamonds + cardinal stars ──
@@ -3684,7 +3699,7 @@
         const layers = ri(4, 6);
         for (let i = 1; i <= layers; i++) {
           const d = 20 + i * r(15, 22);
-          parts += `<path d="M ${cx},${(cy-d).toFixed(1)} L ${(cx+d).toFixed(1)},${cy} L ${cx},${(cy+d).toFixed(1)} L ${(cx-d).toFixed(1)},${cy} Z" fill="none" stroke="${p.primary}" stroke-width="${(1.1 - i*0.08).toFixed(2)}" opacity="${(0.95 - i * 0.08).toFixed(2)}"/>`;
+          parts += `<path d="M ${cx},${(cy-d).toFixed(1)} L ${(cx+d).toFixed(1)},${cy} L ${cx},${(cy+d).toFixed(1)} L ${(cx-d).toFixed(1)},${cy} Z" fill="none" stroke="${p.primary}" stroke-width="${(1.8 - i*0.15).toFixed(2)}" opacity="${(1 - i * 0.08).toFixed(2)}" filter="url(#tArtGlow)"/>`;
         }
         const stars = ri(4, 8);
         for (let i = 0; i < stars; i++) {
@@ -3692,31 +3707,28 @@
           const dist = r(40, 130);
           const sx = cx + Math.cos(a) * dist;
           const sy = cy + Math.sin(a) * dist;
-          parts += `<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${r(1.6, 3).toFixed(1)}" fill="${p.accent}" opacity="${r(0.8, 1).toFixed(2)}"/>`;
+          parts += `<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="${r(2, 3.5).toFixed(1)}" fill="${p.accent}" opacity="1" filter="url(#tArtGlow)"/>`;
         }
         const sparkles = ri(8, 14);
         for (let i = 0; i < sparkles; i++) {
-          parts += `<circle cx="${r(10, W-10).toFixed(1)}" cy="${r(10, H-10).toFixed(1)}" r="${r(0.9, 1.8).toFixed(1)}" fill="${p.secondary}" opacity="${r(0.65, 0.95).toFixed(2)}"/>`;
+          parts += `<circle cx="${r(10, W-10).toFixed(1)}" cy="${r(10, H-10).toFixed(1)}" r="${r(1.2, 2.2).toFixed(1)}" fill="${p.secondary}" opacity="${r(0.8, 1).toFixed(2)}" filter="url(#tArtGlow)"/>`;
         }
       }
       // ── COUPLE: intertwined rose curves + twin centers ──
       else if (tier === 'couple') {
-        // Concentric loose oval rings
         const rings = ri(3, 4);
         for (let i = 1; i <= rings; i++) {
           const rx = 40 + i * r(18, 28);
           const ry = 55 + i * r(20, 32);
           const rot = ri(-15, 15);
-          parts += `<ellipse cx="${cx}" cy="${cy}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="none" stroke="${p.primary}" stroke-width="${(0.95 - i*0.1).toFixed(2)}" opacity="${(0.85 - i*0.1).toFixed(2)}" transform="rotate(${rot} ${cx} ${cy})"/>`;
+          parts += `<ellipse cx="${cx}" cy="${cy}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="none" stroke="${p.primary}" stroke-width="${(1.6 - i*0.2).toFixed(2)}" opacity="${(0.95 - i*0.1).toFixed(2)}" transform="rotate(${rot} ${cx} ${cy})" filter="url(#tArtGlow)"/>`;
         }
-        // Twin centers
-        parts += `<circle cx="${(cx - 6).toFixed(1)}" cy="${cy}" r="2.8" fill="${p.secondary}" opacity="1"/>`;
-        parts += `<circle cx="${(cx + 6).toFixed(1)}" cy="${cy}" r="2.8" fill="${p.secondary}" opacity="1"/>`;
-        // Floating petals/dots
+        parts += `<circle cx="${(cx - 6).toFixed(1)}" cy="${cy}" r="3.5" fill="${p.secondary}" opacity="1" filter="url(#tArtGlow)"/>`;
+        parts += `<circle cx="${(cx + 6).toFixed(1)}" cy="${cy}" r="3.5" fill="${p.secondary}" opacity="1" filter="url(#tArtGlow)"/>`;
         const petals = ri(8, 14);
         for (let i = 0; i < petals; i++) {
           const useAccent = rand() > 0.6;
-          parts += `<circle cx="${r(10, W-10).toFixed(1)}" cy="${r(10, H-10).toFixed(1)}" r="${r(1.3, 2.4).toFixed(1)}" fill="${useAccent ? p.accent : p.secondary}" opacity="${r(0.7, 0.95).toFixed(2)}"/>`;
+          parts += `<circle cx="${r(10, W-10).toFixed(1)}" cy="${r(10, H-10).toFixed(1)}" r="${r(1.6, 2.8).toFixed(1)}" fill="${useAccent ? p.accent : p.secondary}" opacity="${r(0.85, 1).toFixed(2)}" filter="url(#tArtGlow)"/>`;
         }
       }
       // ── SQUAD: constellation of nodes connected by thin lines ──
@@ -3726,7 +3738,6 @@
         for (let i = 0; i < nodeCount; i++) {
           nodes.push({ x: r(20, W - 20), y: r(25, H - 25) });
         }
-        // Draw connections — each node to its 1-2 nearest
         nodes.forEach((n, i) => {
           const distances = nodes
             .map((m, j) => ({ j, d: i === j ? Infinity : Math.hypot(n.x - m.x, n.y - m.y) }))
@@ -3734,17 +3745,16 @@
             .slice(0, 2);
           distances.forEach(({ j }) => {
             const m = nodes[j];
-            parts += `<line x1="${n.x.toFixed(1)}" y1="${n.y.toFixed(1)}" x2="${m.x.toFixed(1)}" y2="${m.y.toFixed(1)}" stroke="${p.accent}" stroke-width="0.55" opacity="0.65"/>`;
+            parts += `<line x1="${n.x.toFixed(1)}" y1="${n.y.toFixed(1)}" x2="${m.x.toFixed(1)}" y2="${m.y.toFixed(1)}" stroke="${p.accent}" stroke-width="0.9" opacity="0.85" filter="url(#tArtGlow)"/>`;
           });
         });
-        // Draw nodes — alternating gold and violet
         nodes.forEach((n, i) => {
           const color = i % 2 === 0 ? p.primary : p.secondary;
-          parts += `<circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${r(2.5, 3.8).toFixed(1)}" fill="${color}" opacity="1"/>`;
+          parts += `<circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${r(3, 4.5).toFixed(1)}" fill="${color}" opacity="1" filter="url(#tArtGlow)"/>`;
         });
       }
 
-      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">${parts}</svg>`;
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">${defs}${parts}</svg>`;
     }
 
 
