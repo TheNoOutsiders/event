@@ -340,6 +340,88 @@
     .method-pill.nagad  { background: rgba(249,115,22,0.15); border: 1px solid rgba(249,115,22,0.3); color: #fdba74; }
     .method-pill.unknown { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.5); }
 
+    /* ── Squad roster (shown when a leader QR is scanned) ── */
+    .squad-roster {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(167,100,255,0.07);
+      border: 1px solid rgba(167,100,255,0.22);
+    }
+    .squad-roster-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .squad-roster-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--purple-light);
+    }
+    .squad-roster-count {
+      font-family: 'Noto Sans Math', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #c084fc;
+    }
+    .squad-roster-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .squad-member {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 11px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .squad-member-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.25);
+    }
+    .squad-member-dot.in { background: var(--green); box-shadow: 0 0 8px rgba(34,197,94,0.5); }
+    .squad-member-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.92);
+      flex: 1;
+    }
+    .squad-member-role {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    .squad-member-role.leader {
+      background: rgba(212,175,55,0.16);
+      border: 1px solid rgba(212,175,55,0.35);
+      color: #f0c95c;
+    }
+    .squad-member-role.member {
+      background: rgba(167,100,255,0.14);
+      border: 1px solid rgba(167,100,255,0.28);
+      color: var(--purple-light);
+    }
+    .squad-member-status {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      color: rgba(255,255,255,0.4);
+      white-space: nowrap;
+    }
+    .squad-member-status.in { color: #86efac; }
+
     /* ── Stats strip ── */
     .stats-strip {
       display: grid;
@@ -527,6 +609,15 @@
       </div>
     </div>
 
+    <!-- Squad roster — populated only when a leader QR is scanned -->
+    <div class="squad-roster" id="squadRoster" style="display:none;">
+      <div class="squad-roster-head">
+        <span class="squad-roster-title">Squad Roster</span>
+        <span class="squad-roster-count" id="squadRosterCount">—</span>
+      </div>
+      <div class="squad-roster-list" id="squadRosterList"></div>
+    </div>
+
   </div>
 
 </div>
@@ -654,6 +745,61 @@
     loadStats();
   }
 
+  // ── Render squad roster (only when scanning a leader's QR) ──
+  function renderSquadRoster(squad) {
+    const box  = document.getElementById('squadRoster');
+    const list = document.getElementById('squadRosterList');
+    const count = document.getElementById('squadRosterCount');
+
+    if (!squad || !squad.leaderName) {
+      box.style.display = 'none';
+      return;
+    }
+
+    const members = squad.members || [];
+    const joined  = squad.joinedCount || (members.length + 1);
+    const size    = squad.squadSize || joined;
+    count.textContent = joined + ' / ' + size;
+
+    list.innerHTML = '';
+
+    // Leader row first
+    list.appendChild(buildSquadRow(squad.leaderName, 'leader', squad.leaderCheckedIn));
+
+    // Then each member
+    members.forEach(function (m) {
+      list.appendChild(buildSquadRow(m.name, 'member', m.checkedIn));
+    });
+
+    box.style.display = 'block';
+  }
+
+  function buildSquadRow(name, role, checkedIn) {
+    const row = document.createElement('div');
+    row.className = 'squad-member';
+
+    const dot = document.createElement('span');
+    dot.className = 'squad-member-dot' + (checkedIn ? ' in' : '');
+
+    const nm = document.createElement('span');
+    nm.className = 'squad-member-name';
+    nm.textContent = name || '—';
+
+    const roleTag = document.createElement('span');
+    roleTag.className = 'squad-member-role ' + role;
+    roleTag.textContent = role;
+
+    const status = document.createElement('span');
+    status.className = 'squad-member-status' + (checkedIn ? ' in' : '');
+    status.textContent = checkedIn ? '✓ In' : 'Not in';
+
+    row.appendChild(dot);
+    row.appendChild(nm);
+    row.appendChild(roleTag);
+    row.appendChild(status);
+    return row;
+  }
+
   // ── Render result ────────────────────────────────────────
   function renderResult(data, code) {
     const card    = document.getElementById('resultCard');
@@ -695,6 +841,7 @@
       resPhone.textContent = '—';
       resTix.textContent   = '—';
       resPay.innerHTML     = '—';
+      renderSquadRoster(null);
       void card.offsetWidth;
       card.classList.add('show');
       return;
@@ -713,6 +860,9 @@
     } else {
       resPay.innerHTML = '<span class="method-pill unknown">—</span>';
     }
+
+    // Squad roster — backend attaches data.squad only when a leader QR is scanned
+    renderSquadRoster(data.squad);
 
     void card.offsetWidth;
     card.classList.add('show');
