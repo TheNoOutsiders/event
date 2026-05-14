@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The No Outsiders — Registration</title>
-  <meta name="description" content="One room. No outsiders. White Room is an immersive night of EDM meets Bollywood — neon lights, bass drops, and a dance floor that never sleeps. Dhaka, April 2026." />
+  <meta name="description" content="One room. No outsiders. White Room is an immersive night of EDM meets Bollywood — neon lights, bass drops, and a dance floor that never sleeps. Dhaka, June 10, 2026." />
   <meta property="og:title" content="The No Outsiders — Registration" />
-  <meta property="og:description" content="One room. No outsiders. White Room is an immersive night of EDM meets Bollywood — neon lights, bass drops, and a dance floor that never sleeps. Dhaka, April 2026." />
+  <meta property="og:description" content="One room. No outsiders. White Room is an immersive night of EDM meets Bollywood — neon lights, bass drops, and a dance floor that never sleeps. Dhaka, June 10, 2026." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://thenooutsiders.github.io/event/poster.jpeg" />
   <meta property="og:image:width" content="1200" />
@@ -14,7 +14,8 @@
   <meta name="twitter:image" content="https://thenooutsiders.github.io/event/poster.jpeg" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="The No Outsiders — Registration" />
-  <meta name="twitter:description" content="One room. No outsiders. White Room is an immersive night of EDM meets Bollywood — neon lights, bass drops, and a dance floor that never sleeps. Dhaka, April 2026." />
+  <meta name="twitter:description" content="One room. No outsiders. White Room is an immersive night of EDM meets Bollywood — neon lights, bass drops, and a dance floor that never sleeps. Dhaka, June 10, 2026." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2316001a'/%3E%3Cpath d='M50 22 L72 50 L50 78 L28 50 Z' fill='%23d4af37'/%3E%3C/svg%3E" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Math:wght@700&family=Barlow+Condensed:ital,wght@1,900&family=Bebas+Neue&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <style>
@@ -2203,10 +2204,242 @@
         filter: none;
       }
     }
+    /* ══ SQUAD FRIEND-JOIN VIEW ══ */
+    #squadJoinView {
+      display: none;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 16px;
+      position: relative;
+      z-index: 5;
+    }
+    #squadJoinView.active { display: flex; }
+    body.squad-join-mode .layout-shell,
+    body.squad-join-mode .event-strip,
+    body.squad-join-mode .admin-toggle-wrap { display: none !important; }
+
+    .squad-join-card {
+      width: 100%;
+      max-width: 380px;
+      background: rgba(15, 5, 25, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 18px;
+      padding: 30px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .squad-join-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.6), transparent);
+    }
+    .squad-join-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: rgba(212, 175, 55, 0.85);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+    .squad-join-invite {
+      font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: 17px;
+      letter-spacing: 1px;
+      color: rgba(220, 200, 255, 0.9);
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+    .squad-join-leader {
+      color: #d4af37;
+      font-size: 22px;
+    }
+    .squad-join-size {
+      font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: 30px;
+      letter-spacing: 3px;
+      color: #fff;
+      margin-bottom: 22px;
+    }
+    .squad-progress-box {
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 24px;
+    }
+    .squad-progress-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: rgba(220, 200, 255, 0.6);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .squad-progress-segments {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .squad-seg {
+      width: 28px;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .squad-seg.filled { background: #d4af37; }
+    .squad-progress-count {
+      font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: 15px;
+      letter-spacing: 1.5px;
+      color: #d4af37;
+    }
+    .squad-members-line {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      color: rgba(220, 200, 255, 0.55);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+    .squad-join-field-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: rgba(220, 200, 255, 0.55);
+      margin-bottom: 8px;
+      text-align: left;
+    }
+    #squadJoinNameInput {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      background: rgba(8, 0, 16, 0.6);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      letter-spacing: 1px;
+      outline: none;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+    #squadJoinNameInput:focus {
+      border-color: rgba(212, 175, 55, 0.7);
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    }
+    .squad-join-btn {
+      width: 100%;
+      min-height: 52px;
+      border-radius: 14px;
+      border: 1px solid rgba(212, 175, 55, 0.6);
+      background: linear-gradient(135deg, #3b2406, #6b4410, #3b2406);
+      color: #d4af37;
+      font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: 18px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .squad-join-btn:hover { transform: translateY(-1px); }
+    .squad-join-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .squad-join-note {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      color: rgba(220, 200, 255, 0.4);
+      margin-top: 16px;
+      line-height: 1.5;
+    }
+    .squad-join-error {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: #ff8b8b;
+      margin-top: 12px;
+      min-height: 16px;
+      letter-spacing: 0.3px;
+    }
+    /* success / full / invalid states reuse the card, just swap inner content */
+    .squad-state-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      line-height: 1;
+    }
+    .squad-state-title {
+      font-family: 'Bebas Neue', Impact, sans-serif;
+      font-size: 26px;
+      letter-spacing: 2px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .squad-state-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: rgba(220, 200, 255, 0.65);
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
+
   </style>
 </head>
 <body>
   <canvas id="particles"></canvas>
+
+  <!-- ══ SQUAD FRIEND-JOIN VIEW (shown only when ?squad=CODE is in the URL) ══ -->
+  <div id="squadJoinView">
+    <div class="squad-join-card" id="squadJoinCard">
+      <!-- Loading state (default) -->
+      <div id="squadJoinLoading">
+        <div class="squad-join-eyebrow">The No Outsiders</div>
+        <div class="squad-state-sub">Loading squad invite…</div>
+      </div>
+
+      <!-- Join form (shown after roster loads OK) -->
+      <div id="squadJoinForm" style="display:none;">
+        <div class="squad-join-eyebrow">You're Invited</div>
+        <div class="squad-join-invite">
+          <span class="squad-join-leader" id="squadLeaderName">—</span><br>
+          invited you to join their
+        </div>
+        <div class="squad-join-size" id="squadSizeLabel">SQUAD</div>
+
+        <div class="squad-progress-box">
+          <div class="squad-progress-label">Squad Progress</div>
+          <div class="squad-progress-segments" id="squadSegments"></div>
+          <div class="squad-progress-count" id="squadCountLabel">— joined</div>
+          <div class="squad-members-line" id="squadMembersLine"></div>
+        </div>
+
+        <div class="squad-join-field-label">YOUR FIRST NAME</div>
+        <input type="text" id="squadJoinNameInput" placeholder="Type your name"
+               maxlength="40" autocomplete="given-name" />
+        <button type="button" class="squad-join-btn" id="squadJoinBtn">JOIN THE SQUAD</button>
+        <div class="squad-join-error" id="squadJoinError"></div>
+
+        <div class="squad-join-note" id="squadJoinNote">
+          The squad leader already paid for everyone.<br>Just add your name — you're in.
+        </div>
+      </div>
+
+      <!-- Success / Full / Invalid states (one container, content swapped by JS) -->
+      <div id="squadJoinState" style="display:none;">
+        <div class="squad-state-icon" id="squadStateIcon">✓</div>
+        <div class="squad-state-title" id="squadStateTitle">You're In!</div>
+        <div class="squad-state-sub" id="squadStateSub">—</div>
+        <div class="squad-progress-box" id="squadStateProgress" style="margin-top:18px;">
+          <div class="squad-progress-segments" id="squadStateSegments"></div>
+          <div class="squad-progress-count" id="squadStateCount">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
   <canvas id="confettiCanvas" style="
     position: fixed;
     inset: 0;
@@ -2294,6 +2527,19 @@
           <span id="ticketDoorsStub">—</span>
         </div>
         <div class="ticket-stub-venue" id="ticketVenue">—</div>
+
+        <!-- ── Squad leader: share block (shown only for squad bookings) ── -->
+        <div id="squadShareBlock" style="display:none;">
+          <div class="ticket-stub-divider"></div>
+          <div style="font-family:'Inter',sans-serif; font-size:10px; letter-spacing:2px; color:rgba(212,175,55,0.85); text-transform:uppercase; font-weight:700; margin-bottom:8px;">
+            Recruit Your Squad
+          </div>
+          <div style="font-family:'Inter',sans-serif; font-size:11px; color:rgba(220,200,255,0.6); line-height:1.5; margin-bottom:10px;">
+            Send this link to your friends so they can join your squad:
+          </div>
+          <div id="squadShareLink" style="font-family:'Inter',sans-serif; font-size:10px; letter-spacing:0.3px; color:#fff; background:rgba(8,0,16,0.6); border:1px dashed rgba(212,175,55,0.5); border-radius:8px; padding:8px 10px; word-break:break-all; margin-bottom:8px;">—</div>
+          <button type="button" id="squadCopyBtn" style="width:100%; min-height:42px; border-radius:10px; border:1px solid rgba(212,175,55,0.6); background:linear-gradient(135deg,#3b2406,#6b4410,#3b2406); color:#d4af37; font-family:'Bebas Neue',Impact,sans-serif; font-size:15px; letter-spacing:2px; cursor:pointer;">COPY SQUAD LINK</button>
+        </div>
       </div>
 
       <!-- Hidden — kept so any other JS referencing these IDs still works -->
@@ -3598,6 +3844,47 @@
       const doorsStub = document.getElementById('ticketDoorsStub');
       if (doorsStub) doorsStub.textContent = EVENT_CONFIG.doorsOpen || '—';
 
+      // ── Squad leader: show the recruit-your-squad share block ──
+      const squadShareBlock = document.getElementById('squadShareBlock');
+      if (squadShareBlock) {
+        if (entry.tier === 'squad' && entry.squadCode) {
+          const base = window.location.origin + window.location.pathname;
+          const shareUrl = base + '?squad=' + encodeURIComponent(entry.squadCode);
+          const linkEl = document.getElementById('squadShareLink');
+          const copyBtn = document.getElementById('squadCopyBtn');
+          if (linkEl) linkEl.textContent = shareUrl;
+          if (copyBtn) {
+            copyBtn.onclick = function () {
+              const done = function () {
+                copyBtn.textContent = '✓ COPIED!';
+                setTimeout(function () { copyBtn.textContent = 'COPY SQUAD LINK'; }, 2000);
+              };
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareUrl).then(done).catch(function () {
+                  // Fallback: select-and-copy via a temp textarea
+                  const ta = document.createElement('textarea');
+                  ta.value = shareUrl;
+                  document.body.appendChild(ta);
+                  ta.select();
+                  try { document.execCommand('copy'); done(); } catch (_) {}
+                  document.body.removeChild(ta);
+                });
+              } else {
+                const ta = document.createElement('textarea');
+                ta.value = shareUrl;
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); done(); } catch (_) {}
+                document.body.removeChild(ta);
+              }
+            };
+          }
+          squadShareBlock.style.display = 'block';
+        } else {
+          squadShareBlock.style.display = 'none';
+        }
+      }
+
       // Show loading overlay before opening modal (#10)
       const qrLoading = document.getElementById('qrLoading');
       qrLoading.classList.remove('hidden');
@@ -3695,16 +3982,189 @@
       renderDashboard();
     });
 
+    // ════════════════════════════════════════════════════════════════════
+    // SQUAD FRIEND-JOIN MODE
+    // When the URL has ?squad=CODE, the page becomes a friend-join screen
+    // instead of the normal registration form.
+    // ════════════════════════════════════════════════════════════════════
+    var SQUAD_JOIN_CODE = (function () {
+      const c = new URLSearchParams(window.location.search).get('squad');
+      return c ? c.trim().toUpperCase() : null;
+    })();
+
+    function squadEl(id) { return document.getElementById(id); }
+
+    function renderSquadSegments(containerId, joined, size) {
+      const box = squadEl(containerId);
+      if (!box) return;
+      box.innerHTML = '';
+      const total = Math.max(1, Number(size) || 1);
+      for (let i = 0; i < total; i++) {
+        const seg = document.createElement('div');
+        seg.className = 'squad-seg' + (i < joined ? ' filled' : '');
+        box.appendChild(seg);
+      }
+    }
+
+    function showSquadJoinForm(data) {
+      squadEl('squadJoinLoading').style.display = 'none';
+      squadEl('squadJoinState').style.display = 'none';
+      squadEl('squadJoinForm').style.display = 'block';
+
+      squadEl('squadLeaderName').textContent = (data.leaderName || 'Someone').toUpperCase();
+      squadEl('squadSizeLabel').textContent = 'SQUAD OF ' + (data.squadSize || '—');
+      squadEl('squadCountLabel').textContent = data.joinedCount + ' of ' + data.squadSize + ' joined';
+      renderSquadSegments('squadSegments', data.joinedCount, data.squadSize);
+
+      // Member names line (social proof)
+      const names = (data.members || []).map(m => m.name).filter(Boolean);
+      const line = squadEl('squadMembersLine');
+      if (names.length) {
+        line.textContent = 'Already in: ' + names.join(', ');
+      } else {
+        line.textContent = 'Be the first to join!';
+      }
+    }
+
+    function showSquadState(opts) {
+      squadEl('squadJoinLoading').style.display = 'none';
+      squadEl('squadJoinForm').style.display = 'none';
+      squadEl('squadJoinState').style.display = 'block';
+
+      squadEl('squadStateIcon').textContent = opts.icon || '✓';
+      squadEl('squadStateTitle').textContent = opts.title || '';
+      squadEl('squadStateSub').textContent = opts.sub || '';
+
+      if (opts.joined != null && opts.size != null) {
+        squadEl('squadStateProgress').style.display = 'block';
+        renderSquadSegments('squadStateSegments', opts.joined, opts.size);
+        squadEl('squadStateCount').textContent = opts.joined + ' of ' + opts.size + ' joined';
+      } else {
+        squadEl('squadStateProgress').style.display = 'none';
+      }
+    }
+
+    function loadSquadRoster() {
+      fetch(APPS_SCRIPT_URL + '?action=getSquad&code=' + encodeURIComponent(SQUAD_JOIN_CODE))
+        .then(r => r.json())
+        .then(data => {
+          if (!data || data.status !== 'ok') {
+            showSquadState({
+              icon: '⚠️',
+              title: 'Invalid Invite',
+              sub: "This squad invite link isn't valid. Ask your friend for a fresh link."
+            });
+            return;
+          }
+          if (data.joinedCount >= data.squadSize) {
+            showSquadState({
+              icon: '🔒',
+              title: 'Squad Full',
+              sub: (data.leaderName || 'This squad') + "'s squad is already full (" +
+                   data.squadSize + '/' + data.squadSize + '). Ask about another squad.',
+              joined: data.joinedCount,
+              size: data.squadSize
+            });
+            return;
+          }
+          showSquadJoinForm(data);
+        })
+        .catch(() => {
+          showSquadState({
+            icon: '⚠️',
+            title: 'Connection Error',
+            sub: "Couldn't load the squad. Check your connection and refresh."
+          });
+        });
+    }
+
+    function submitSquadJoin() {
+      const input = squadEl('squadJoinNameInput');
+      const btn = squadEl('squadJoinBtn');
+      const errEl = squadEl('squadJoinError');
+      const name = input.value.trim();
+
+      errEl.textContent = '';
+      if (!name) {
+        errEl.textContent = 'Please enter your first name.';
+        input.focus();
+        return;
+      }
+      if (name.length < 2) {
+        errEl.textContent = 'That name looks too short.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'JOINING…';
+
+      fetch(APPS_SCRIPT_URL + '?action=joinSquad&code=' +
+            encodeURIComponent(SQUAD_JOIN_CODE) + '&name=' + encodeURIComponent(name))
+        .then(r => r.json())
+        .then(data => {
+          if (data.status === 'ok') {
+            showSquadState({
+              icon: '✓',
+              title: "You're In!",
+              sub: 'Welcome to ' + (data.leaderName || 'the') + "'s squad. See you on June 10 at Aloki Glass House.",
+              joined: data.joinedCount,
+              size: data.squadSize
+            });
+          } else if (data.status === 'full') {
+            showSquadState({
+              icon: '🔒',
+              title: 'Just Missed It',
+              sub: 'This squad filled up (' + data.squadSize + '/' + data.squadSize + ') before you joined.',
+              joined: data.joinedCount,
+              size: data.squadSize
+            });
+          } else if (data.status === 'duplicate_name') {
+            btn.disabled = false;
+            btn.textContent = 'JOIN THE SQUAD';
+            errEl.textContent = "Someone with that name is already on this squad. Add a last initial?";
+          } else if (data.status === 'not_found') {
+            showSquadState({
+              icon: '⚠️',
+              title: 'Invalid Invite',
+              sub: "This squad invite link isn't valid anymore."
+            });
+          } else {
+            btn.disabled = false;
+            btn.textContent = 'JOIN THE SQUAD';
+            errEl.textContent = data.message || 'Something went wrong. Try again.';
+          }
+        })
+        .catch(() => {
+          btn.disabled = false;
+          btn.textContent = 'JOIN THE SQUAD';
+          errEl.textContent = 'Connection error — please try again.';
+        });
+    }
+
+    // Boot squad-join mode if applicable
+    if (SQUAD_JOIN_CODE) {
+      document.body.classList.add('squad-join-mode');
+      squadEl('squadJoinView').classList.add('active');
+      squadEl('squadJoinBtn').addEventListener('click', submitSquadJoin);
+      squadEl('squadJoinNameInput').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') submitSquadJoin();
+      });
+      loadSquadRoster();
+    }
+
     // Load tiers from sheet, then resolve the selected tier from URL,
     // apply locked-tickets behaviour, render the banner, and wire updates.
-    fetchTiers().then(() => {
-      SELECTED_TIER = readTierFromUrl();
-      applyTierToTicketsField();
-      renderTierBanner();
-      renderTierPanel();
-      updateTierPanelProgress();
-      wireBannerUpdatesOnTicketsChange();
-    });
+    // Skipped entirely when in squad-join mode — the normal form is hidden.
+    if (!SQUAD_JOIN_CODE) {
+      fetchTiers().then(() => {
+        SELECTED_TIER = readTierFromUrl();
+        applyTierToTicketsField();
+        renderTierBanner();
+        renderTierPanel();
+        updateTierPanelProgress();
+        wireBannerUpdatesOnTicketsChange();
+      });
+    }
 
     closeTicketModal.addEventListener('click', () => {
       ticketModal.classList.remove('open');
@@ -3802,6 +4262,17 @@
         verified: 'NO',
         validatedAt: ''
       };
+
+      // ── Squad leader: generate a shareable squad code ──
+      // Only squad-tier bookings get a code; everyone else leaves M/N blank.
+      if (SELECTED_TIER && SELECTED_TIER.type === 'squad') {
+        const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+        payload.squadCode = 'SQUAD-' + rand;
+        payload.squadRole = 'leader';
+      } else {
+        payload.squadCode = '';
+        payload.squadRole = '';
+      }
 
       btn.disabled = true;
       btn.textContent = 'Checking…';
