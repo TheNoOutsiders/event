@@ -1855,389 +1855,46 @@
     .ticker-eyebrow-line { flex: 0 0 36px; }
   }
 
-  /* ═══════════════════ MYSTERY DOOR INTRO (gold curtains) ═══════════════════
-     Shown once per session. Two gold velvet curtains part to reveal the page.
-     Renders ABOVE everything via a high z-index, then removes itself entirely. */
-  .intro-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    overflow: hidden;
-    /* No solid background — the page underneath shows through the frosted glass panels */
-    background: transparent;
-  }
-  .intro-overlay.fading {
-    transition: opacity 0.8s ease;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .intro-overlay.hidden { display: none; }
-
-  /* Subtle cool ambient haze behind the gate — feels like dimmed venue light */
-  .intro-glow {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 40% 50% at center,
-      rgba(176, 112, 255, 0.08),
-      transparent 65%);
-    animation: introGlowPulse 3.4s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 1;
-  }
-  @keyframes introGlowPulse {
-    0%, 100% { opacity: 0.4; }
-    50%      { opacity: 0.75; }
-  }
-
-  .intro-eyebrow { display: none; } /* deprecated — replaced by the intro-gate */
-
-  /* ── TAP TO ENTER gate ── 
-     Sits in front of the curtains. Clicked once → curtains begin parting.
-     Required because browsers block audio autoplay without user interaction. */
-  .intro-gate {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-    text-align: center;
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
-  .intro-gate.hidden {
-    opacity: 0;
-    transform: translate(-50%, -55%) scale(0.96);
-    pointer-events: none;
-  }
-  .intro-gate-eyebrow {
-    font-family: 'Inter', sans-serif;
-    font-size: 10px;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    color: rgba(212, 175, 55, 0.85);
-    margin: 0;
-    animation: introEyebrowSlide 1.2s ease-out 0.1s both;
-  }
-  .intro-gate-title {
-    font-family: 'Bebas Neue', Impact, sans-serif;
-    font-size: 38px;
-    letter-spacing: 6px;
-    color: #fff;
-    margin: 0;
-    line-height: 1;
-    text-shadow:
-      0 2px 18px rgba(0, 0, 0, 0.6),
-      0 0 30px rgba(212, 175, 55, 0.25);
-    animation: introTitleSlide 1.2s ease-out 0.3s both;
-  }
-  .intro-gate-btn {
-    background: linear-gradient(135deg, #3b2406, #6b4410, #3b2406);
-    border: 1px solid rgba(212, 175, 55, 0.6);
-    color: #d4af37;
-    font-family: 'Bebas Neue', Impact, sans-serif;
-    font-size: 14px;
-    letter-spacing: 4px;
-    padding: 14px 28px;
-    border-radius: 999px;
-    cursor: pointer;
-    margin-top: 6px;
-    box-shadow: 0 0 22px rgba(212, 175, 55, 0.15);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
-    animation: introBtnSlide 1.2s ease-out 0.55s both, introBtnPulse 2.4s ease-in-out 1.8s infinite;
-  }
-  .intro-gate-btn:hover {
-    color: #f4cf57;
-    transform: translateY(-1px);
-    box-shadow: 0 0 30px rgba(212, 175, 55, 0.35);
-  }
-  .intro-gate-hint {
-    font-family: 'Inter', sans-serif;
-    font-size: 9px;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    color: rgba(220, 200, 255, 0.4);
-    margin-top: 4px;
-    animation: introBtnSlide 1.2s ease-out 0.75s both;
-  }
-  @keyframes introEyebrowSlide {
-    from { opacity: 0; transform: translateY(-8px); }
+  /* ═══════════════════ PAGE INTRO — STAGGER FADE ═══════════════════
+     Replaces the previous "doors" overlay. Each direct child section of
+     <main> fades up softly in sequence on page load. Adds zero modal,
+     zero overlay, zero blocked time — page is interactive immediately.
+     Uses a CSS-only approach with animation-delay to stagger. */
+  @keyframes pageIntroFade {
+    from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  @keyframes introTitleSlide {
-    from { opacity: 0; transform: translateY(-6px); letter-spacing: 14px; }
-    to   { opacity: 1; transform: translateY(0); letter-spacing: 6px; }
-  }
-  @keyframes introBtnSlide {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes introBtnPulse {
-    0%, 100% { box-shadow: 0 0 22px rgba(212, 175, 55, 0.15); }
-    50%      { box-shadow: 0 0 32px rgba(212, 175, 55, 0.4); }
-  }
-
-  /* ── Watery glass panels ──
-     Two frosted, gold-tinted glass doors. The page underneath is visible
-     through them (thanks to backdrop-filter: blur). An SVG turbulence filter
-     applies a slow water-ripple distortion across each panel. */
-  .intro-curtain {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 51%;
-    transition: transform 2.6s cubic-bezier(0.55, 0, 0.25, 1),
-                opacity 2.6s ease;
-    will-change: transform, opacity;
-    z-index: 2;
-    /* Frosted gold-tinted glass */
-    backdrop-filter: blur(14px) saturate(1.4);
-    -webkit-backdrop-filter: blur(14px) saturate(1.4);
-    /* Water-ripple distortion. Filters reference the SVG <defs> placed in markup. */
-  }
-  .intro-curtain.left  {
-    left: 0;
-    transform: translateX(0);
-    /* Deep violet glass — brand-true. Same void purple as the hero. */
-    background: linear-gradient(90deg,
-      rgba(40, 8, 72, 0.40) 0%,
-      rgba(40, 8, 72, 0.45) 60%,
-      rgba(40, 8, 72, 0.50) 100%);
-    border-right: 1px solid rgba(212, 175, 55, 0.45);
-    box-shadow:
-      inset -1px 0 0 rgba(255, 238, 180, 0.15),
-      inset -30px 0 60px -20px rgba(0, 0, 0, 0.4);
-    filter: url(#waterDistortLeft);
-  }
-  .intro-curtain.right {
-    right: 0;
-    transform: translateX(0);
-    background: linear-gradient(270deg,
-      rgba(40, 8, 72, 0.40) 0%,
-      rgba(40, 8, 72, 0.45) 60%,
-      rgba(40, 8, 72, 0.50) 100%);
-    border-left: 1px solid rgba(212, 175, 55, 0.45);
-    box-shadow:
-      inset 1px 0 0 rgba(255, 238, 180, 0.15),
-      inset 30px 0 60px -20px rgba(0, 0, 0, 0.4);
-    filter: url(#waterDistortRight);
-  }
-
-  /* Open state — driven by JS adding .parting to the overlay.
-     Panels slide outward AND fade out so the page sharpens into focus. */
-  .intro-overlay.parting .intro-curtain.left  {
-    transform: translateX(-102%);
+  .top-brand,
+  main > section {
     opacity: 0;
+    animation: pageIntroFade 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
-  .intro-overlay.parting .intro-curtain.right {
-    transform: translateX(102%);
-    opacity: 0;
-  }
+  .top-brand                          { animation-delay: 0.05s; }
+  main > section:nth-of-type(1)       { animation-delay: 0.15s; }  /* hero */
+  main > section:nth-of-type(2)       { animation-delay: 0.30s; }  /* collective */
+  main > section:nth-of-type(3)       { animation-delay: 0.42s; }  /* spots bar */
+  main > section:nth-of-type(4)       { animation-delay: 0.54s; }  /* entry tiers */
+  main > section:nth-of-type(5)       { animation-delay: 0.66s; }  /* venue */
+  main > section:nth-of-type(6)       { animation-delay: 0.78s; }  /* faq */
+  .ticker-section                     { animation: pageIntroFade 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.90s forwards; opacity: 0; }
+  .site-footer                        { animation: pageIntroFade 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.0s forwards; opacity: 0; }
 
-  /* Subtle reflective light streaks on each glass panel */
-  .intro-curtain::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-      linear-gradient(180deg,
-        transparent 0%,
-        rgba(255,255,255,0.10) 30%,
-        transparent 40%,
-        transparent 60%,
-        rgba(255,255,255,0.06) 75%,
-        transparent 85%);
-    mix-blend-mode: screen;
-    opacity: 0.7;
-  }
-
-  /* The glowing seam where the two panels meet */
-  .intro-seam {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 1px;
-    transform: translateX(-50%);
-    background: linear-gradient(180deg,
-      transparent 0%,
-      rgba(212,175,55,0.85) 25%,
-      rgba(255,238,180,1) 50%,
-      rgba(212,175,55,0.85) 75%,
-      transparent 100%);
-    box-shadow: 0 0 18px rgba(255,238,180,0.6),
-                0 0 32px rgba(212,175,55,0.4);
-    z-index: 3;
-    transition: opacity 1s ease, transform 1s ease;
-    pointer-events: none;
-  }
-  .intro-overlay.parting .intro-seam {
-    opacity: 0;
-    transform: translateX(-50%) scaleY(0.3);
-  }
-
-  /* Skip button — fades in after 2s */
-  .intro-skip {
-    position: absolute;
-    top: 24px;
-    right: 24px;
-    z-index: 4;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    border: 1px solid rgba(212, 175, 55, 0.35);
-    border-radius: 999px;
-    padding: 8px 16px;
-    color: rgba(212, 175, 55, 0.9);
-    font-family: 'Inter', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    font-weight: 600;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.5s ease, color 0.2s ease, border-color 0.2s ease;
-  }
-  .intro-skip.visible { opacity: 1; }
-  .intro-skip:hover {
-    color: #f4cf57;
-    border-color: rgba(212, 175, 55, 0.7);
-  }
-
-  /* Accessibility — reduced motion users get an instant fade */
+  /* Respect users who don't want motion */
   @media (prefers-reduced-motion: reduce) {
-    .intro-curtain { transition: opacity 0.4s ease; }
-    .intro-overlay.parting .intro-curtain { opacity: 0; transform: none !important; }
-    .intro-glow { animation: none; }
+    .top-brand,
+    main > section,
+    .ticker-section,
+    .site-footer {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
   }
 
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════ MYSTERY DOOR INTRO ═══════════════════ -->
-<!-- Built once per session. JS removes it after the curtains part.
-     Requires a user tap to start (browser autoplay policy blocks sound otherwise). -->
-<div class="intro-overlay" id="introOverlay" aria-hidden="true">
-
-  <!-- SVG filters powering the water-ripple distortion on the glass panels.
-       Hidden by zero-size svg; referenced via filter: url() in CSS.
-       Long wavelengths + slow animation = silky, calm-water motion. -->
-  <svg width="0" height="0" style="position:absolute;" aria-hidden="true">
-    <defs>
-      <filter id="waterDistortLeft" x="-10%" y="-10%" width="120%" height="120%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.005 0.012" numOctaves="1" seed="3" result="noise">
-          <animate attributeName="baseFrequency" dur="32s"
-                   values="0.005 0.012; 0.006 0.014; 0.005 0.012" repeatCount="indefinite"/>
-        </feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="8"/>
-      </filter>
-      <filter id="waterDistortRight" x="-10%" y="-10%" width="120%" height="120%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.006 0.013" numOctaves="1" seed="11" result="noise">
-          <animate attributeName="baseFrequency" dur="36s"
-                   values="0.006 0.013; 0.007 0.015; 0.006 0.013" repeatCount="indefinite"/>
-        </feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="8"/>
-      </filter>
-    </defs>
-  </svg>
-
-  <div class="intro-glow"></div>
-
-  <!-- Two frosted glass panels — show page through, distorted by water filters -->
-  <div class="intro-curtain left"></div>
-  <div class="intro-curtain right"></div>
-
-  <!-- Glowing gold seam where the panels meet -->
-  <div class="intro-seam"></div>
-
-  <!-- Tap to Enter gate — what users see first -->
-  <div class="intro-gate" id="introGate">
-    <p class="intro-gate-eyebrow">The No Outsiders · Presents</p>
-    <h1 class="intro-gate-title">GLASSHOUSE</h1>
-    <button type="button" class="intro-gate-btn" id="introGateBtn">ENTER ↘</button>
-    <p class="intro-gate-hint">Tap to begin · Sound on</p>
-  </div>
-
-  <button type="button" class="intro-skip" id="introSkip" aria-label="Skip intro">Skip ↘</button>
-  <audio id="introAudio" preload="auto" playsinline>
-    <source src="intro.mp3" type="audio/mpeg">
-  </audio>
-</div>
-
-<script>
-  // Mystery Door intro — runs once per session, requires a tap to start (autoplay policy).
-  (function () {
-    var SESSION_KEY = 'whiteRoomIntroSeen';
-    var overlay = document.getElementById('introOverlay');
-    var gate    = document.getElementById('introGate');
-    var gateBtn = document.getElementById('introGateBtn');
-    var audio   = document.getElementById('introAudio');
-    var skipBtn = document.getElementById('introSkip');
-
-    // Already seen this session? Remove immediately.
-    if (sessionStorage.getItem(SESSION_KEY) === '1') {
-      overlay.classList.add('hidden');
-      return;
-    }
-    sessionStorage.setItem(SESSION_KEY, '1');
-
-    // Timing (ms) — calibrated to the 3s liquid whoosh sound and 2.6s glass-part CSS.
-    var PART_DURATION = 2600;                   // matches the CSS transition above
-    var REVEAL_AFTER  = PART_DURATION + 200;    // overlay starts fading
-    var DONE_AFTER    = REVEAL_AFTER + 800;     // overlay fully removed
-
-    function fadeAndRemove() {
-      overlay.classList.add('fading');
-      if (audio) {
-        try { audio.pause(); audio.currentTime = 0; } catch (_) {}
-      }
-      setTimeout(function () {
-        overlay.parentNode && overlay.parentNode.removeChild(overlay);
-      }, 700);
-    }
-
-    function startSequence() {
-      // Hide the gate first
-      gate.classList.add('hidden');
-      // Show skip button as a backup escape
-      setTimeout(function () { skipBtn.classList.add('visible'); }, 800);
-
-      // Play audio — now allowed because this is inside a click handler
-      if (audio) {
-        try { audio.currentTime = 0; } catch (_) {}
-        var p = audio.play();
-        if (p && typeof p.then === 'function') {
-          p.catch(function () { /* still proceed visually if blocked */ });
-        }
-      }
-
-      // Begin parting just after the gate fades (so the user's eye follows the motion)
-      setTimeout(function () { overlay.classList.add('parting'); }, 350);
-
-      // Reveal the page
-      setTimeout(fadeAndRemove, REVEAL_AFTER);
-    }
-
-    function skipIntro() {
-      fadeAndRemove();
-    }
-
-    gateBtn.addEventListener('click', startSequence);
-    skipBtn.addEventListener('click', skipIntro);
-
-    // Reduced motion users — gate stays, but skip is faster
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      // Make the button just dismiss instantly
-      gateBtn.addEventListener('click', function () {
-        setTimeout(fadeAndRemove, 200);
-      }, { once: true });
-    }
-  })();
-</script>
 
 <!-- ── Hero video background (1 of 3 picked at random on each load) ── -->
 <video id="heroVideo" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
