@@ -1873,21 +1873,20 @@
   }
   .intro-overlay.hidden { display: none; }
 
-  /* Subtle ambient gold haze layered behind the gate, sitting between
-     the two glass panels. Adds atmosphere without blocking the page. */
+  /* Subtle cool ambient haze behind the gate — feels like dimmed venue light */
   .intro-glow {
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse 40% 50% at center,
-      rgba(212, 175, 55, 0.18),
+      rgba(176, 112, 255, 0.08),
       transparent 65%);
-    animation: introGlowPulse 2.6s ease-in-out infinite;
+    animation: introGlowPulse 3.4s ease-in-out infinite;
     pointer-events: none;
     z-index: 1;
   }
   @keyframes introGlowPulse {
-    0%, 100% { opacity: 0.5; }
-    50%      { opacity: 0.9; }
+    0%, 100% { opacity: 0.4; }
+    50%      { opacity: 0.75; }
   }
 
   .intro-eyebrow { display: none; } /* deprecated — replaced by the intro-gate */
@@ -1929,7 +1928,9 @@
     color: #fff;
     margin: 0;
     line-height: 1;
-    text-shadow: 0 0 22px rgba(212, 175, 55, 0.35);
+    text-shadow:
+      0 2px 18px rgba(0, 0, 0, 0.6),
+      0 0 30px rgba(212, 175, 55, 0.25);
     animation: introTitleSlide 1.2s ease-out 0.3s both;
   }
   .intro-gate-btn {
@@ -1999,23 +2000,28 @@
   .intro-curtain.left  {
     left: 0;
     transform: translateX(0);
+    /* Smoked glass — very dark, slight cool tint, lets the page show through dimmed */
     background: linear-gradient(90deg,
-      rgba(212,175,55,0.30) 0%,
-      rgba(212,175,55,0.35) 60%,
-      rgba(212,175,55,0.42) 100%);
-    border-right: 1px solid rgba(255,238,180,0.55);
-    box-shadow: inset -20px 0 40px -10px rgba(0,0,0,0.35);
+      rgba(8, 4, 16, 0.55) 0%,
+      rgba(8, 4, 16, 0.60) 60%,
+      rgba(8, 4, 16, 0.65) 100%);
+    border-right: 1px solid rgba(212, 175, 55, 0.45);
+    box-shadow:
+      inset -1px 0 0 rgba(255, 238, 180, 0.15),
+      inset -30px 0 60px -20px rgba(0, 0, 0, 0.5);
     filter: url(#waterDistortLeft);
   }
   .intro-curtain.right {
     right: 0;
     transform: translateX(0);
     background: linear-gradient(270deg,
-      rgba(212,175,55,0.30) 0%,
-      rgba(212,175,55,0.35) 60%,
-      rgba(212,175,55,0.42) 100%);
-    border-left: 1px solid rgba(255,238,180,0.55);
-    box-shadow: inset 20px 0 40px -10px rgba(0,0,0,0.35);
+      rgba(8, 4, 16, 0.55) 0%,
+      rgba(8, 4, 16, 0.60) 60%,
+      rgba(8, 4, 16, 0.65) 100%);
+    border-left: 1px solid rgba(212, 175, 55, 0.45);
+    box-shadow:
+      inset 1px 0 0 rgba(255, 238, 180, 0.15),
+      inset 30px 0 60px -20px rgba(0, 0, 0, 0.5);
     filter: url(#waterDistortRight);
   }
 
@@ -2118,22 +2124,23 @@
 <div class="intro-overlay" id="introOverlay" aria-hidden="true">
 
   <!-- SVG filters powering the water-ripple distortion on the glass panels.
-       Hidden by zero-size svg; referenced via filter: url() in CSS. -->
+       Hidden by zero-size svg; referenced via filter: url() in CSS.
+       Long wavelengths + slow animation = silky, calm-water motion. -->
   <svg width="0" height="0" style="position:absolute;" aria-hidden="true">
     <defs>
       <filter id="waterDistortLeft" x="-10%" y="-10%" width="120%" height="120%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.04" numOctaves="2" seed="3" result="noise">
-          <animate attributeName="baseFrequency" dur="14s"
-                   values="0.012 0.04; 0.018 0.05; 0.012 0.04" repeatCount="indefinite"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.005 0.012" numOctaves="1" seed="3" result="noise">
+          <animate attributeName="baseFrequency" dur="32s"
+                   values="0.005 0.012; 0.006 0.014; 0.005 0.012" repeatCount="indefinite"/>
         </feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="14"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="8"/>
       </filter>
       <filter id="waterDistortRight" x="-10%" y="-10%" width="120%" height="120%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.014 0.05" numOctaves="2" seed="7" result="noise">
-          <animate attributeName="baseFrequency" dur="16s"
-                   values="0.014 0.05; 0.020 0.06; 0.014 0.05" repeatCount="indefinite"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.006 0.013" numOctaves="1" seed="11" result="noise">
+          <animate attributeName="baseFrequency" dur="36s"
+                   values="0.006 0.013; 0.007 0.015; 0.006 0.013" repeatCount="indefinite"/>
         </feTurbulence>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="14"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="8"/>
       </filter>
     </defs>
   </svg>
