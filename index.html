@@ -670,6 +670,55 @@
     text-transform: uppercase;
   }
 
+  /* ── Squad silhouettes — visual body for the "X PPL" number ── */
+  .squad-silhouettes {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 5px;
+    margin: 0 0 14px;
+    min-height: 30px;
+    flex-wrap: wrap;
+  }
+  .squad-figure {
+    width: 15px;
+    height: 26px;
+    flex-shrink: 0;
+    color: rgba(220, 200, 255, 0.18);
+    transition: color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.45s ease;
+    transform: translateY(2px) scale(0.9);
+  }
+  .squad-figure svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  /* A lit figure = part of the current squad size */
+  .squad-figure.lit {
+    color: var(--gold);
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.55));
+  }
+  /* The most-recently-lit figure gets a brief pop */
+  .squad-figure.just-lit {
+    animation: squadFigurePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes squadFigurePop {
+    0%   { transform: translateY(0) scale(0.6); }
+    60%  { transform: translateY(0) scale(1.25); }
+    100% { transform: translateY(0) scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .squad-figure, .squad-figure.just-lit {
+      transition: color 0.2s ease;
+      animation: none;
+      transform: none;
+    }
+    .squad-figure.lit { transform: none; }
+  }
+
   /* ── Fixed note (used by Couple tier) ── */
   .tier-fixed-note {
     display: inline-block;
@@ -1777,10 +1826,286 @@
     .ticker-eyebrow-line { flex: 0 0 36px; }
   }
 
+  /* ═══════════════════ MYSTERY DOOR INTRO (gold curtains) ═══════════════════
+     Shown once per session. Two gold velvet curtains part to reveal the page.
+     Renders ABOVE everything via a high z-index, then removes itself entirely. */
+  .intro-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: #000;
+    overflow: hidden;
+    /* Faint radial purple haze so it doesn't feel like pure black */
+    background-image:
+      radial-gradient(ellipse at center, rgba(40, 0, 60, 0.4), transparent 70%),
+      linear-gradient(180deg, #000 0%, #08000c 50%, #000 100%);
+  }
+  .intro-overlay.fading {
+    transition: opacity 0.6s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .intro-overlay.hidden { display: none; }
+
+  /* Subtle ambient glow behind the curtains while closed */
+  .intro-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 50% 60% at center,
+      rgba(212, 175, 55, 0.12),
+      transparent 60%);
+    animation: introGlowPulse 2.6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes introGlowPulse {
+    0%, 100% { opacity: 0.45; }
+    50%      { opacity: 0.85; }
+  }
+
+  /* Tiny eyebrow text above the curtain seam — sets the mood */
+  .intro-eyebrow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -120px);
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: rgba(212, 175, 55, 0.85);
+    white-space: nowrap;
+    opacity: 0;
+    animation: introEyebrowFade 1.4s ease-out 0.2s forwards;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .intro-overlay.parting .intro-eyebrow {
+    animation: introEyebrowOut 0.6s ease-in forwards;
+  }
+  @keyframes introEyebrowFade {
+    from { opacity: 0; transform: translate(-50%, -110px); }
+    to   { opacity: 1; transform: translate(-50%, -120px); }
+  }
+  @keyframes introEyebrowOut {
+    to { opacity: 0; transform: translate(-50%, -140px); }
+  }
+
+  /* The curtains — two panels, anchored to left and right edges, meeting center */
+  .intro-curtain {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 52%;
+    transition: transform 4.8s cubic-bezier(0.7, 0, 0.3, 1);
+    will-change: transform;
+    z-index: 2;
+  }
+  .intro-curtain.left  { left: 0;  transform: translateX(0); }
+  .intro-curtain.right { right: 0; transform: translateX(0); }
+  /* Open state — driven by JS adding .parting to the overlay */
+  .intro-overlay.parting .intro-curtain.left  { transform: translateX(-102%); }
+  .intro-overlay.parting .intro-curtain.right { transform: translateX(102%); }
+
+  /* Velvet texture: vertical fabric ridges via repeating gradient,
+     plus a richer gold-to-deep-gold gradient for depth */
+  .intro-curtain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(0, 0, 0, 0.22) 0px,
+        rgba(0, 0, 0, 0.22) 1px,
+        transparent 1px,
+        transparent 14px),
+      linear-gradient(180deg,
+        #6b4a0c 0%,
+        #d4af37 30%,
+        #f4cf57 50%,
+        #d4af37 70%,
+        #6b4a0c 100%);
+  }
+  .intro-curtain.left::before {
+    background-image:
+      repeating-linear-gradient(90deg,
+        rgba(0, 0, 0, 0.22) 0px,
+        rgba(0, 0, 0, 0.22) 1px,
+        transparent 1px,
+        transparent 14px),
+      linear-gradient(90deg,
+        #2a1a05 0%,
+        #6b4a0c 20%,
+        #d4af37 60%,
+        #f4cf57 92%,
+        #b08a2a 100%);
+  }
+  .intro-curtain.right::before {
+    background-image:
+      repeating-linear-gradient(90deg,
+        rgba(0, 0, 0, 0.22) 0px,
+        rgba(0, 0, 0, 0.22) 1px,
+        transparent 1px,
+        transparent 14px),
+      linear-gradient(270deg,
+        #2a1a05 0%,
+        #6b4a0c 20%,
+        #d4af37 60%,
+        #f4cf57 92%,
+        #b08a2a 100%);
+  }
+
+  /* Inner-edge shadow line where the curtains meet — sells the seam */
+  .intro-curtain::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    pointer-events: none;
+  }
+  .intro-curtain.left::after  { right: 0; background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.55)); }
+  .intro-curtain.right::after { left: 0;  background: linear-gradient(270deg, transparent, rgba(0, 0, 0, 0.55)); }
+
+  /* Decorative gold tassel/cord at the inner edge */
+  .intro-curtain-tassel {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg,
+      #f4cf57 0%,
+      #d4af37 15%,
+      #6b4a0c 50%,
+      #d4af37 85%,
+      #f4cf57 100%);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
+    z-index: 1;
+  }
+  .intro-curtain.left  .intro-curtain-tassel { right: 0; }
+  .intro-curtain.right .intro-curtain-tassel { left: 0; }
+
+  /* Skip button — fades in after 2s */
+  .intro-skip {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 4;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 999px;
+    padding: 8px 16px;
+    color: rgba(212, 175, 55, 0.9);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.5s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .intro-skip.visible { opacity: 1; }
+  .intro-skip:hover {
+    color: #f4cf57;
+    border-color: rgba(212, 175, 55, 0.7);
+  }
+
+  /* Accessibility — reduced motion users get an instant fade-out instead */
+  @media (prefers-reduced-motion: reduce) {
+    .intro-curtain { transition: opacity 0.4s ease; }
+    .intro-overlay.parting .intro-curtain { opacity: 0; transform: none !important; }
+    .intro-glow { animation: none; }
+  }
 
 </style>
 </head>
 <body>
+
+<!-- ═══════════════════ MYSTERY DOOR INTRO ═══════════════════ -->
+<!-- Built once per session. JS removes it after the curtains part. -->
+<div class="intro-overlay" id="introOverlay" aria-hidden="true">
+  <div class="intro-glow"></div>
+  <div class="intro-eyebrow">The No Outsiders · Presents</div>
+  <div class="intro-curtain left"><div class="intro-curtain-tassel"></div></div>
+  <div class="intro-curtain right"><div class="intro-curtain-tassel"></div></div>
+  <button type="button" class="intro-skip" id="introSkip" aria-label="Skip intro">Skip ↘</button>
+  <audio id="introAudio" preload="auto" playsinline>
+    <source src="intro.mp3" type="audio/mpeg">
+  </audio>
+</div>
+
+<script>
+  // Run synchronously so the overlay never flashes the page underneath it.
+  (function () {
+    var SESSION_KEY = 'whiteRoomIntroSeen';
+    var overlay = document.getElementById('introOverlay');
+    var audio   = document.getElementById('introAudio');
+    var skipBtn = document.getElementById('introSkip');
+
+    // Already seen this session? Remove the overlay immediately.
+    if (sessionStorage.getItem(SESSION_KEY) === '1') {
+      overlay.classList.add('hidden');
+      return;
+    }
+
+    sessionStorage.setItem(SESSION_KEY, '1');
+
+    // Timing (ms): curtains start parting after a short beat,
+    // sound plays in sync, page revealed shortly after curtains finish.
+    var PART_DELAY = 700;          // beat of anticipation
+    var CURTAIN_DURATION = 4800;   // matches the CSS transition above
+    var SKIP_VISIBLE_AT = 2000;    // skip button fades in
+    var REVEAL_AT = PART_DELAY + CURTAIN_DURATION;     // overlay starts fading
+    var DONE_AT   = REVEAL_AT + 700;                   // overlay fully removed
+
+    // Try to play audio — Safari may block it without user interaction;
+    // in that case the visual still runs silently.
+    function tryPlayAudio() {
+      if (!audio) return;
+      var p = audio.play();
+      if (p && typeof p.then === 'function') {
+        p.catch(function () { /* silently swallow autoplay-block errors */ });
+      }
+    }
+
+    function partCurtains() {
+      overlay.classList.add('parting');
+      tryPlayAudio();
+    }
+
+    function fadeAndRemove() {
+      overlay.classList.add('fading');
+      // Stop audio after the overlay starts fading so it doesn't linger
+      if (audio) {
+        try { audio.pause(); audio.currentTime = 0; } catch (_) {}
+      }
+      setTimeout(function () {
+        overlay.parentNode && overlay.parentNode.removeChild(overlay);
+      }, 700);
+    }
+
+    function skipIntro() {
+      // Tearing down mid-sequence — clean up timers
+      timers.forEach(function (t) { clearTimeout(t); });
+      fadeAndRemove();
+    }
+
+    var timers = [];
+    timers.push(setTimeout(partCurtains, PART_DELAY));
+    timers.push(setTimeout(function () { skipBtn.classList.add('visible'); }, SKIP_VISIBLE_AT));
+    timers.push(setTimeout(fadeAndRemove, REVEAL_AT));
+
+    skipBtn.addEventListener('click', skipIntro);
+
+    // If reduced motion, finish much faster
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      timers.forEach(function (t) { clearTimeout(t); });
+      setTimeout(fadeAndRemove, 400);
+    }
+  })();
+</script>
 
 <canvas id="particles"></canvas>
 
@@ -2267,6 +2592,8 @@
           <button type="button" class="squad-size-btn" data-squad-action="inc" aria-label="Increase size">+</button>
         </div>
 
+        <div class="squad-silhouettes" data-squad-figures aria-hidden="true"></div>
+
         <div class="squad-price-row">
           <div class="tier-price" data-squad-total>${formatPrice(startTotal)}</div>
           <div class="squad-per-person">
@@ -2305,6 +2632,43 @@
     const linkEl = card.querySelector('[data-squad-link]');
     const decBtn = card.querySelector('[data-squad-action="dec"]');
     const incBtn = card.querySelector('[data-squad-action="inc"]');
+    const figuresEl = card.querySelector('[data-squad-figures]');
+
+    // A simple standing-person silhouette (head + body)
+    const FIGURE_SVG =
+      '<svg viewBox="0 0 15 26" xmlns="http://www.w3.org/2000/svg">' +
+      '<circle cx="7.5" cy="4.5" r="4" fill="currentColor"/>' +
+      '<path d="M7.5 10 C3.4 10 1.5 13 1.5 17 L1.5 24 C1.5 25 2.2 25.5 3 25.5 L12 25.5 C12.8 25.5 13.5 25 13.5 24 L13.5 17 C13.5 13 11.6 10 7.5 10 Z" fill="currentColor"/>' +
+      '</svg>';
+
+    // Build `max` figures once
+    let figures = [];
+    if (figuresEl) {
+      figuresEl.innerHTML = '';
+      for (let i = 0; i < max; i++) {
+        const fig = document.createElement('div');
+        fig.className = 'squad-figure';
+        fig.innerHTML = FIGURE_SVG;
+        figuresEl.appendChild(fig);
+        figures.push(fig);
+      }
+    }
+
+    let prevSize = size;
+    function renderFigures(growing) {
+      figures.forEach((fig, i) => {
+        const shouldBeLit = i < size;
+        const wasLit = fig.classList.contains('lit');
+        fig.classList.toggle('lit', shouldBeLit);
+        fig.classList.remove('just-lit');
+        // Pop only the figure(s) that newly lit up when growing
+        if (growing && shouldBeLit && !wasLit) {
+          // force reflow so the animation re-triggers reliably
+          void fig.offsetWidth;
+          fig.classList.add('just-lit');
+        }
+      });
+    }
 
     function update() {
       const perPerson = getSquadPrice(tier, size);
@@ -2320,6 +2684,9 @@
 
       decBtn.disabled = size <= min;
       incBtn.disabled = size >= max;
+
+      renderFigures(size > prevSize);
+      prevSize = size;
     }
 
     decBtn.addEventListener('click', () => {
