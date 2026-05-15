@@ -4,16 +4,16 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>The No Outsiders — Choose Your Experience</title>
-<meta name="description" content="One room. No outsiders. Choose your entry tier — Regular, VIP, Couple, or Squad. White Room is an immersive night of EDM meets Bollywood — Dhaka, June 10, 2026." />
+<meta name="description" content="One room. No outsiders. Choose your entry tier — Regular, VIP, Couple, or Squad. GLASSHOUSE is an immersive night of EDM meets Bollywood — Dhaka, June 10, 2026." />
 <meta property="og:title" content="The No Outsiders — Choose Your Experience" />
-<meta property="og:description" content="Choose your entry tier for White Room — an immersive night of EDM meets Bollywood. Dhaka, June 10, 2026." />
+<meta property="og:description" content="Choose your entry tier for GLASSHOUSE — an immersive night of EDM meets Bollywood. Dhaka, June 10, 2026." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="https://thenooutsiders.github.io/event/poster.jpeg" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="The No Outsiders — Choose Your Experience" />
-<meta name="twitter:description" content="Choose your entry tier for White Room — an immersive night of EDM meets Bollywood. Dhaka, June 10, 2026." />
+<meta name="twitter:description" content="Choose your entry tier for GLASSHOUSE — an immersive night of EDM meets Bollywood. Dhaka, June 10, 2026." />
 <meta name="twitter:image" content="https://thenooutsiders.github.io/event/poster.jpeg" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2316001a'/%3E%3Cpath d='M50 22 L72 50 L50 78 L28 50 Z' fill='%23d4af37'/%3E%3C/svg%3E" />
 
@@ -2000,28 +2000,28 @@
   .intro-curtain.left  {
     left: 0;
     transform: translateX(0);
-    /* Smoked glass — very dark, slight cool tint, lets the page show through dimmed */
+    /* Deep violet glass — brand-true. Same void purple as the hero. */
     background: linear-gradient(90deg,
-      rgba(8, 4, 16, 0.55) 0%,
-      rgba(8, 4, 16, 0.60) 60%,
-      rgba(8, 4, 16, 0.65) 100%);
+      rgba(40, 8, 72, 0.40) 0%,
+      rgba(40, 8, 72, 0.45) 60%,
+      rgba(40, 8, 72, 0.50) 100%);
     border-right: 1px solid rgba(212, 175, 55, 0.45);
     box-shadow:
       inset -1px 0 0 rgba(255, 238, 180, 0.15),
-      inset -30px 0 60px -20px rgba(0, 0, 0, 0.5);
+      inset -30px 0 60px -20px rgba(0, 0, 0, 0.4);
     filter: url(#waterDistortLeft);
   }
   .intro-curtain.right {
     right: 0;
     transform: translateX(0);
     background: linear-gradient(270deg,
-      rgba(8, 4, 16, 0.55) 0%,
-      rgba(8, 4, 16, 0.60) 60%,
-      rgba(8, 4, 16, 0.65) 100%);
+      rgba(40, 8, 72, 0.40) 0%,
+      rgba(40, 8, 72, 0.45) 60%,
+      rgba(40, 8, 72, 0.50) 100%);
     border-left: 1px solid rgba(212, 175, 55, 0.45);
     box-shadow:
       inset 1px 0 0 rgba(255, 238, 180, 0.15),
-      inset 30px 0 60px -20px rgba(0, 0, 0, 0.5);
+      inset 30px 0 60px -20px rgba(0, 0, 0, 0.4);
     filter: url(#waterDistortRight);
   }
 
@@ -2157,7 +2157,7 @@
   <!-- Tap to Enter gate — what users see first -->
   <div class="intro-gate" id="introGate">
     <p class="intro-gate-eyebrow">The No Outsiders · Presents</p>
-    <h1 class="intro-gate-title">WHITE ROOM<span style="color:#d4af37;">'</span></h1>
+    <h1 class="intro-gate-title">GLASSHOUSE</h1>
     <button type="button" class="intro-gate-btn" id="introGateBtn">ENTER ↘</button>
     <p class="intro-gate-hint">Tap to begin · Sound on</p>
   </div>
@@ -2292,7 +2292,7 @@
 
 <div class="top-bar">
   <div class="top-kicker">THE NO OUTSIDERS</div>
-  <div class="top-brand">WHITE ROOM'</div>
+  <div class="top-brand">GLASSHOUSE</div>
 </div>
 
 <main>
@@ -2306,7 +2306,7 @@
     </div>
 
     <div class="hero-eyebrow">A PRIVATE COLLECTIVE PRESENTS</div>
-    <h1 class="hero-headline">WHITE ROOM<span class="hero-apostrophe">'</span></h1>
+    <h1 class="hero-headline">GLASSHOUSE</h1>
 
     <div class="hero-tagline" id="heroTagline">
       Bollywood breaks meet underground beats. Dhaka's most exclusive night returns. June 10.
@@ -3211,7 +3211,7 @@
     if (data.heroCopy) EVENT_CONFIG.tagline = String(data.heroCopy).trim();
     if (data.tagline) EVENT_CONFIG.tagline = String(data.tagline).trim(); // fallback if you also add `tagline`
 
-    // Optional hero title override (otherwise stays "WHITE ROOM'")
+    // Optional hero title override (otherwise stays "GLASSHOUSE")
     if (data.heroTitle) EVENT_CONFIG.heroTitle = String(data.heroTitle).trim();
 
     // Brand kicker (the small uppercase text above the headline)
