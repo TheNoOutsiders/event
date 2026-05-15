@@ -57,6 +57,35 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
+    opacity: 0.55;  /* dimmed so they sparkle on top of the video without competing */
+  }
+
+  /* ── Hero video background ── 
+     Sits behind the particles. One of 3 videos is picked at random on each load.
+     Muted + playsinline + autoplay = browsers allow autoplay (audio is the only blocker). */
+  #heroVideo {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  #heroVideo.loaded { opacity: 0.55; }
+
+  /* Dark overlay on top of the video so text stays readable.
+     Sits at z-index: -1, between video (-2) and particles (0). */
+  #heroVideoTint {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at center, rgba(0,0,0,0.35), rgba(0,0,0,0.7) 75%),
+      linear-gradient(180deg, rgba(20,0,40,0.5) 0%, rgba(8,0,16,0.7) 100%);
   }
 
   /* ── Page-wipe transition (kept from original) ── */
@@ -1833,36 +1862,34 @@
     position: fixed;
     inset: 0;
     z-index: 10000;
-    background: #000;
     overflow: hidden;
-    /* Faint radial purple haze so it doesn't feel like pure black */
-    background-image:
-      radial-gradient(ellipse at center, rgba(40, 0, 60, 0.4), transparent 70%),
-      linear-gradient(180deg, #000 0%, #08000c 50%, #000 100%);
+    /* No solid background — the page underneath shows through the frosted glass panels */
+    background: transparent;
   }
   .intro-overlay.fading {
-    transition: opacity 0.6s ease;
+    transition: opacity 0.8s ease;
     opacity: 0;
     pointer-events: none;
   }
   .intro-overlay.hidden { display: none; }
 
-  /* Subtle ambient glow behind the curtains while closed */
+  /* Subtle ambient gold haze layered behind the gate, sitting between
+     the two glass panels. Adds atmosphere without blocking the page. */
   .intro-glow {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 50% 60% at center,
-      rgba(212, 175, 55, 0.12),
-      transparent 60%);
+    background: radial-gradient(ellipse 40% 50% at center,
+      rgba(212, 175, 55, 0.18),
+      transparent 65%);
     animation: introGlowPulse 2.6s ease-in-out infinite;
     pointer-events: none;
+    z-index: 1;
   }
   @keyframes introGlowPulse {
-    0%, 100% { opacity: 0.45; }
-    50%      { opacity: 0.85; }
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 0.9; }
   }
 
-  /* Tiny eyebrow text above the curtain seam — sets the mood */
   .intro-eyebrow { display: none; } /* deprecated — replaced by the intro-gate */
 
   /* ── TAP TO ENTER gate ── 
@@ -1951,99 +1978,100 @@
     50%      { box-shadow: 0 0 32px rgba(212, 175, 55, 0.4); }
   }
 
-  /* The curtains — two panels, anchored to left and right edges, meeting center */
+  /* ── Watery glass panels ──
+     Two frosted, gold-tinted glass doors. The page underneath is visible
+     through them (thanks to backdrop-filter: blur). An SVG turbulence filter
+     applies a slow water-ripple distortion across each panel. */
   .intro-curtain {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 52%;
-    transition: transform 4.8s cubic-bezier(0.7, 0, 0.3, 1);
-    will-change: transform;
+    width: 51%;
+    transition: transform 2.6s cubic-bezier(0.55, 0, 0.25, 1),
+                opacity 2.6s ease;
+    will-change: transform, opacity;
     z-index: 2;
+    /* Frosted gold-tinted glass */
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    /* Water-ripple distortion. Filters reference the SVG <defs> placed in markup. */
   }
-  .intro-curtain.left  { left: 0;  transform: translateX(0); }
-  .intro-curtain.right { right: 0; transform: translateX(0); }
-  /* Open state — driven by JS adding .parting to the overlay */
-  .intro-overlay.parting .intro-curtain.left  { transform: translateX(-102%); }
-  .intro-overlay.parting .intro-curtain.right { transform: translateX(102%); }
+  .intro-curtain.left  {
+    left: 0;
+    transform: translateX(0);
+    background: linear-gradient(90deg,
+      rgba(212,175,55,0.30) 0%,
+      rgba(212,175,55,0.35) 60%,
+      rgba(212,175,55,0.42) 100%);
+    border-right: 1px solid rgba(255,238,180,0.55);
+    box-shadow: inset -20px 0 40px -10px rgba(0,0,0,0.35);
+    filter: url(#waterDistortLeft);
+  }
+  .intro-curtain.right {
+    right: 0;
+    transform: translateX(0);
+    background: linear-gradient(270deg,
+      rgba(212,175,55,0.30) 0%,
+      rgba(212,175,55,0.35) 60%,
+      rgba(212,175,55,0.42) 100%);
+    border-left: 1px solid rgba(255,238,180,0.55);
+    box-shadow: inset 20px 0 40px -10px rgba(0,0,0,0.35);
+    filter: url(#waterDistortRight);
+  }
 
-  /* Velvet texture: vertical fabric ridges via repeating gradient,
-     plus a richer gold-to-deep-gold gradient for depth */
+  /* Open state — driven by JS adding .parting to the overlay.
+     Panels slide outward AND fade out so the page sharpens into focus. */
+  .intro-overlay.parting .intro-curtain.left  {
+    transform: translateX(-102%);
+    opacity: 0;
+  }
+  .intro-overlay.parting .intro-curtain.right {
+    transform: translateX(102%);
+    opacity: 0;
+  }
+
+  /* Subtle reflective light streaks on each glass panel */
   .intro-curtain::before {
     content: "";
     position: absolute;
     inset: 0;
+    pointer-events: none;
     background:
-      repeating-linear-gradient(90deg,
-        rgba(0, 0, 0, 0.22) 0px,
-        rgba(0, 0, 0, 0.22) 1px,
-        transparent 1px,
-        transparent 14px),
       linear-gradient(180deg,
-        #6b4a0c 0%,
-        #d4af37 30%,
-        #f4cf57 50%,
-        #d4af37 70%,
-        #6b4a0c 100%);
-  }
-  .intro-curtain.left::before {
-    background-image:
-      repeating-linear-gradient(90deg,
-        rgba(0, 0, 0, 0.22) 0px,
-        rgba(0, 0, 0, 0.22) 1px,
-        transparent 1px,
-        transparent 14px),
-      linear-gradient(90deg,
-        #2a1a05 0%,
-        #6b4a0c 20%,
-        #d4af37 60%,
-        #f4cf57 92%,
-        #b08a2a 100%);
-  }
-  .intro-curtain.right::before {
-    background-image:
-      repeating-linear-gradient(90deg,
-        rgba(0, 0, 0, 0.22) 0px,
-        rgba(0, 0, 0, 0.22) 1px,
-        transparent 1px,
-        transparent 14px),
-      linear-gradient(270deg,
-        #2a1a05 0%,
-        #6b4a0c 20%,
-        #d4af37 60%,
-        #f4cf57 92%,
-        #b08a2a 100%);
+        transparent 0%,
+        rgba(255,255,255,0.10) 30%,
+        transparent 40%,
+        transparent 60%,
+        rgba(255,255,255,0.06) 75%,
+        transparent 85%);
+    mix-blend-mode: screen;
+    opacity: 0.7;
   }
 
-  /* Inner-edge shadow line where the curtains meet — sells the seam */
-  .intro-curtain::after {
-    content: "";
+  /* The glowing seam where the two panels meet */
+  .intro-seam {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 30px;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg,
+      transparent 0%,
+      rgba(212,175,55,0.85) 25%,
+      rgba(255,238,180,1) 50%,
+      rgba(212,175,55,0.85) 75%,
+      transparent 100%);
+    box-shadow: 0 0 18px rgba(255,238,180,0.6),
+                0 0 32px rgba(212,175,55,0.4);
+    z-index: 3;
+    transition: opacity 1s ease, transform 1s ease;
     pointer-events: none;
   }
-  .intro-curtain.left::after  { right: 0; background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.55)); }
-  .intro-curtain.right::after { left: 0;  background: linear-gradient(270deg, transparent, rgba(0, 0, 0, 0.55)); }
-
-  /* Decorative gold tassel/cord at the inner edge */
-  .intro-curtain-tassel {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: linear-gradient(180deg,
-      #f4cf57 0%,
-      #d4af37 15%,
-      #6b4a0c 50%,
-      #d4af37 85%,
-      #f4cf57 100%);
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
-    z-index: 1;
+  .intro-overlay.parting .intro-seam {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0.3);
   }
-  .intro-curtain.left  .intro-curtain-tassel { right: 0; }
-  .intro-curtain.right .intro-curtain-tassel { left: 0; }
 
   /* Skip button — fades in after 2s */
   .intro-skip {
@@ -2073,7 +2101,7 @@
     border-color: rgba(212, 175, 55, 0.7);
   }
 
-  /* Accessibility — reduced motion users get an instant fade-out instead */
+  /* Accessibility — reduced motion users get an instant fade */
   @media (prefers-reduced-motion: reduce) {
     .intro-curtain { transition: opacity 0.4s ease; }
     .intro-overlay.parting .intro-curtain { opacity: 0; transform: none !important; }
@@ -2088,7 +2116,36 @@
 <!-- Built once per session. JS removes it after the curtains part.
      Requires a user tap to start (browser autoplay policy blocks sound otherwise). -->
 <div class="intro-overlay" id="introOverlay" aria-hidden="true">
+
+  <!-- SVG filters powering the water-ripple distortion on the glass panels.
+       Hidden by zero-size svg; referenced via filter: url() in CSS. -->
+  <svg width="0" height="0" style="position:absolute;" aria-hidden="true">
+    <defs>
+      <filter id="waterDistortLeft" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.04" numOctaves="2" seed="3" result="noise">
+          <animate attributeName="baseFrequency" dur="14s"
+                   values="0.012 0.04; 0.018 0.05; 0.012 0.04" repeatCount="indefinite"/>
+        </feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="14"/>
+      </filter>
+      <filter id="waterDistortRight" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.014 0.05" numOctaves="2" seed="7" result="noise">
+          <animate attributeName="baseFrequency" dur="16s"
+                   values="0.014 0.05; 0.020 0.06; 0.014 0.05" repeatCount="indefinite"/>
+        </feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="14"/>
+      </filter>
+    </defs>
+  </svg>
+
   <div class="intro-glow"></div>
+
+  <!-- Two frosted glass panels — show page through, distorted by water filters -->
+  <div class="intro-curtain left"></div>
+  <div class="intro-curtain right"></div>
+
+  <!-- Glowing gold seam where the panels meet -->
+  <div class="intro-seam"></div>
 
   <!-- Tap to Enter gate — what users see first -->
   <div class="intro-gate" id="introGate">
@@ -2098,8 +2155,6 @@
     <p class="intro-gate-hint">Tap to begin · Sound on</p>
   </div>
 
-  <div class="intro-curtain left"><div class="intro-curtain-tassel"></div></div>
-  <div class="intro-curtain right"><div class="intro-curtain-tassel"></div></div>
   <button type="button" class="intro-skip" id="introSkip" aria-label="Skip intro">Skip ↘</button>
   <audio id="introAudio" preload="auto" playsinline>
     <source src="intro.mp3" type="audio/mpeg">
@@ -2123,10 +2178,10 @@
     }
     sessionStorage.setItem(SESSION_KEY, '1');
 
-    // Timing (ms)
-    var CURTAIN_DURATION = 4800;   // matches the CSS transition
-    var REVEAL_AFTER = CURTAIN_DURATION + 200;
-    var DONE_AFTER   = REVEAL_AFTER + 700;
+    // Timing (ms) — calibrated to the 3s liquid whoosh sound and 2.6s glass-part CSS.
+    var PART_DURATION = 2600;                   // matches the CSS transition above
+    var REVEAL_AFTER  = PART_DURATION + 200;    // overlay starts fading
+    var DONE_AFTER    = REVEAL_AFTER + 800;     // overlay fully removed
 
     function fadeAndRemove() {
       overlay.classList.add('fading');
@@ -2176,6 +2231,10 @@
     }
   })();
 </script>
+
+<!-- ── Hero video background (1 of 3 picked at random on each load) ── -->
+<video id="heroVideo" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+<div id="heroVideoTint" aria-hidden="true"></div>
 
 <canvas id="particles"></canvas>
 
@@ -3505,6 +3564,48 @@
     setInterval(render, 30000);
     // Start the live-add cycle
     setTimeout(tick, 45000 + Math.random() * 45000);
+  })();
+
+  // ════════════════════════════════════════════════════════════════════════
+  // HERO VIDEO BACKGROUND
+  // Picks 1 of 3 videos at random on each page load.
+  // Browsers allow muted autoplay, so no user gesture is needed.
+  // ════════════════════════════════════════════════════════════════════════
+  (function () {
+    const video = document.getElementById('heroVideo');
+    if (!video) return;
+
+    const VIDEOS = ['video_1.mp4', 'video_2.mp4', 'video_3.mp4'];
+    const pick = VIDEOS[Math.floor(Math.random() * VIDEOS.length)];
+
+    video.src = pick;
+
+    // Fade in once the video has enough data to play smoothly
+    video.addEventListener('loadeddata', function () {
+      video.classList.add('loaded');
+    });
+
+    // If the video genuinely can't load (404, codec issue, etc),
+    // we silently fall back to the particle background — no error UI.
+    video.addEventListener('error', function () {
+      video.style.display = 'none';
+      var tint = document.getElementById('heroVideoTint');
+      if (tint) tint.style.display = 'none';
+    });
+
+    // Some mobile browsers pause the video when the tab is hidden — resume on focus
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden && video.paused) {
+        var p = video.play();
+        if (p && typeof p.then === 'function') p.catch(function () {});
+      }
+    });
+
+    // Respect reduced-motion users — pause the video, leave the dark overlay
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      video.pause();
+      video.style.display = 'none';
+    }
   })();
 
   // ════════════════════════════════════════════════════════════════════════
