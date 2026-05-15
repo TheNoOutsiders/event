@@ -1863,31 +1863,92 @@
   }
 
   /* Tiny eyebrow text above the curtain seam — sets the mood */
-  .intro-eyebrow {
+  .intro-eyebrow { display: none; } /* deprecated — replaced by the intro-gate */
+
+  /* ── TAP TO ENTER gate ── 
+     Sits in front of the curtains. Clicked once → curtains begin parting.
+     Required because browsers block audio autoplay without user interaction. */
+  .intro-gate {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -120px);
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    text-align: center;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .intro-gate.hidden {
+    opacity: 0;
+    transform: translate(-50%, -55%) scale(0.96);
+    pointer-events: none;
+  }
+  .intro-gate-eyebrow {
     font-family: 'Inter', sans-serif;
     font-size: 10px;
     letter-spacing: 6px;
     text-transform: uppercase;
     color: rgba(212, 175, 55, 0.85);
-    white-space: nowrap;
-    opacity: 0;
-    animation: introEyebrowFade 1.4s ease-out 0.2s forwards;
-    z-index: 3;
-    pointer-events: none;
+    margin: 0;
+    animation: introEyebrowSlide 1.2s ease-out 0.1s both;
   }
-  .intro-overlay.parting .intro-eyebrow {
-    animation: introEyebrowOut 0.6s ease-in forwards;
+  .intro-gate-title {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 38px;
+    letter-spacing: 6px;
+    color: #fff;
+    margin: 0;
+    line-height: 1;
+    text-shadow: 0 0 22px rgba(212, 175, 55, 0.35);
+    animation: introTitleSlide 1.2s ease-out 0.3s both;
   }
-  @keyframes introEyebrowFade {
-    from { opacity: 0; transform: translate(-50%, -110px); }
-    to   { opacity: 1; transform: translate(-50%, -120px); }
+  .intro-gate-btn {
+    background: linear-gradient(135deg, #3b2406, #6b4410, #3b2406);
+    border: 1px solid rgba(212, 175, 55, 0.6);
+    color: #d4af37;
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 14px;
+    letter-spacing: 4px;
+    padding: 14px 28px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-top: 6px;
+    box-shadow: 0 0 22px rgba(212, 175, 55, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+    animation: introBtnSlide 1.2s ease-out 0.55s both, introBtnPulse 2.4s ease-in-out 1.8s infinite;
   }
-  @keyframes introEyebrowOut {
-    to { opacity: 0; transform: translate(-50%, -140px); }
+  .intro-gate-btn:hover {
+    color: #f4cf57;
+    transform: translateY(-1px);
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.35);
+  }
+  .intro-gate-hint {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: rgba(220, 200, 255, 0.4);
+    margin-top: 4px;
+    animation: introBtnSlide 1.2s ease-out 0.75s both;
+  }
+  @keyframes introEyebrowSlide {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes introTitleSlide {
+    from { opacity: 0; transform: translateY(-6px); letter-spacing: 14px; }
+    to   { opacity: 1; transform: translateY(0); letter-spacing: 6px; }
+  }
+  @keyframes introBtnSlide {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes introBtnPulse {
+    0%, 100% { box-shadow: 0 0 22px rgba(212, 175, 55, 0.15); }
+    50%      { box-shadow: 0 0 32px rgba(212, 175, 55, 0.4); }
   }
 
   /* The curtains — two panels, anchored to left and right edges, meeting center */
@@ -2024,10 +2085,19 @@
 <body>
 
 <!-- ═══════════════════ MYSTERY DOOR INTRO ═══════════════════ -->
-<!-- Built once per session. JS removes it after the curtains part. -->
+<!-- Built once per session. JS removes it after the curtains part.
+     Requires a user tap to start (browser autoplay policy blocks sound otherwise). -->
 <div class="intro-overlay" id="introOverlay" aria-hidden="true">
   <div class="intro-glow"></div>
-  <div class="intro-eyebrow">The No Outsiders · Presents</div>
+
+  <!-- Tap to Enter gate — what users see first -->
+  <div class="intro-gate" id="introGate">
+    <p class="intro-gate-eyebrow">The No Outsiders · Presents</p>
+    <h1 class="intro-gate-title">WHITE ROOM<span style="color:#d4af37;">'</span></h1>
+    <button type="button" class="intro-gate-btn" id="introGateBtn">ENTER ↘</button>
+    <p class="intro-gate-hint">Tap to begin · Sound on</p>
+  </div>
+
   <div class="intro-curtain left"><div class="intro-curtain-tassel"></div></div>
   <div class="intro-curtain right"><div class="intro-curtain-tassel"></div></div>
   <button type="button" class="intro-skip" id="introSkip" aria-label="Skip intro">Skip ↘</button>
@@ -2037,47 +2107,29 @@
 </div>
 
 <script>
-  // Run synchronously so the overlay never flashes the page underneath it.
+  // Mystery Door intro — runs once per session, requires a tap to start (autoplay policy).
   (function () {
     var SESSION_KEY = 'whiteRoomIntroSeen';
     var overlay = document.getElementById('introOverlay');
+    var gate    = document.getElementById('introGate');
+    var gateBtn = document.getElementById('introGateBtn');
     var audio   = document.getElementById('introAudio');
     var skipBtn = document.getElementById('introSkip');
 
-    // Already seen this session? Remove the overlay immediately.
+    // Already seen this session? Remove immediately.
     if (sessionStorage.getItem(SESSION_KEY) === '1') {
       overlay.classList.add('hidden');
       return;
     }
-
     sessionStorage.setItem(SESSION_KEY, '1');
 
-    // Timing (ms): curtains start parting after a short beat,
-    // sound plays in sync, page revealed shortly after curtains finish.
-    var PART_DELAY = 700;          // beat of anticipation
-    var CURTAIN_DURATION = 4800;   // matches the CSS transition above
-    var SKIP_VISIBLE_AT = 2000;    // skip button fades in
-    var REVEAL_AT = PART_DELAY + CURTAIN_DURATION;     // overlay starts fading
-    var DONE_AT   = REVEAL_AT + 700;                   // overlay fully removed
-
-    // Try to play audio — Safari may block it without user interaction;
-    // in that case the visual still runs silently.
-    function tryPlayAudio() {
-      if (!audio) return;
-      var p = audio.play();
-      if (p && typeof p.then === 'function') {
-        p.catch(function () { /* silently swallow autoplay-block errors */ });
-      }
-    }
-
-    function partCurtains() {
-      overlay.classList.add('parting');
-      tryPlayAudio();
-    }
+    // Timing (ms)
+    var CURTAIN_DURATION = 4800;   // matches the CSS transition
+    var REVEAL_AFTER = CURTAIN_DURATION + 200;
+    var DONE_AFTER   = REVEAL_AFTER + 700;
 
     function fadeAndRemove() {
       overlay.classList.add('fading');
-      // Stop audio after the overlay starts fading so it doesn't linger
       if (audio) {
         try { audio.pause(); audio.currentTime = 0; } catch (_) {}
       }
@@ -2086,23 +2138,41 @@
       }, 700);
     }
 
+    function startSequence() {
+      // Hide the gate first
+      gate.classList.add('hidden');
+      // Show skip button as a backup escape
+      setTimeout(function () { skipBtn.classList.add('visible'); }, 800);
+
+      // Play audio — now allowed because this is inside a click handler
+      if (audio) {
+        try { audio.currentTime = 0; } catch (_) {}
+        var p = audio.play();
+        if (p && typeof p.then === 'function') {
+          p.catch(function () { /* still proceed visually if blocked */ });
+        }
+      }
+
+      // Begin parting just after the gate fades (so the user's eye follows the motion)
+      setTimeout(function () { overlay.classList.add('parting'); }, 350);
+
+      // Reveal the page
+      setTimeout(fadeAndRemove, REVEAL_AFTER);
+    }
+
     function skipIntro() {
-      // Tearing down mid-sequence — clean up timers
-      timers.forEach(function (t) { clearTimeout(t); });
       fadeAndRemove();
     }
 
-    var timers = [];
-    timers.push(setTimeout(partCurtains, PART_DELAY));
-    timers.push(setTimeout(function () { skipBtn.classList.add('visible'); }, SKIP_VISIBLE_AT));
-    timers.push(setTimeout(fadeAndRemove, REVEAL_AT));
-
+    gateBtn.addEventListener('click', startSequence);
     skipBtn.addEventListener('click', skipIntro);
 
-    // If reduced motion, finish much faster
+    // Reduced motion users — gate stays, but skip is faster
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      timers.forEach(function (t) { clearTimeout(t); });
-      setTimeout(fadeAndRemove, 400);
+      // Make the button just dismiss instantly
+      gateBtn.addEventListener('click', function () {
+        setTimeout(fadeAndRemove, 200);
+      }, { once: true });
     }
   })();
 </script>
