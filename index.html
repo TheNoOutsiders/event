@@ -1344,6 +1344,35 @@
     align-items: center;
     justify-content: center;
   }
+
+  /* ── Venue photo (replaces the decorative map preview) ── */
+  .venue-photo {
+    position: relative;
+    min-height: 280px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0a0014, #1a0028);
+  }
+  .venue-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .venue-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* Subtle inner vignette + tiny purple wash, so photo feels brand-cohesive
+       but the photo's own colors still come through */
+    background:
+      radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.35) 100%),
+      linear-gradient(180deg, rgba(40,8,72,0.06) 0%, transparent 50%);
+  }
+  .venue-card:hover .venue-photo img {
+    transform: scale(1.04);
+  }
   .venue-map-grid {
     position: absolute;
     inset: 0;
@@ -1536,6 +1565,7 @@
   @media (max-width: 600px) {
     .venue-card { grid-template-columns: 1fr; }
     .venue-map-preview { min-height: 200px; }
+    .venue-photo { min-height: 220px; }
     .venue-info { padding: 22px 22px 24px; }
     .hero-meta { gap: 10px; padding: 14px 16px; }
     .hero-meta-divider { display: none; }
@@ -2065,16 +2095,8 @@
     <div class="section-label">WHERE IT ALL HAPPENS</div>
     <h2 class="section-title">THE VENUE</h2>
     <div class="venue-card">
-      <div class="venue-map-preview" id="venueMapPreview">
-        <div class="venue-map-grid">
-          <div class="venue-map-pin">
-            <div class="venue-pin-ring"></div>
-            <div class="venue-pin-dot">◆</div>
-          </div>
-        </div>
-        <div class="venue-map-overlay">
-          <div class="venue-map-watermark">📍</div>
-        </div>
+      <div class="venue-photo">
+        <img src="venue.jpg" alt="Aloki Glass House — venue photo" loading="lazy" />
       </div>
       <div class="venue-info">
         <div class="venue-name" id="venueName">Aloki Glass House</div>
@@ -2084,7 +2106,7 @@
           <span>OPEN IN GOOGLE MAPS</span>
         </a>
         <div class="venue-helper">
-          Click the button above for directions, parking info, and exact location.
+          Click the button above for directions and exact location.
         </div>
       </div>
     </div>
