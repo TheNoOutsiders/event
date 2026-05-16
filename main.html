@@ -1914,6 +1914,148 @@
       color: rgba(255,255,255,0.88);
     }
 
+    /* ── Agreement gate (checkbox + expandable terms) ──────────────────── */
+    .agreement-gate {
+      margin: 18px 0 18px;
+      padding: 14px 16px;
+      background: rgba(15, 5, 25, 0.55);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 12px;
+      transition: border-color 0.25s ease, background 0.25s ease;
+    }
+    .agreement-gate.checked {
+      border-color: rgba(212, 175, 55, 0.55);
+      background: rgba(40, 20, 8, 0.35);
+    }
+
+    .agreement-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .agreement-row input[type="checkbox"] {
+      /* Hide the native checkbox; we draw a custom one */
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .agreement-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      border: 1.5px solid rgba(212, 175, 55, 0.5);
+      background: rgba(8, 0, 16, 0.6);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .agreement-row:hover .agreement-box {
+      border-color: rgba(212, 175, 55, 0.8);
+    }
+    .agreement-row input:checked ~ .agreement-box {
+      background: #d4af37;
+      border-color: #d4af37;
+    }
+    .agreement-box svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    .agreement-row input:checked ~ .agreement-box svg {
+      opacity: 1;
+    }
+    .agreement-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: rgba(255, 245, 230, 0.92);
+      letter-spacing: 0.3px;
+      line-height: 1.4;
+    }
+    .agreement-label strong {
+      color: #d4af37;
+      font-weight: 600;
+    }
+
+    .agreement-toggle {
+      background: none;
+      border: none;
+      padding: 0;
+      margin-top: 8px;
+      margin-left: 32px;
+      color: rgba(212, 175, 55, 0.85);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s ease;
+    }
+    .agreement-toggle:hover { color: #f4cf57; }
+    .agreement-toggle .chev {
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+    .agreement-toggle.open .chev { transform: rotate(180deg); }
+
+    .agreement-terms {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.22, 1, 0.36, 1), margin-top 0.3s ease;
+      margin-top: 0;
+    }
+    .agreement-terms.open {
+      max-height: 1500px; /* large enough for the full list to fit */
+      margin-top: 14px;
+    }
+    .agreement-terms-inner {
+      padding: 14px 16px 4px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .agreement-term {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      line-height: 1.55;
+      color: rgba(255, 235, 245, 0.78);
+      margin-bottom: 10px;
+    }
+    .agreement-term strong {
+      display: block;
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+      font-size: 12.5px;
+    }
+    .agreement-foot {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed rgba(212, 175, 55, 0.2);
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      color: rgba(212, 175, 55, 0.75);
+      font-style: italic;
+      letter-spacing: 0.2px;
+      line-height: 1.5;
+    }
+
+    /* Disabled submit state — when checkbox isn't ticked yet */
+    button[type="submit"]:disabled,
+    button[type="submit"][aria-disabled="true"] {
+      opacity: 0.45;
+      cursor: not-allowed;
+      filter: grayscale(0.4);
+      pointer-events: none;
+    }
+
     /* ── QR loading state (#10) ── */
     .ticket-qr-wrap {
       position: relative;
@@ -2735,29 +2877,44 @@
             <span>⚠ <strong>Important:</strong> You must complete your payment before clicking "Confirm" — your spot will not be secured without a successful payment.</span>
           </div>
 
-          <button type="submit" id="submitBtn">Secure My Spot</button>
+          <!-- ── AGREEMENT GATE ── Submit stays disabled until the user ticks. -->
+          <div class="agreement-gate" id="agreementGate">
+            <label class="agreement-row" for="agreementCheckbox">
+              <input type="checkbox" id="agreementCheckbox" name="agreement" required />
+              <span class="agreement-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5 12l5 5L20 7" stroke="#16001a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="agreement-label">I agree to the <strong>Terms &amp; Conditions</strong></span>
+            </label>
+            <button type="button" class="agreement-toggle" id="agreementToggle" aria-expanded="false" aria-controls="agreementTerms">
+              <span class="toggle-text">Read terms</span>
+              <span class="chev">▾</span>
+            </button>
+            <div class="agreement-terms" id="agreementTerms" role="region" aria-label="Terms and conditions">
+              <div class="agreement-terms-inner">
+                <p class="agreement-term"><strong>Age Restriction</strong> Entry is strictly limited to individuals aged 18 and above. Valid government-issued identification may be required at the entrance.</p>
+                <p class="agreement-term"><strong>Ticket Policy</strong> A valid ticket is required for entry. Tickets are non-transferable and non-refundable unless stated otherwise by the organizers.</p>
+                <p class="agreement-term"><strong>Code of Conduct</strong> Any form of harassment, inappropriate behavior, misconduct, aggression, disruption, or unsafe actions will result in immediate removal from the venue without refund.</p>
+                <p class="agreement-term"><strong>Prohibited Substances</strong> Drugs and alcohol are strictly prohibited inside the venue. Entry may be denied, or guests may be removed if found violating this rule.</p>
+                <p class="agreement-term"><strong>Smoking Policy</strong> Smoking is only permitted in designated smoking areas.</p>
+                <p class="agreement-term"><strong>Security Compliance</strong> All guests must follow instructions provided by event staff and security personnel at all times.</p>
+                <p class="agreement-term"><strong>Photography &amp; Media</strong> Photos and videos may be captured during the event for promotional and marketing purposes. By attending, guests consent to being photographed or recorded.</p>
+                <p class="agreement-term"><strong>Liability Disclaimer</strong> The organizers are not responsible for any personal injury, loss, theft, or damage to personal belongings during the event.</p>
+                <p class="agreement-term"><strong>Respectful Environment</strong> Guests are expected to maintain a respectful attitude and contribute positive energy to ensure a safe and enjoyable experience for everyone.</p>
+                <p class="agreement-term"><strong>Right of Admission Reserved</strong> The organizers reserve the right to refuse entry or remove any individual who violates these terms and conditions or disrupts the event atmosphere.</p>
+                <p class="agreement-foot">By entering the venue, you acknowledge and agree to all event rules and policies.</p>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" id="submitBtn" disabled aria-disabled="true">Secure My Spot</button>
         </form>
 
         <div class="success" id="successMsg">✔ Entry request submitted</div>
         <div class="success error-msg" id="errorMsg">✖ Submission failed — please try again</div>
 
-        <div class="terms-section">
-          <div class="terms-heading">
-            <div class="terms-heading-bar"></div>
-            <span class="terms-heading-text">Terms &amp; Conditions</span>
-          </div>
-          <ul class="terms-list">
-            <li><span class="terms-bullet">◆</span><span><strong>18+ only</strong> — ID may be checked at entry.</span></li>
-            <li><span class="terms-bullet">◆</span><span><strong>Valid ticket required</strong> — non-transferable &amp; final sale, no refunds.</span></li>
-            <li><span class="terms-bullet">◆</span><span><strong>No drugs or intoxication</strong> — offenders will be removed.</span></li>
-            <li><span class="terms-bullet">◆</span><span><strong>Smoking</strong> allowed only in the outdoor area — use the designated outside zone.</span></li>
-            <li><span class="terms-bullet">◆</span><span><strong>Respect others</strong> — aggressive or abusive behaviour may lead to removal.</span></li>
-            <li><span class="terms-bullet">◆</span><span><strong>No dangerous items</strong> — weapons, glass, or fireworks prohibited.</span></li>
-            <li><span class="terms-bullet">◆</span><span><strong>Organizers</strong> can refuse entry or remove anyone at discretion.</span></li>
-            <li><span class="terms-bullet">◆</span><span><strong>Photos &amp; videos</strong> may be taken for promotional purposes.</span></li>
-            <li><span class="terms-bullet">◆</span><span><strong>Reselling tickets</strong> above face value invalidates them.</span></li>
-          </ul>
-        </div>
       </div>
     </div>
 
@@ -4220,6 +4377,40 @@
         hiddenForm.submit();
       });
     }
+
+    // ── AGREEMENT GATE ──────────────────────────────────────────────────
+    // Submit button stays disabled until the user ticks the T&C checkbox.
+    // The "Read terms" toggle smoothly expands/collapses the terms list.
+    (function wireAgreementGate() {
+      const gate = document.getElementById('agreementGate');
+      const checkbox = document.getElementById('agreementCheckbox');
+      const submitBtn = document.getElementById('submitBtn');
+      const toggle = document.getElementById('agreementToggle');
+      const terms = document.getElementById('agreementTerms');
+      const toggleText = toggle && toggle.querySelector('.toggle-text');
+      if (!gate || !checkbox || !submitBtn || !toggle || !terms) return;
+
+      function syncSubmitState() {
+        if (checkbox.checked) {
+          submitBtn.disabled = false;
+          submitBtn.setAttribute('aria-disabled', 'false');
+          gate.classList.add('checked');
+        } else {
+          submitBtn.disabled = true;
+          submitBtn.setAttribute('aria-disabled', 'true');
+          gate.classList.remove('checked');
+        }
+      }
+      checkbox.addEventListener('change', syncSubmitState);
+      syncSubmitState(); // initial state
+
+      toggle.addEventListener('click', function () {
+        const isOpen = terms.classList.toggle('open');
+        toggle.classList.toggle('open', isOpen);
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        if (toggleText) toggleText.textContent = isOpen ? 'Hide terms' : 'Read terms';
+      });
+    })();
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
