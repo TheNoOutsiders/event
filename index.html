@@ -112,17 +112,27 @@
     gap: 18px;
   }
   #wipe .wipe-mark {
-    width: 60px;
-    height: 60px;
+    width: 84px;
+    height: 84px;
     border-radius: 50%;
-    background: radial-gradient(circle at 50% 40%, rgba(212,175,55,0.5), rgba(96,32,160,0.2));
+    background: radial-gradient(circle at 50% 40%, rgba(212,175,55,0.35), rgba(96,32,160,0.15));
     border: 1px solid var(--gold-line);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--gold);
-    font-size: 22px;
-    animation: pulseGlow 1.2s ease-in-out infinite;
+    animation: pulseGlow 2s ease-in-out infinite;
+    overflow: hidden;
+  }
+  #wipe .wipe-mark img {
+    width: 70%;
+    height: 70%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.2));
+    animation: wipeMarkSpin 2.4s linear infinite;
+  }
+  @keyframes wipeMarkSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
   }
   #wipe .wipe-text {
     font-family: var(--font-display);
@@ -1949,7 +1959,7 @@
 
 <div id="wipe">
   <div class="wipe-content">
-    <div class="wipe-mark">◆</div>
+    <div class="wipe-mark"><img src="logo.png" alt="" /></div>
     <div class="wipe-text" id="wipeText">SECURING YOUR EXPERIENCE</div>
   </div>
 </div>
