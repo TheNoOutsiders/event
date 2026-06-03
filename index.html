@@ -3370,24 +3370,41 @@
   // LIVE SPOTS — fetches the # of registrations from Apps Script
   // ════════════════════════════════════════════════════════════════════════
   // ════════════════════════════════════════════════════════════════════════
-  // DEMAND BAR — one source of truth (FAKE_PERCENT_CLAIMED), everything else
-  // cascades. Ticks up subtly every 2 minutes so it feels alive.
-  // Bump FAKE_PERCENT_CLAIMED → claimed, left, bar, % label all update.
+  // DEMAND BAR — time-based auto-climb. Set start/end percent + event date.
+  // Everything cascades from there: claimed, tickets-left, bar all derived.
+  //
+  // The percent linearly climbs from FAKE_START_PERCENT (today) to
+  // FAKE_END_PERCENT (event day) — no manual updates needed during the run-up.
   // ════════════════════════════════════════════════════════════════════════
-  const FAKE_TOTAL_CAPACITY  = 250;   // ← venue capacity (the "/250" denominator)
-  const FAKE_PERCENT_CLAIMED = 73;    // ← change this anytime (0-99). Drives all numbers.
-  const LIVE_TICK_INTERVAL_MS = 120000; // 2 minutes between ticks
-  const LIVE_TICK_HARD_CAP_PERCENT = 99; // never reach 100% — keep hope alive
+  const FAKE_TOTAL_CAPACITY  = 250;
+  const FAKE_START_PERCENT   = 73;          // ← where the bar sits today
+  const FAKE_END_PERCENT     = 95;          // ← where it lands on event day (never 100%)
+  const FAKE_START_DATE      = '2026-06-03'; // ← today (start of climb)
+  const FAKE_EVENT_DATE      = '2026-06-14'; // ← event day (end of climb)
+  const LIVE_TICK_INTERVAL_MS = 1800000;     // 30 min — subtle "someone just bought" feel
+  const LIVE_TICK_HARD_CAP_PERCENT = 99;     // never reach 100%
 
-  // Internal: tracks the "live drift" added on top of the base percent
+  // Internal: tracks the small in-session drift on top of the time-based base
   let liveDriftClaimed = 0;
+
+  // Returns the percent claimed based on calendar progression from
+  // FAKE_START_DATE → FAKE_EVENT_DATE. Before start = start%. After event = end%.
+  function getTimeBasedPercent() {
+    const start = new Date(FAKE_START_DATE + 'T00:00:00').getTime();
+    const end   = new Date(FAKE_EVENT_DATE + 'T00:00:00').getTime();
+    const now   = Date.now();
+    if (now <= start) return FAKE_START_PERCENT;
+    if (now >= end)   return FAKE_END_PERCENT;
+    const progress = (now - start) / (end - start);
+    return FAKE_START_PERCENT + progress * (FAKE_END_PERCENT - FAKE_START_PERCENT);
+  }
 
   function renderDemandBar() {
     const total = Math.max(1, FAKE_TOTAL_CAPACITY);
-    const basePercent = Math.max(0, Math.min(100, FAKE_PERCENT_CLAIMED));
+    const basePercent = Math.max(0, Math.min(100, getTimeBasedPercent()));
     const baseClaimed = Math.round((basePercent / 100) * total);
 
-    // Apply live drift, but cap at LIVE_TICK_HARD_CAP_PERCENT of total
+    // Apply in-session live drift, but cap at LIVE_TICK_HARD_CAP_PERCENT of total
     const hardCapClaimed = Math.floor((LIVE_TICK_HARD_CAP_PERCENT / 100) * total);
     const claimed = Math.min(baseClaimed + liveDriftClaimed, hardCapClaimed);
     const left = Math.max(0, total - claimed);
@@ -3408,7 +3425,6 @@
 
   function startLiveTick() {
     setInterval(() => {
-      // +1 ticket each tick — claimed creeps up, bar follows
       liveDriftClaimed += 1;
       renderDemandBar();
     }, LIVE_TICK_INTERVAL_MS);
