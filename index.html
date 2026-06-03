@@ -1307,15 +1307,22 @@
 
   .spots-footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     font-family: var(--font-body);
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-3);
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
   }
   .spots-footer #spotsPercent {
     color: var(--gold);
     font-weight: 700;
+    margin-right: 4px;
+  }
+  .spots-claim-label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
   }
 
   /* ═══════════════════════════════════════════════════════════════════
@@ -2432,23 +2439,19 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════ SPOTS LEFT ═══════════════════════════ -->
+  <!-- ═══════════════════════════ DEMAND BAR ═══════════════════════════
+       Visual scarcity indicator. Number is statically set (FAKE_PERCENT_CLAIMED
+       in the JS below) — bump it manually as the event approaches. -->
   <section class="section spots-section">
     <div class="spots-card">
       <div class="spots-header">
-        <div class="spots-eyebrow">LIVE · LIMITED CAPACITY</div>
-        <div class="spots-live"><span class="spots-live-dot"></span>UPDATING</div>
-      </div>
-      <div class="spots-stat-row">
-        <div class="spots-stat-big" id="spotsLeftBig">—</div>
-        <div class="spots-stat-label">TICKETS LEFT</div>
+        <div class="spots-eyebrow">LIMITED CAPACITY</div>
       </div>
       <div class="spots-bar">
         <div class="spots-bar-fill" id="spotsBarFill" style="width:0%"></div>
       </div>
       <div class="spots-footer">
-        <span><span id="spotsClaimed">—</span> / <span id="spotsTotal">400</span> claimed</span>
-        <span id="spotsPercent">—%</span>
+        <span class="spots-claim-label"><span id="spotsPercent">—%</span> claimed</span>
       </div>
     </div>
   </section>
@@ -3307,10 +3310,6 @@
     const venueAddrEl = document.getElementById('venueAddress');
     if (venueNameEl) venueNameEl.textContent = EVENT_CONFIG.venueName;
     if (venueAddrEl) venueAddrEl.textContent = EVENT_CONFIG.venueAddress;
-
-    // Total spots (capacity)
-    const spotsTotalEl = document.getElementById('spotsTotal');
-    if (spotsTotalEl) spotsTotalEl.textContent = EVENT_CONFIG.capacity;
   }
 
   // ── Fetch config (reuses the same Apps Script endpoint as main.html) ──
@@ -3370,65 +3369,29 @@
   // ════════════════════════════════════════════════════════════════════════
   // LIVE SPOTS — fetches the # of registrations from Apps Script
   // ════════════════════════════════════════════════════════════════════════
-  function renderSpots(claimed, total) {
-    const claimedNum = Math.max(0, Number(claimed) || 0);
-    const totalNum = Math.max(1, Number(total) || EVENT_CONFIG.capacity);
-    const left = Math.max(0, totalNum - claimedNum);
-    const percent = Math.min(100, Math.round((claimedNum / totalNum) * 100));
+  // ════════════════════════════════════════════════════════════════════════
+  // DEMAND BAR — statically set percentage. Bump this number to crank urgency.
+  // No backend call — change the value, push, done.
+  // ════════════════════════════════════════════════════════════════════════
+  const FAKE_PERCENT_CLAIMED = 60;  // ← change this number anytime (0-100)
 
-    const bigEl = document.getElementById('spotsLeftBig');
-    const claimedEl = document.getElementById('spotsClaimed');
-    const totalEl = document.getElementById('spotsTotal');
+  function renderDemandBar() {
+    const percent = Math.max(0, Math.min(100, FAKE_PERCENT_CLAIMED));
     const percentEl = document.getElementById('spotsPercent');
     const fillEl = document.getElementById('spotsBarFill');
-
-    if (bigEl) bigEl.textContent = left.toLocaleString('en-IN');
-    if (claimedEl) claimedEl.textContent = claimedNum;
-    if (totalEl) totalEl.textContent = totalNum;
     if (percentEl) percentEl.textContent = percent + '%';
     if (fillEl) fillEl.style.width = percent + '%';
   }
 
-  function fetchSpots() {
-    return fetch(APPS_SCRIPT_URL + '?action=getStats', { redirect: 'follow' })
-      .then(r => r.json())
-      .then(data => {
-        if (data && data.status === 'ok') {
-          // Count both checked-in and total registrations as "claimed"
-          // (better than just verified count for landing-page urgency)
-          renderSpots(data.total || 0, EVENT_CONFIG.capacity);
-        }
-      })
-      .catch(() => new Promise((resolve) => {
-        const cbName = 'tnoStatsCb_' + Date.now();
-        const t = setTimeout(() => { delete window[cbName]; resolve(); }, 6000);
-        window[cbName] = function (data) {
-          clearTimeout(t); delete window[cbName];
-          if (data && data.status === 'ok') {
-            renderSpots(data.total || 0, EVENT_CONFIG.capacity);
-          }
-          resolve();
-        };
-        const s = document.createElement('script');
-        s.src = APPS_SCRIPT_URL + '?action=getStats&callback=' + cbName;
-        s.onerror = () => { clearTimeout(t); delete window[cbName]; resolve(); };
-        document.head.appendChild(s);
-      }));
-  }
-
   // Render initial defaults so the page never looks empty
   renderHeroFromConfig();
-  renderSpots(0, EVENT_CONFIG.capacity);
-
-  // Refresh live spots every 30 seconds
-  setInterval(fetchSpots, 30000);
+  renderDemandBar();
 
   // ── Bootstrap ──
   fetchTiers().then(() => {
     renderTiers();
   });
   fetchConfig();
-  fetchSpots();
 
   // Render defaults immediately so the page never looks empty
   setTimeout(() => {
