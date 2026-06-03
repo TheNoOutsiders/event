@@ -1307,22 +1307,15 @@
 
   .spots-footer {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     font-family: var(--font-body);
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-3);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
+    letter-spacing: 1px;
   }
   .spots-footer #spotsPercent {
     color: var(--gold);
     font-weight: 700;
-    margin-right: 4px;
-  }
-  .spots-claim-label {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 4px;
   }
 
   /* ═══════════════════════════════════════════════════════════════════
@@ -2440,18 +2433,25 @@
   </section>
 
   <!-- ═══════════════════════════ DEMAND BAR ═══════════════════════════
-       Visual scarcity indicator. Number is statically set (FAKE_PERCENT_CLAIMED
-       in the JS below) — bump it manually as the event approaches. -->
+       Visually live, mechanically static. Single source of truth:
+       FAKE_PERCENT_CLAIMED (below in JS). Bump it → everything cascades.
+       Numbers tick up ~+1 ticket every 2 minutes for that "alive" feel. -->
   <section class="section spots-section">
     <div class="spots-card">
       <div class="spots-header">
-        <div class="spots-eyebrow">LIMITED CAPACITY</div>
+        <div class="spots-eyebrow">LIVE · LIMITED CAPACITY</div>
+        <div class="spots-live"><span class="spots-live-dot"></span>UPDATING</div>
+      </div>
+      <div class="spots-stat-row">
+        <div class="spots-stat-big" id="spotsLeftBig">—</div>
+        <div class="spots-stat-label">TICKETS LEFT</div>
       </div>
       <div class="spots-bar">
         <div class="spots-bar-fill" id="spotsBarFill" style="width:0%"></div>
       </div>
       <div class="spots-footer">
-        <span class="spots-claim-label"><span id="spotsPercent">—%</span> claimed</span>
+        <span><span id="spotsClaimed">—</span> / <span id="spotsTotal">250</span> claimed</span>
+        <span id="spotsPercent">—%</span>
       </div>
     </div>
   </section>
@@ -3370,22 +3370,54 @@
   // LIVE SPOTS — fetches the # of registrations from Apps Script
   // ════════════════════════════════════════════════════════════════════════
   // ════════════════════════════════════════════════════════════════════════
-  // DEMAND BAR — statically set percentage. Bump this number to crank urgency.
-  // No backend call — change the value, push, done.
+  // DEMAND BAR — one source of truth (FAKE_PERCENT_CLAIMED), everything else
+  // cascades. Ticks up subtly every 2 minutes so it feels alive.
+  // Bump FAKE_PERCENT_CLAIMED → claimed, left, bar, % label all update.
   // ════════════════════════════════════════════════════════════════════════
-  const FAKE_PERCENT_CLAIMED = 73;  // ← change this number anytime (0-100)
+  const FAKE_TOTAL_CAPACITY  = 250;   // ← venue capacity (the "/250" denominator)
+  const FAKE_PERCENT_CLAIMED = 73;    // ← change this anytime (0-99). Drives all numbers.
+  const LIVE_TICK_INTERVAL_MS = 120000; // 2 minutes between ticks
+  const LIVE_TICK_HARD_CAP_PERCENT = 99; // never reach 100% — keep hope alive
+
+  // Internal: tracks the "live drift" added on top of the base percent
+  let liveDriftClaimed = 0;
 
   function renderDemandBar() {
-    const percent = Math.max(0, Math.min(100, FAKE_PERCENT_CLAIMED));
+    const total = Math.max(1, FAKE_TOTAL_CAPACITY);
+    const basePercent = Math.max(0, Math.min(100, FAKE_PERCENT_CLAIMED));
+    const baseClaimed = Math.round((basePercent / 100) * total);
+
+    // Apply live drift, but cap at LIVE_TICK_HARD_CAP_PERCENT of total
+    const hardCapClaimed = Math.floor((LIVE_TICK_HARD_CAP_PERCENT / 100) * total);
+    const claimed = Math.min(baseClaimed + liveDriftClaimed, hardCapClaimed);
+    const left = Math.max(0, total - claimed);
+    const percent = Math.min(100, Math.round((claimed / total) * 100));
+
+    const bigEl = document.getElementById('spotsLeftBig');
+    const claimedEl = document.getElementById('spotsClaimed');
+    const totalEl = document.getElementById('spotsTotal');
     const percentEl = document.getElementById('spotsPercent');
     const fillEl = document.getElementById('spotsBarFill');
+
+    if (bigEl) bigEl.textContent = left.toLocaleString('en-IN');
+    if (claimedEl) claimedEl.textContent = claimed;
+    if (totalEl) totalEl.textContent = total;
     if (percentEl) percentEl.textContent = percent + '%';
     if (fillEl) fillEl.style.width = percent + '%';
+  }
+
+  function startLiveTick() {
+    setInterval(() => {
+      // +1 ticket each tick — claimed creeps up, bar follows
+      liveDriftClaimed += 1;
+      renderDemandBar();
+    }, LIVE_TICK_INTERVAL_MS);
   }
 
   // Render initial defaults so the page never looks empty
   renderHeroFromConfig();
   renderDemandBar();
+  startLiveTick();
 
   // ── Bootstrap ──
   fetchTiers().then(() => {
