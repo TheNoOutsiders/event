@@ -3280,7 +3280,7 @@
     // Default tier definitions (fallback if sheet is unreachable)
     // Only one tier active. Other definitions removed in the tier-cut surgery.
     const DEFAULT_TIERS = {
-      regular: { id: 'regular', name: 'REGULAR', price: 800, type: 'standard', lockedSize: null, maxSize: 5 }
+      regular: { id: 'regular', name: 'REGULAR', price: 800, type: 'standard', lockedSize: null, maxSize: 10 }
     };
     let TIER_LIBRARY = JSON.parse(JSON.stringify(DEFAULT_TIERS));
 
@@ -3317,7 +3317,7 @@
         result.lockedTickets = 1;
       } else {
         // Regular / VIP — size from URL (since the field is now on index.html)
-        const max = Number(def.maxSize) || 5;
+        const max = Number(def.maxSize) || 10;
         const size = Number.isFinite(sizeRaw) && sizeRaw >= 1 && sizeRaw <= max ? sizeRaw : 1;
         result.size = size;
         result.perPerson = def.price;
@@ -3493,7 +3493,10 @@
           name: String(t.name || id.toUpperCase()).trim(),
           price: Number(t.price) || 0,
           type: isSquad ? 'squad' : 'standard',
-          lockedSize: id === 'couple' ? 2 : null
+          lockedSize: id === 'couple' ? 2 : null,
+          // Read maxSize for ALL tiers — Regular/VIP need it for the stepper limit
+          // (couple ignores it because it's locked to 2; squad has its own range below)
+          maxSize: Number(t.maxSize) || (isSquad ? 10 : 10)
         };
         if (isSquad) {
           tier.minSize = Number(t.minSize) || 5;
