@@ -3466,15 +3466,14 @@
     }
 
     // ── Apply locked-tickets behaviour to the form's tickets field ──
+    // The tickets input is hidden — its value just rides the URL ?size= param
+    // via SELECTED_TIER.lockedTickets. We don't need a .field wrapper for that.
     function applyTierToTicketsField() {
-      const ticketsField = ticketsInput ? ticketsInput.closest('.field') : null;
-      if (!ticketsField || !ticketsInput) return;
-
+      if (!ticketsInput) return;
       if (SELECTED_TIER && SELECTED_TIER.lockedTickets !== null) {
         ticketsInput.value = String(SELECTED_TIER.lockedTickets);
-        ticketsField.classList.add('tickets-locked');
       } else {
-        ticketsField.classList.remove('tickets-locked');
+        ticketsInput.value = '1';
       }
     }
 
