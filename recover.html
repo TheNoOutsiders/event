@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>TNO — QR Recovery</title>
+<link rel="icon" type="image/png" href="logo.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<style>
+  :root {
+    --bg: #060608;
+    --gold: #d4af37;
+    --gold-bright: #f4cf57;
+    --gold-line: rgba(212, 175, 55, 0.4);
+    --text-1: rgba(255, 245, 230, 0.95);
+    --text-2: rgba(220, 200, 255, 0.7);
+    --text-3: rgba(220, 200, 255, 0.45);
+    --violet-glow: rgba(176, 112, 255, 0.18);
+    --border: rgba(212, 175, 55, 0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-height: 100%;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(55, 20, 110, 0.22), transparent 32%),
+      radial-gradient(circle at 80% 15%, rgba(55, 20, 110, 0.2), transparent 30%),
+      linear-gradient(135deg, #08000c 0%, #0e000e 55%, #1a001a 80%, #280028 100%);
+    color: var(--text-1);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+  body {
+    padding: 28px 16px 48px;
+    min-height: 100vh;
+  }
+
+  .shell {
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .head {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .head-kicker {
+    font-size: 10px;
+    letter-spacing: 5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .head-title {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 32px;
+    letter-spacing: 4px;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 0 18px rgba(212, 175, 55, 0.2);
+  }
+  .head-sub {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-3);
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  /* Card */
+  .card {
+    background: rgba(15, 5, 25, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px 22px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.55), transparent);
+  }
+
+  /* Search form */
+  .field-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .field-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(8, 0, 16, 0.55);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 10px;
+    color: var(--text-1);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    outline: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .field-input:focus {
+    border-color: var(--gold);
+    background: rgba(20, 5, 35, 0.8);
+  }
+  .field-input::placeholder {
+    color: var(--text-3);
+    letter-spacing: 1px;
+  }
+  .field-hint {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text-3);
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+  .submit-btn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    background: linear-gradient(135deg, #3b2406, #6b4410, #3b2406);
+    border: 1px solid rgba(212, 175, 55, 0.6);
+    color: var(--gold);
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 14px;
+    letter-spacing: 4px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  }
+  .submit-btn:hover:not(:disabled) {
+    box-shadow: 0 0 22px rgba(212, 175, 55, 0.3);
+  }
+  .submit-btn:active:not(:disabled) { transform: translateY(1px); }
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  /* Status messages */
+  .status {
+    margin-top: 14px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-align: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    display: none;
+  }
+  .status.error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+    display: block;
+  }
+  .status.warning {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #fcd34d;
+    display: block;
+  }
+
+  /* ── Ticket stub (matches the one customers see) ── */
+  .ticket-result {
+    display: none;
+    margin-top: 26px;
+  }
+  .ticket-result.visible { display: block; }
+
+  .ticket-stub {
+    background: linear-gradient(135deg, #0a0014, #1a0028);
+    border: 1px solid var(--gold-line);
+    border-radius: 16px;
+    padding: 22px 20px;
+    color: var(--text-1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+  }
+  .ticket-stub::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.7), transparent);
+  }
+
+  .stub-tier {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 14px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .stub-code {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .stub-code-pill {
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px dashed var(--gold-line);
+    border-radius: 999px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2.5px;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .stub-qr-wrap {
+    background: #fff;
+    padding: 14px;
+    border-radius: 12px;
+    width: 168px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stub-qr-wrap canvas { display: block; }
+
+  .stub-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-line), transparent);
+    margin: 14px 0;
+  }
+
+  .stub-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .stub-count {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--text-2);
+    text-align: center;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .stub-meta {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--text-2);
+    text-align: center;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .stub-meta-sep {
+    color: var(--gold);
+    margin: 0 8px;
+  }
+  .stub-venue {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-3);
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  /* Verified status badge */
+  .stub-status {
+    text-align: center;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(212, 175, 55, 0.18);
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .status-badge.pending {
+    background: rgba(245, 158, 11, 0.12);
+    color: #fcd34d;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+  }
+  .status-badge.verified {
+    background: rgba(34, 197, 94, 0.12);
+    color: #86efac;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+  }
+  .status-badge.checkedin {
+    background: rgba(176, 112, 255, 0.15);
+    color: #c890ec;
+    border: 1px solid rgba(176, 112, 255, 0.4);
+  }
+
+  /* Action buttons under the ticket */
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .action-btn {
+    flex: 1;
+    padding: 11px 12px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    color: var(--gold);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .action-btn:hover {
+    background: rgba(212, 175, 55, 0.18);
+  }
+
+  /* Footer */
+  .foot {
+    text-align: center;
+    margin-top: 26px;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(212, 175, 55, 0.25);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Tiny detail rows shown above the ticket for admin verification */
+  .verify-rows {
+    background: rgba(8, 0, 16, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+  .verify-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 3px 0;
+  }
+  .verify-row + .verify-row { border-top: 1px dashed rgba(255,255,255,0.05); margin-top: 3px; padding-top: 6px; }
+  .verify-key {
+    color: var(--text-3);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .verify-val {
+    color: var(--text-1);
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="head">
+    <div class="head-kicker">The No Outsiders</div>
+    <div class="head-title">QR RECOVERY</div>
+    <div class="head-sub">Re-issue tickets · Internal tool</div>
+  </div>
+
+  <div class="card">
+    <div class="field-label">Search</div>
+    <input
+      type="text"
+      id="searchInput"
+      class="field-input"
+      placeholder="Phone, email, or TNO code"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <div class="field-hint">Phone is fastest match · email also works · TNO-XXXX as fallback</div>
+
+    <button type="button" class="submit-btn" id="searchBtn">LOOKUP ↘</button>
+
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+  <!-- Ticket result -->
+  <div class="ticket-result" id="ticketResult">
+
+    <div class="verify-rows" id="verifyRows">
+      <!-- Filled by JS — admin verification details -->
+    </div>
+
+    <div class="ticket-stub">
+      <div class="stub-tier" id="stubTier">TICKET</div>
+      <div class="stub-code"><span class="stub-code-pill" id="stubCode">—</span></div>
+      <div class="stub-qr-wrap"><canvas id="stubQr"></canvas></div>
+      <div class="stub-divider"></div>
+      <div class="stub-name" id="stubName">—</div>
+      <div class="stub-count" id="stubCount">—</div>
+      <div class="stub-meta">
+        <span id="stubDate">—</span>
+        <span class="stub-meta-sep">·</span>
+        <span id="stubDoors">Doors —</span>
+      </div>
+      <div class="stub-venue" id="stubVenue">—</div>
+
+      <div class="stub-status">
+        <span class="status-badge pending" id="stubStatus">PENDING VERIFICATION</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="action-btn" id="copyCodeBtn">Copy code</button>
+      <button type="button" class="action-btn" id="newSearchBtn">New search</button>
+    </div>
+
+  </div>
+
+  <div class="foot">Private · Admin Use Only</div>
+
+</div>
+
+<script>
+  // ════════════════════════════════════════════════════════════════════════
+  // QR RECOVERY — looks up a registration in the sheet by phone/email/code
+  // and re-renders the exact ticket card they would have seen on submit.
+  // ════════════════════════════════════════════════════════════════════════
+  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2WEysuk9c1mrHS_kQsWq706XZqhMg3ChwgyTr8-S9x3sOqDuuMMwioQpeq78719sk/exec';
+
+  // Event display config — same values main.html uses for the ticket stub
+  var EVENT_DISPLAY = {
+    venue: 'Aloki Glass House',
+    doorsOpen: '07:45 PM',
+    eventDate: new Date('2026-06-14T19:30:00')
+  };
+
+  var searchInput = document.getElementById('searchInput');
+  var searchBtn = document.getElementById('searchBtn');
+  var statusMsg = document.getElementById('statusMsg');
+  var ticketResult = document.getElementById('ticketResult');
+  var verifyRows = document.getElementById('verifyRows');
+
+  var stubTier = document.getElementById('stubTier');
+  var stubCode = document.getElementById('stubCode');
+  var stubName = document.getElementById('stubName');
+  var stubCount = document.getElementById('stubCount');
+  var stubDate = document.getElementById('stubDate');
+  var stubDoors = document.getElementById('stubDoors');
+  var stubVenue = document.getElementById('stubVenue');
+  var stubStatus = document.getElementById('stubStatus');
+
+  var stubQrInstance = null;
+
+  function showStatus(text, kind) {
+    statusMsg.className = 'status ' + (kind || '');
+    statusMsg.textContent = text;
+  }
+
+  function hideStatus() {
+    statusMsg.className = 'status';
+    statusMsg.textContent = '';
+  }
+
+  function setLoading(loading) {
+    searchBtn.disabled = !!loading;
+    if (loading) {
+      searchBtn.innerHTML = '<span class="spinner"></span>LOOKING UP…';
+    } else {
+      searchBtn.textContent = 'LOOKUP ↘';
+    }
+  }
+
+  function renderTicket(reg) {
+    // Tier badge text — mirrors main.html showTicket logic
+    var tier = String(reg.tier || '').toLowerCase();
+    var tickets = Number(reg.tickets) || 1;
+    var tierBadgeText;
+    var countLine;
+    if (tier === 'squad') {
+      tierBadgeText = 'SQUAD TICKET';
+      countLine = tickets + ' people';
+    } else if (tier === 'couple') {
+      tierBadgeText = 'COUPLE TICKET';
+      countLine = '2 people';
+    } else if (tier === 'regular') {
+      tierBadgeText = 'REGULAR TICKET';
+      countLine = tickets + (tickets === 1 ? ' person' : ' people');
+    } else if (tier) {
+      tierBadgeText = tier.toUpperCase() + ' TICKET';
+      countLine = tickets + (tickets === 1 ? ' person' : ' people');
+    } else {
+      tierBadgeText = 'GENERAL TICKET';
+      countLine = tickets + (tickets === 1 ? ' person' : ' people');
+    }
+
+    stubTier.textContent = tierBadgeText;
+    stubCode.textContent = reg.ticketCode;
+    stubName.textContent = reg.name || '—';
+    stubCount.textContent = countLine;
+    stubVenue.textContent = EVENT_DISPLAY.venue;
+
+    // Date label
+    var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    var d = EVENT_DISPLAY.eventDate;
+    stubDate.textContent = months[d.getMonth()] + ' ' + d.getDate() + ' · ' + d.getFullYear();
+    stubDoors.textContent = 'Doors ' + EVENT_DISPLAY.doorsOpen;
+
+    // Status badge
+    var verified = String(reg.verified || '').toUpperCase();
+    if (verified === 'CHECKED_IN') {
+      stubStatus.className = 'status-badge checkedin';
+      stubStatus.textContent = '✓ CHECKED IN';
+    } else if (verified === 'YES') {
+      stubStatus.className = 'status-badge verified';
+      stubStatus.textContent = '✓ VERIFIED';
+    } else {
+      stubStatus.className = 'status-badge pending';
+      stubStatus.textContent = 'PENDING VERIFICATION';
+    }
+
+    // QR payload — IDENTICAL schema to what main.html generates
+    // so the scanner accepts this re-issued QR exactly the same.
+    var qrPayload = JSON.stringify({
+      ticketCode: reg.ticketCode,
+      name: reg.name,
+      phone: reg.phone,
+      email: reg.email,
+      tickets: tickets,
+      tier: reg.tier || '',
+      squadSize: '',
+      amount: '',
+      venue: EVENT_DISPLAY.venue,
+      doorsOpen: EVENT_DISPLAY.doorsOpen
+    });
+
+    if (stubQrInstance) {
+      stubQrInstance.set({ value: qrPayload, size: 140 });
+    } else {
+      stubQrInstance = new QRious({
+        element: document.getElementById('stubQr'),
+        value: qrPayload,
+        size: 140,
+        background: 'white',
+        foreground: 'black'
+      });
+    }
+
+    // Verify rows — admin-only context (so I know I'm sending it to the right person)
+    verifyRows.innerHTML =
+      '<div class="verify-row"><span class="verify-key">Phone</span><span class="verify-val">' + escapeHtml(reg.phone || '—') + '</span></div>' +
+      '<div class="verify-row"><span class="verify-key">Email</span><span class="verify-val">' + escapeHtml(reg.email || '—') + '</span></div>' +
+      '<div class="verify-row"><span class="verify-key">Tickets</span><span class="verify-val">' + tickets + '</span></div>' +
+      '<div class="verify-row"><span class="verify-key">TRX ID</span><span class="verify-val">' + escapeHtml(reg.trxID || '—') + '</span></div>';
+
+    ticketResult.classList.add('visible');
+  }
+
+  function hideTicket() {
+    ticketResult.classList.remove('visible');
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function doLookup() {
+    var q = searchInput.value.trim();
+    if (!q) {
+      showStatus('Enter a phone, email, or TNO code', 'warning');
+      return;
+    }
+    hideStatus();
+    hideTicket();
+    setLoading(true);
+
+    // GET via fetch first, JSONP fallback if it fails
+    fetch(APPS_SCRIPT_URL + '?action=lookupRegistration&q=' + encodeURIComponent(q), { redirect: 'follow' })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        handleLookupResponse(data);
+      })
+      .catch(function () {
+        // JSONP fallback (handles strict redirect/CORS edge cases on Google scripts)
+        var cb = 'tnoRecoverCb_' + Date.now();
+        window[cb] = function (data) {
+          delete window[cb];
+          handleLookupResponse(data);
+        };
+        var s = document.createElement('script');
+        s.src = APPS_SCRIPT_URL + '?action=lookupRegistration&q=' + encodeURIComponent(q) + '&callback=' + cb;
+        s.onerror = function () {
+          setLoading(false);
+          showStatus("Couldn't reach the server. Check your connection.", 'error');
+        };
+        document.head.appendChild(s);
+      });
+  }
+
+  function handleLookupResponse(data) {
+    setLoading(false);
+    if (!data || typeof data !== 'object') {
+      showStatus('Unexpected response from server.', 'error');
+      return;
+    }
+    if (data.status === 'ok' && data.registration) {
+      renderTicket(data.registration);
+    } else if (data.status === 'not_found') {
+      showStatus('No registration found for that phone/email/code.', 'warning');
+    } else if (data.status === 'missing_query') {
+      showStatus('Please enter a search value.', 'warning');
+    } else {
+      showStatus('Lookup failed: ' + (data.status || 'unknown error'), 'error');
+    }
+  }
+
+  searchBtn.addEventListener('click', doLookup);
+  searchInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') doLookup();
+  });
+
+  // Copy ticket code
+  document.getElementById('copyCodeBtn').addEventListener('click', function () {
+    var code = stubCode.textContent || '';
+    if (!code || code === '—') return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      var btn = this;
+      navigator.clipboard.writeText(code).then(function () {
+        btn.textContent = '✓ Copied!';
+        setTimeout(function () { btn.textContent = 'Copy code'; }, 1500);
+      });
+    }
+  });
+
+  // Reset for next lookup
+  document.getElementById('newSearchBtn').addEventListener('click', function () {
+    hideTicket();
+    hideStatus();
+    searchInput.value = '';
+    searchInput.focus();
+  });
+
+  // Auto-focus on load for fast workflow
+  setTimeout(function () { searchInput.focus(); }, 100);
+</script>
+
+</body>
+</html>
