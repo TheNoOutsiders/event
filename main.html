@@ -2717,6 +2717,19 @@
           <div id="squadShareLink" style="font-family:'Inter',sans-serif; font-size:10px; letter-spacing:0.3px; color:#fff; background:rgba(8,0,16,0.6); border:1px dashed rgba(212,175,55,0.5); border-radius:8px; padding:8px 10px; word-break:break-all; margin-bottom:8px;">—</div>
           <button type="button" id="squadCopyBtn" style="width:100%; min-height:42px; border-radius:10px; border:1px solid rgba(212,175,55,0.6); background:linear-gradient(135deg,#3b2406,#6b4410,#3b2406); color:#d4af37; font-family:'Bebas Neue',Impact,sans-serif; font-size:15px; letter-spacing:2px; cursor:pointer;">COPY SQUAD LINK</button>
         </div>
+
+        <!-- ── Prebooker: referral share block (shown only if this registration happened during the prebook window) ── -->
+        <div id="referralShareBlock" style="display:none;">
+          <div class="ticket-stub-divider"></div>
+          <div style="font-family:'Inter',sans-serif; font-size:10px; letter-spacing:2px; color:rgba(212,175,55,0.85); text-transform:uppercase; font-weight:700; margin-bottom:8px;">
+            Your Referral Code
+          </div>
+          <div style="font-family:'Inter',sans-serif; font-size:11px; color:rgba(220,200,255,0.6); line-height:1.5; margin-bottom:10px;">
+            Share this with up to 3 friends — they get a discount when they register:
+          </div>
+          <div id="referralCodeDisplay" style="font-family:'Inter',sans-serif; font-size:14px; letter-spacing:1px; font-weight:700; color:#fff; background:rgba(8,0,16,0.6); border:1px dashed rgba(212,175,55,0.5); border-radius:8px; padding:8px 10px; word-break:break-all; margin-bottom:8px; text-align:center;">—</div>
+          <button type="button" id="referralCopyBtn" style="width:100%; min-height:42px; border-radius:10px; border:1px solid rgba(212,175,55,0.6); background:linear-gradient(135deg,#3b2406,#6b4410,#3b2406); color:#d4af37; font-family:'Bebas Neue',Impact,sans-serif; font-size:15px; letter-spacing:2px; cursor:pointer;">COPY REFERRAL CODE</button>
+        </div>
       </div>
 
       <!-- Hidden — kept so any other JS referencing these IDs still works -->
@@ -2903,6 +2916,14 @@
             </div>
           </div>
 
+          <div class="field" id="referralField">
+            <label for="referralCode">Have a referral code? <span style="opacity:0.6; font-weight:400;">(optional)</span></label>
+            <div class="input-shell">
+              <input type="text" id="referralCode" placeholder="e.g. REF-A1B2" autocomplete="off" style="text-transform:uppercase;" />
+            </div>
+            <div id="referralFeedback" style="font-family:'Inter',sans-serif; font-size:12px; margin-top:6px; display:none;"></div>
+          </div>
+
           <div class="spacer-8"></div>
 
           <!-- Hidden tickets field — count comes from URL ?size= via SELECTED_TIER -->
@@ -2971,6 +2992,7 @@
           <div class="tier-panel-total" id="tpTotal">৳1,800</div>
           <div class="tier-panel-total-label" id="tpTotalLabel">TOTAL TO PAY</div>
           <div class="tier-panel-perperson" id="tpPerPerson">৳1,800 per person</div>
+          <div id="tpReferralNote" style="display:none; font-family:'Inter',sans-serif; font-size:11px; letter-spacing:1px; color:#7CFFB2; margin-top:6px;"></div>
         </div>
 
         <div class="tier-panel-section">
@@ -3134,7 +3156,10 @@
       doorsOpen: '07:45 PM',
       venue: 'bruncha cafe',
       location: 'Level 4, Khan ABC Tradeplex, House 37, Road 2, Dhanmondi, Dhaka, Bangladesh',
-      eventDate: new Date('2026-04-29T19:30:00')
+      eventDate: new Date('2026-04-29T19:30:00'),
+      prebookOpen: false,
+      prebookEndsAt: null,
+      referralDiscount: 0
     };
 
     // Track sync status for the admin debug pill
@@ -3228,7 +3253,29 @@
         if (!isNaN(d)) EVENT_CONFIG.eventDate = d;
       }
 
+      // ── Prebook / referral config ──
+      // prebookOpen: your manual on/off switch. prebookEndsAt: optional
+      // scheduled cutoff — if set and already passed, prebooking is closed
+      // even if you forgot to flip prebookOpen back to NO.
+      EVENT_CONFIG.prebookOpen = String(data.prebookOpen || '').trim().toUpperCase() === 'YES';
+      if (data.prebookEndsAt) {
+        const pd = new Date(data.prebookEndsAt);
+        if (!isNaN(pd)) EVENT_CONFIG.prebookEndsAt = pd;
+      }
+      const refDiscount = Number(data.referralDiscount);
+      EVENT_CONFIG.referralDiscount = Number.isFinite(refDiscount) ? refDiscount : 0;
+
       console.log('[Config] Applied:', EVENT_CONFIG);
+    }
+
+    // Is prebooking open RIGHT NOW? Manual switch AND (no scheduled end,
+    // or that end hasn't passed yet).
+    function isPrebookOpen() {
+      if (!EVENT_CONFIG.prebookOpen) return false;
+      if (EVENT_CONFIG.prebookEndsAt instanceof Date && !isNaN(EVENT_CONFIG.prebookEndsAt)) {
+        return new Date() < EVENT_CONFIG.prebookEndsAt;
+      }
+      return true;
     }
 
     // ── Fetch config — primary path is fetch(), JSONP is the CORS fallback ──
@@ -3286,6 +3333,17 @@
 
     // Will hold the user's chosen tier + size after URL parsing
     var SELECTED_TIER = null;
+
+    // ── Referral state ──
+    // REFERRAL_DISCOUNT_APPLIED is only non-zero once a code has been
+    // live-validated against the backend (never trust the raw input value).
+    var REFERRAL_DISCOUNT_APPLIED = 0;
+    var REFERRAL_CODE_VALIDATED = ''; // the exact code string that passed validation
+
+    function getFinalTotal() {
+      if (!SELECTED_TIER) return 0;
+      return Math.max(0, SELECTED_TIER.total - REFERRAL_DISCOUNT_APPLIED);
+    }
 
     // ── Read ?tier= and ?size= from the URL ──
     function readTierFromUrl() {
@@ -3361,7 +3419,7 @@
       }
 
       document.getElementById('tierBannerLine').textContent = lineText;
-      document.getElementById('tierBannerTotal').textContent = formatBdt(SELECTED_TIER.total);
+      document.getElementById('tierBannerTotal').textContent = formatBdt(getFinalTotal());
 
       // Also update the side tier panel
       renderTierPanel();
@@ -3395,9 +3453,19 @@
       const subEl = document.getElementById('tpSub');
       if (subEl) subEl.textContent = subText;
 
-      // Total
+      // Total (reflects any validated referral discount)
       const totalEl = document.getElementById('tpTotal');
-      if (totalEl) totalEl.textContent = formatBdt(SELECTED_TIER.total);
+      if (totalEl) totalEl.textContent = formatBdt(getFinalTotal());
+
+      const referralNoteEl = document.getElementById('tpReferralNote');
+      if (referralNoteEl) {
+        if (REFERRAL_DISCOUNT_APPLIED > 0) {
+          referralNoteEl.textContent = '✓ ' + formatBdt(REFERRAL_DISCOUNT_APPLIED) + ' OFF WITH REFERRAL';
+          referralNoteEl.style.display = 'block';
+        } else {
+          referralNoteEl.style.display = 'none';
+        }
+      }
 
       // Per-person line
       const perPersonEl = document.getElementById('tpPerPerson');
@@ -4073,6 +4141,44 @@
         }
       }
 
+      // ── Prebooker: show their own referral code to share ──
+      const referralShareBlock = document.getElementById('referralShareBlock');
+      if (referralShareBlock) {
+        if (entry.isPrebook === 'YES' && entry.myReferralCode) {
+          const codeEl = document.getElementById('referralCodeDisplay');
+          const copyBtn = document.getElementById('referralCopyBtn');
+          if (codeEl) codeEl.textContent = entry.myReferralCode;
+          if (copyBtn) {
+            copyBtn.onclick = function () {
+              const done = function () {
+                copyBtn.textContent = '✓ COPIED!';
+                setTimeout(function () { copyBtn.textContent = 'COPY REFERRAL CODE'; }, 2000);
+              };
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(entry.myReferralCode).then(done).catch(function () {
+                  const ta = document.createElement('textarea');
+                  ta.value = entry.myReferralCode;
+                  document.body.appendChild(ta);
+                  ta.select();
+                  try { document.execCommand('copy'); done(); } catch (_) {}
+                  document.body.removeChild(ta);
+                });
+              } else {
+                const ta = document.createElement('textarea');
+                ta.value = entry.myReferralCode;
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); done(); } catch (_) {}
+                document.body.removeChild(ta);
+              }
+            };
+          }
+          referralShareBlock.style.display = 'block';
+        } else {
+          referralShareBlock.style.display = 'none';
+        }
+      }
+
       // Show loading overlay before opening modal (#10)
       const qrLoading = document.getElementById('qrLoading');
       qrLoading.classList.remove('hidden');
@@ -4443,6 +4549,67 @@
       });
     })();
 
+    // ── REFERRAL CODE — live validation, debounced ──────────────────────
+    // Friends can enter a prebooker's code any time (even after prebooking
+    // closes — only the prebook WINDOW is time-limited, not the codes it
+    // issued). We never trust the raw text; only a successful backend check
+    // sets REFERRAL_DISCOUNT_APPLIED, which is what actually changes price.
+    (function wireReferralCode() {
+      const input = document.getElementById('referralCode');
+      const feedback = document.getElementById('referralFeedback');
+      if (!input || !feedback) return;
+
+      let debounceTimer = null;
+
+      function clearDiscount() {
+        REFERRAL_DISCOUNT_APPLIED = 0;
+        REFERRAL_CODE_VALIDATED = '';
+        renderTierBanner();
+      }
+
+      function showFeedback(text, ok) {
+        feedback.textContent = text;
+        feedback.style.color = ok ? '#7CFFB2' : '#f87171';
+        feedback.style.display = 'block';
+      }
+
+      input.addEventListener('input', () => {
+        const raw = input.value.trim().toUpperCase();
+        clearTimeout(debounceTimer);
+
+        if (!raw) {
+          feedback.style.display = 'none';
+          clearDiscount();
+          return;
+        }
+
+        showFeedback('Checking code…', true);
+        debounceTimer = setTimeout(async () => {
+          try {
+            const res = await fetch(
+              APPS_SCRIPT_URL + '?action=validateReferral&code=' + encodeURIComponent(raw)
+            ).then(r => r.json());
+
+            if (res.status === 'valid') {
+              REFERRAL_DISCOUNT_APPLIED = Number(res.discount) || 0;
+              REFERRAL_CODE_VALIDATED = raw;
+              showFeedback('✓ Code applied — ' + formatBdt(REFERRAL_DISCOUNT_APPLIED) + ' off', true);
+            } else if (res.status === 'maxed') {
+              clearDiscount();
+              showFeedback('✖ This code has already been used by 3 friends', false);
+            } else {
+              clearDiscount();
+              showFeedback('✖ Code not recognized', false);
+            }
+          } catch (_) {
+            clearDiscount();
+            showFeedback('✖ Could not check code — try again', false);
+          }
+          renderTierBanner();
+        }, 500);
+      });
+    })();
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -4478,13 +4645,30 @@
         tier: SELECTED_TIER ? SELECTED_TIER.id : '',
         tierName: SELECTED_TIER ? SELECTED_TIER.name : '',
         squadSize: (SELECTED_TIER && SELECTED_TIER.type === 'squad') ? SELECTED_TIER.size : '',
-        amount: SELECTED_TIER ? SELECTED_TIER.total : '',
+        amount: getFinalTotal(),
         submittedAt: new Date().toISOString(),
         ticketCode: buildTicketCode(),
         verified: 'NO',
         validatedAt: '',
         accessCode: window.__ACCESS_CODE__ || ''  // burned by backend on success
       };
+
+      // ── Referral: the code a FRIEND entered (only counts if it actually
+      // passed live validation — a stale/edited input never reaches here) ──
+      const referralInputNow = document.getElementById('referralCode');
+      const referralRawNow = referralInputNow ? referralInputNow.value.trim().toUpperCase() : '';
+      payload.referralCodeUsed = (referralRawNow && referralRawNow === REFERRAL_CODE_VALIDATED)
+        ? REFERRAL_CODE_VALIDATED : '';
+
+      // ── Referral: THIS registrant's own shareable code — only issued
+      // while prebooking is open. Same generation pattern as squadCode. ──
+      payload.isPrebook = isPrebookOpen() ? 'YES' : 'NO';
+      if (isPrebookOpen()) {
+        const refRand = Math.random().toString(36).slice(2, 6).toUpperCase();
+        payload.myReferralCode = 'REF-' + refRand;
+      } else {
+        payload.myReferralCode = '';
+      }
 
       // ── Squad leader: generate a shareable squad code ──
       // Only squad-tier bookings get a code; everyone else leaves M/N blank.
