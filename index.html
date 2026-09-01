@@ -551,6 +551,14 @@
     text-transform: uppercase;
   }
 
+  /* ── Pricing hidden site-wide: money is handled over DM, not shown here ── */
+  .tier-price,
+  .tier-price-label,
+  .squad-price-row,
+  .price-row {
+    display: none !important;
+  }
+
   .tier-perks {
     list-style: none;
     padding: 0;
@@ -2339,11 +2347,11 @@
         <span class="confirm-label">People</span>
         <span class="confirm-value" id="confirmPeople">1</span>
       </div>
-      <div class="confirm-row">
+      <div class="confirm-row price-row">
         <span class="confirm-label">Per person</span>
         <span class="confirm-value" id="confirmPerPerson">৳1,800</span>
       </div>
-      <div class="confirm-row confirm-total-row">
+      <div class="confirm-row confirm-total-row price-row">
         <span class="confirm-label">Total</span>
         <span class="confirm-total" id="confirmTotal">৳1,800</span>
       </div>
