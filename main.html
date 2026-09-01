@@ -1829,6 +1829,12 @@
       -webkit-text-fill-color: transparent;
     }
 
+    /* ── Pricing hidden site-wide: money is handled over DM, not shown here ── */
+    .tier-banner-total,
+    .tier-panel-price-block {
+      display: none !important;
+    }
+
     /* ── No-tier hint (fallback when user lands on main.html directly) ── */
     .no-tier-hint {
       margin-bottom: 18px;
@@ -2741,7 +2747,7 @@
         <span class="event-strip-meta-divider">·</span>
         <span class="event-strip-meta-item" id="eventStripDoors">7:45 PM</span>
         <span class="event-strip-meta-divider">·</span>
-        <span class="event-strip-meta-item" id="venueDisplay">Phoenix Convention Hall</span>
+        <span class="event-strip-meta-item" id="venueDisplay">Phoenix Convention Center</span>
       </div>
     </div>
     <a href="index.html" class="event-strip-change">Change tier ↗</a>
@@ -3132,8 +3138,8 @@
       spotsText: 'Only 150 priority spots remaining tonight',
       maxTickets: 10,
       doorsOpen: '07:45 PM',
-      venue: 'Phoenix Convention Hall',
-      location: 'Phoenix Convention Hall, Tejgaon, Dhaka, Bangladesh',
+      venue: 'Phoenix Convention Center',
+      location: 'Phoenix Convention Center, 408 Tejgaon I/A, Dhaka 1206, Bangladesh',
       eventDate: new Date('2026-10-08T19:30:00')
     };
 
@@ -3350,14 +3356,13 @@
 
       let lineText;
       if (SELECTED_TIER.type === 'squad') {
-        lineText = formatBdt(SELECTED_TIER.perPerson) + ' × ' + SELECTED_TIER.size + ' people';
+        lineText = SELECTED_TIER.size + ' people';
       } else if (SELECTED_TIER.id === 'couple') {
-        lineText = formatBdt(SELECTED_TIER.perPerson) + ' for 2 people';
+        lineText = '2 people';
       } else {
         // Regular / VIP — count from URL
         const count = SELECTED_TIER.size;
-        lineText = formatBdt(SELECTED_TIER.perPerson) + ' × ' + count +
-                   (count === 1 ? ' person' : ' people');
+        lineText = count + (count === 1 ? ' person' : ' people');
       }
 
       document.getElementById('tierBannerLine').textContent = lineText;
@@ -4294,7 +4299,7 @@
             showSquadState({
               icon: '✓',
               title: "You're In!",
-              sub: 'Welcome to ' + (data.leaderName || 'the') + "'s squad. See you on October 8 at Phoenix Convention Hall.",
+              sub: 'Welcome to ' + (data.leaderName || 'the') + "'s squad. See you on October 8 at Phoenix Convention Center.",
               joined: data.joinedCount,
               size: data.squadSize
             });
