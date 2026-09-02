@@ -3628,17 +3628,14 @@
 
   // ════════════════════════════════════════════════════════════════════════
   // HERO VIDEO BACKGROUND
-  // Picks 1 of 3 videos at random on each page load.
+  // Single fixed background video.
   // Browsers allow muted autoplay, so no user gesture is needed.
   // ════════════════════════════════════════════════════════════════════════
   (function () {
     const video = document.getElementById('heroVideo');
     if (!video) return;
 
-    const VIDEOS = ['video_1.mp4', 'video_2.mp4', 'video_3.mp4'];
-    const pick = VIDEOS[Math.floor(Math.random() * VIDEOS.length)];
-
-    video.src = pick;
+    video.src = 'video_1.mp4';
 
     // Fade in once the video has enough data to play smoothly
     video.addEventListener('loadeddata', function () {
