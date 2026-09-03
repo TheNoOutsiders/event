@@ -2403,7 +2403,7 @@
       <div class="hero-meta-divider"></div>
       <div class="hero-meta-item">
         <div class="hero-meta-label">Door Closes</div>
-        <div class="hero-meta-value" id="heroDoors">7:45 PM</div>
+        <div class="hero-meta-value" id="heroDoors">6:30 PM</div>
       </div>
       <div class="hero-meta-divider"></div>
       <div class="hero-meta-item">
@@ -3235,7 +3235,8 @@
   // ════════════════════════════════════════════════════════════════════════
   const EVENT_CONFIG = {
     eventDate: new Date('2026-06-10T19:45:00+06:00'),
-    doorsOpen: '7:45 PM',
+    doorsOpen: '5:30 PM',
+    doorsClose: '6:30 PM',
     venueName: 'Phoenix Convention Center',
     venueAddress: 'Dhaka, Bangladesh',
     mapUrl: 'https://maps.app.goo.gl/t6Uk6hjjPuvQa2U38',
@@ -3251,6 +3252,7 @@
       if (!isNaN(d)) EVENT_CONFIG.eventDate = d;
     }
     if (data.doorsOpen) EVENT_CONFIG.doorsOpen = String(data.doorsOpen).trim();
+    if (data.doorsClose) EVENT_CONFIG.doorsClose = String(data.doorsClose).trim();
     if (data.venue) EVENT_CONFIG.venueName = String(data.venue).trim();
     if (data.location) EVENT_CONFIG.venueAddress = String(data.location).trim();
 
@@ -3307,9 +3309,9 @@
       dateEl.textContent = months[d.getMonth()] + ' ' + d.getDate() + ' · ' + d.getFullYear();
     }
 
-    // Doors
+    // Doors (this box shows the CLOSE time per its "Door Closes" label)
     const doorsEl = document.getElementById('heroDoors');
-    if (doorsEl) doorsEl.textContent = EVENT_CONFIG.doorsOpen;
+    if (doorsEl) doorsEl.textContent = EVENT_CONFIG.doorsClose;
 
     // Venue (hero meta)
     const venueEl = document.getElementById('heroVenue');
