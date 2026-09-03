@@ -2990,7 +2990,7 @@
           <div class="tier-panel-section-label">✦ After you book</div>
           <ul class="tier-panel-perks">
             <li><span class="tp-perk-icon">◆</span>Instant confirmation with QR ticket</li>
-            <li><span class="tp-perk-icon">◆</span>Doors open at <span id="tpDoors">7:45 PM</span> on event night</li>
+            <li><span class="tp-perk-icon">◆</span>Doors open at <span id="tpDoors">5:30 PM</span> and close at <span id="tpDoorsClose">6:30 PM</span></li>
             <li><span class="tp-perk-icon">◆</span>Bring valid ID matching your booking name</li>
             <li><span class="tp-perk-icon">◆</span>Show your QR at the door for entry</li>
           </ul>
@@ -3137,7 +3137,8 @@
       heroCopy: 'Get ready for a night of nonstop beats, electric vibes, and unforgettable energy. Join us for a rave party filled with neon lights, bass drops, and a dance floor that never sleeps.',
       spotsText: 'Only 150 priority spots remaining tonight',
       maxTickets: 10,
-      doorsOpen: '07:45 PM',
+      doorsOpen: '5:30 PM',
+      doorsClose: '6:30 PM',
       venue: 'Phoenix Convention Center',
       location: 'Phoenix Convention Center, 408 Tejgaon I/A, Dhaka 1206, Bangladesh',
       eventDate: new Date('2026-10-08T19:30:00')
@@ -3216,7 +3217,7 @@
       }
 
       // Strings — straight assignment if present and non-empty
-      ['brandName','heroTitle','heroCopy','spotsText','venue','location','doorsOpen'].forEach((k) => {
+      ['brandName','heroTitle','heroCopy','spotsText','venue','location','doorsOpen','doorsClose'].forEach((k) => {
         if (data[k] !== undefined && data[k] !== null && String(data[k]).trim() !== '') {
           EVENT_CONFIG[k] = String(data[k]).trim();
         }
@@ -3435,6 +3436,10 @@
       const doorsEl = document.getElementById('tpDoors');
       if (doorsEl && EVENT_CONFIG && EVENT_CONFIG.doorsOpen) {
         doorsEl.textContent = EVENT_CONFIG.doorsOpen;
+      }
+      const doorsCloseEl = document.getElementById('tpDoorsClose');
+      if (doorsCloseEl && EVENT_CONFIG && EVENT_CONFIG.doorsClose) {
+        doorsCloseEl.textContent = EVENT_CONFIG.doorsClose;
       }
     }
 
