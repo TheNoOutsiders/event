@@ -2004,6 +2004,24 @@
     border-radius: 22px;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    transform: translateY(-28px);
+  }
+  @media (max-height: 640px) {
+    .igate-card { transform: translateY(-12px); }
+  }
+
+  /* Crowd of silhouette figures walking along the bottom of the gate */
+  .igate-crowd {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 130px;
+    pointer-events: none;
+  }
+  @media (max-width: 600px) {
+    .igate-crowd { height: 90px; }
   }
   .igate-card::before {
     content: "";
@@ -2211,6 +2229,7 @@
      Persists via localStorage until the code is burned at registration. -->
 <div id="indexGate" role="dialog" aria-modal="true" aria-label="Enter access code">
   <div class="igate-ambience" aria-hidden="true"></div>
+  <canvas class="igate-crowd" id="igateCrowd" aria-hidden="true"></canvas>
   <div class="igate-card">
     <div class="igate-eyebrow">The No Outsiders · Presents</div>
     <div class="igate-title">THE NO OUTSIDERS</div>
@@ -2289,14 +2308,24 @@
     function unlock(code) {
       // Persist for the browser; main.html reads the same key
       try { localStorage.setItem(STORAGE_KEY, code); } catch (_) {}
-      // Remember this tab already verified the code live — skips the
-      // network check on any later visit to this page this session.
       try { sessionStorage.setItem(SESSION_KEY, code); } catch (_) {}
       // Stash on window so the existing main.html access-code payload picks it up
       window.__ACCESS_CODE__ = code;
       // Reveal the site
       document.body.classList.remove('locked');
       gateEl.classList.add('hidden');
+    }
+
+    function relock() {
+      // Only used if a background re-check finds the code was burned/invalid
+      // after we'd already optimistically unlocked with it.
+      try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      try { sessionStorage.removeItem(SESSION_KEY); } catch (_) {}
+      window.__ACCESS_CODE__ = null;
+      document.body.classList.add('locked');
+      gateEl.classList.remove('hidden');
+      setFeedback("That code isn't valid anymore. Enter a new one.");
+      inputEl.focus();
     }
 
     // Auto-unlock if we already have a stored code (validated last time)
@@ -2307,19 +2336,14 @@
     var urlParams = new URLSearchParams(window.location.search);
     var urlCode = (urlParams.get('access') || '').trim();
 
-    // Already verified live earlier this tab session — unlock immediately,
-    // no fetch, no waiting, no flash of the lock card.
-    var sessionOk = null;
-    try { sessionOk = sessionStorage.getItem(SESSION_KEY); } catch (_) {}
-
     function tryAutoUnlock(code) {
-      // Re-validate silently — if the code was burned since last visit, lock again.
+      // Used only for a brand-new ?access= link this tab hasn't seen before —
+      // blocking here is fine since there's nothing to optimistically trust yet.
       fetchGate(GATE_URL + '?action=validateAccess&code=' + encodeURIComponent(code))
         .then(function (data) {
           if (data && data.status === 'valid') {
             unlock(code);
           } else {
-            // Code burned or invalid — clear the stored copy and stay locked.
             try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
             inputEl.focus();
           }
@@ -2330,13 +2354,35 @@
         });
     }
 
-    if (sessionOk && (sessionOk === stored || sessionOk === urlCode)) {
-      unlock(sessionOk);
-    } else if (urlCode) {
-      // URL code wins if present
+    // Re-checks a code we've ALREADY optimistically unlocked with, quietly in
+    // the background. Never blocks the UI — only relocks if it comes back
+    // definitively invalid/used. A network hiccup here just leaves the
+    // person unlocked, which is the right failure direction (never make a
+    // returning, already-proven visitor sit and wait or get stuck again).
+    function backgroundRevalidate(code) {
+      fetchGate(GATE_URL + '?action=validateAccess&code=' + encodeURIComponent(code))
+        .then(function (data) {
+          if (!data || (data.status !== 'valid')) {
+            relock();
+          }
+        })
+        .catch(function () {});
+    }
+
+    var sessionOk = null;
+    try { sessionOk = sessionStorage.getItem(SESSION_KEY); } catch (_) {}
+
+    if (urlCode && urlCode !== stored && urlCode !== sessionOk) {
+      // Genuinely new link this tab hasn't verified before — worth the live check.
       tryAutoUnlock(urlCode);
+    } else if (sessionOk) {
+      // Already verified live earlier this tab session.
+      unlock(sessionOk);
     } else if (stored) {
-      tryAutoUnlock(stored);
+      // Seen before (maybe an earlier tab/session) — unlock instantly, no
+      // wait, and confirm quietly in the background instead of blocking.
+      unlock(stored);
+      backgroundRevalidate(stored);
     } else {
       setTimeout(function () { inputEl.focus(); }, 100);
     }
@@ -2381,6 +2427,111 @@
           submitEl.textContent = 'UNLOCK ↘︎';
         });
     });
+  })();
+
+  // ═══ GATE CROWD — silhouette figures walking along the bottom ═══════
+  // Plain canvas + rAF, no sprite images or libraries — keeps this cheap
+  // on mobile. Stops drawing once the gate is unlocked/hidden.
+  (function () {
+    var canvas = document.getElementById('igateCrowd');
+    if (!canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext('2d');
+    var gateEl = document.getElementById('indexGate');
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var DPR = Math.min(window.devicePixelRatio || 1, 2);
+    var W = 0, H = 0;
+
+    function resize() {
+      var rect = canvas.getBoundingClientRect();
+      W = rect.width;
+      H = rect.height;
+      canvas.width = W * DPR;
+      canvas.height = H * DPR;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var narrow = window.innerWidth < 600;
+    var count = narrow ? 6 : 10;
+    var people = [];
+    for (var i = 0; i < count; i++) {
+      var scale = 0.65 + Math.random() * 0.5;
+      people.push({
+        x: Math.random() * 1.4 - 0.2,      // fraction of width, staggered start
+        scale: scale,
+        speed: (0.028 + Math.random() * 0.02) * scale,
+        phase: Math.random() * Math.PI * 2,
+        opacity: 0.30 + scale * 0.35
+      });
+    }
+
+    function drawPerson(p) {
+      var s = 26 * p.scale;              // overall figure height unit
+      var x = p.x * (W + s * 2) - s;
+      var groundY = H - 6;
+      var strideY = Math.abs(Math.sin(p.phase)) * 2;
+
+      ctx.save();
+      ctx.translate(x, groundY);
+      ctx.fillStyle = 'rgba(40, 14, 16,' + p.opacity + ')';
+
+      // head
+      ctx.beginPath();
+      ctx.arc(0, -s * 0.92, s * 0.13, 0, Math.PI * 2);
+      ctx.fill();
+
+      // body
+      ctx.beginPath();
+      ctx.moveTo(-s * 0.13, -s * 0.78);
+      ctx.lineTo(s * 0.13, -s * 0.78);
+      ctx.lineTo(s * 0.18, -s * 0.32);
+      ctx.lineTo(-s * 0.18, -s * 0.32);
+      ctx.closePath();
+      ctx.fill();
+
+      // legs — alternate swing via sin(phase)
+      var swing = Math.sin(p.phase) * s * 0.16;
+      ctx.strokeStyle = ctx.fillStyle;
+      ctx.lineWidth = Math.max(1.5, s * 0.09);
+      ctx.lineCap = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(-s * 0.06, -s * 0.32);
+      ctx.lineTo(-s * 0.06 + swing, -strideY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(s * 0.06, -s * 0.32);
+      ctx.lineTo(s * 0.06 - swing, -strideY);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    var running = true;
+    function frame() {
+      if (!running) return;
+      if (gateEl.classList.contains('hidden')) { running = false; return; }
+
+      ctx.clearRect(0, 0, W, H);
+      for (var i = 0; i < people.length; i++) {
+        var p = people[i];
+        p.x += p.speed / 100;
+        if (p.x > 1.2) p.x = -0.2;
+        p.phase += 0.09;
+        drawPerson(p);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    if (!reduceMotion) {
+      requestAnimationFrame(frame);
+    } else {
+      // Reduced motion: draw one static frame, no loop.
+      for (var i = 0; i < people.length; i++) drawPerson(people[i]);
+    }
   })();
 </script>
 
@@ -2461,7 +2612,7 @@
       <div class="hero-meta-divider"></div>
       <div class="hero-meta-item">
         <div class="hero-meta-label">Door Closes</div>
-        <div class="hero-meta-value" id="heroDoors">6:30 PM</div>
+        <div class="hero-meta-value" id="heroDoors">7:00 PM</div>
       </div>
       <div class="hero-meta-divider"></div>
       <div class="hero-meta-item">
@@ -3294,7 +3445,7 @@
   const EVENT_CONFIG = {
     eventDate: new Date('2026-06-10T19:45:00+06:00'),
     doorsOpen: '5:30 PM',
-    doorsClose: '6:30 PM',
+    doorsClose: '7:00 PM',
     venueName: 'Phoenix Convention Center',
     venueAddress: '408 Tejgaon I/A, Dhaka 1206',
     mapUrl: 'https://maps.app.goo.gl/t6Uk6hjjPuvQa2U38',
