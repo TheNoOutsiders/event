@@ -154,7 +154,7 @@
   .top-bar {
     position: relative;
     z-index: 5;
-    padding: 28px 24px 0;
+    padding: 16px 24px 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1016,7 +1016,7 @@
      ═══════════════════════════════════════════════════════════════════ */
   .hero-section {
     text-align: center;
-    padding: 38px 0 56px;
+    padding: 20px 0 56px;
     margin-bottom: 32px;
     position: relative;
   }
@@ -1583,7 +1583,7 @@
     .hero-meta { gap: 10px; padding: 14px 16px; }
     .hero-meta-divider { display: none; }
     .hero-meta-item { min-width: calc(50% - 10px); flex: 0 0 calc(50% - 10px); }
-    .hero-section { padding: 24px 0 40px; }
+    .hero-section { padding: 14px 0 40px; }
   }
 
 @media (max-width: 480px) {
@@ -2026,10 +2026,14 @@
     font-family: 'Bebas Neue', Impact, sans-serif;
     font-size: clamp(36px, 9vw, 52px);
     letter-spacing: 5px;
-    color: #fff;
     margin: 0 0 12px;
     line-height: 1;
-    text-shadow: 0 0 30px rgba(158, 34, 44, 0.25);
+    background: linear-gradient(180deg, #fff 0%, #ccb0b2 22%, #9e222c 50%, #5a1319 75%, #0e0606 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 30px rgba(158, 34, 44, 0.35));
   }
   .igate-tagline {
     font-family: 'Inter', sans-serif;
@@ -2188,6 +2192,7 @@
   <div class="igate-ambience" aria-hidden="true"></div>
   <div class="igate-card">
     <div class="igate-eyebrow">The No Outsiders · Presents</div>
+    <div class="igate-title">THE NO OUTSIDERS</div>
     <div class="igate-tagline">Bollywood breaks meet underground beats</div>
     <div class="igate-info">
       <span>Phoenix Convention Center</span>
@@ -2387,6 +2392,8 @@
     </div>
 
     <div class="hero-eyebrow">A PRIVATE COLLECTIVE PRESENTS</div>
+
+    <div class="hero-headline">THE NO OUTSIDERS</div>
 
     <div class="hero-tagline" id="heroTagline">
       Bollywood breaks meet underground beats. Dhaka's most exclusive night returns. October 8.
