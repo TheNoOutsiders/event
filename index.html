@@ -2248,6 +2248,12 @@
   // ═══ INDEX GATE — runs synchronously, gates the whole page ═══════════
   (function () {
     var STORAGE_KEY = 'glasshouse_access_code';
+    // Marks "already verified live once this tab session" — lets repeat
+    // visits to this page (e.g. tapping back from main.html) unlock
+    // instantly with no network round-trip, instead of re-checking Apps
+    // Script every single time. Clears when the tab closes, so a brand
+    // new visit still gets the real live check.
+    var SESSION_KEY = 'glasshouse_session_ok';
     // Apps Script URL (kept in sync with the one used elsewhere on the page)
     var GATE_URL = 'https://script.google.com/macros/s/AKfycbx2WEysuk9c1mrHS_kQsWq706XZqhMg3ChwgyTr8-S9x3sOqDuuMMwioQpeq78719sk/exec';
 
@@ -2283,6 +2289,9 @@
     function unlock(code) {
       // Persist for the browser; main.html reads the same key
       try { localStorage.setItem(STORAGE_KEY, code); } catch (_) {}
+      // Remember this tab already verified the code live — skips the
+      // network check on any later visit to this page this session.
+      try { sessionStorage.setItem(SESSION_KEY, code); } catch (_) {}
       // Stash on window so the existing main.html access-code payload picks it up
       window.__ACCESS_CODE__ = code;
       // Reveal the site
@@ -2297,6 +2306,11 @@
     // Also accept ?access=CODE in the URL for backward compatibility with old links
     var urlParams = new URLSearchParams(window.location.search);
     var urlCode = (urlParams.get('access') || '').trim();
+
+    // Already verified live earlier this tab session — unlock immediately,
+    // no fetch, no waiting, no flash of the lock card.
+    var sessionOk = null;
+    try { sessionOk = sessionStorage.getItem(SESSION_KEY); } catch (_) {}
 
     function tryAutoUnlock(code) {
       // Re-validate silently — if the code was burned since last visit, lock again.
@@ -2316,7 +2330,9 @@
         });
     }
 
-    if (urlCode) {
+    if (sessionOk && (sessionOk === stored || sessionOk === urlCode)) {
+      unlock(sessionOk);
+    } else if (urlCode) {
       // URL code wins if present
       tryAutoUnlock(urlCode);
     } else if (stored) {
@@ -2662,7 +2678,7 @@
       priceLabel: 'PER PERSON',
       featured: false,
       maxSize: 5,
-      perks: ['General entry', 'Dance floor access', '1 welcome drink', 'Coat check']
+      perks: []
     }
   ];
 
