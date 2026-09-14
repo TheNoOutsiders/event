@@ -1058,7 +1058,7 @@
     letter-spacing: 10px;
     line-height: 0.95;
     margin: 0 0 28px;
-    background: linear-gradient(180deg, #fff 0%, #9e222c 12%, #5a1319 40%, #0e0606 85%, #0e0606 100%);
+    background: linear-gradient(180deg, #fff 0%, #ece0e1 30%, #ccb0b2 60%, #721820 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -2138,6 +2138,27 @@
   .igate-feedback.checking { color: rgba(234, 221, 222, 0.7); }
   .igate-feedback.success { color: rgba(150, 230, 180, 0.95); }
 
+  .igate-spinner {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    margin-right: 8px;
+    border: 2px solid rgba(158, 34, 44, 0.35);
+    border-top-color: #d61828;
+    border-radius: 50%;
+    vertical-align: -2px;
+    animation: igateSpin 0.7s linear infinite;
+  }
+  @keyframes igateSpin {
+    to { transform: rotate(360deg); }
+  }
+  .igate-feedback.retry-link {
+    color: rgba(214, 24, 40, 0.95);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
   .igate-footer {
     margin-top: 24px;
     padding-top: 18px;
@@ -2241,6 +2262,24 @@
       feedback.className = 'igate-feedback' + (state ? ' ' + state : '');
     }
 
+    // Fetch with a timeout + one silent retry. Apps Script can be slow
+    // (redirect hop + occasional cold start) — one retry smooths over a
+    // single dropped/slow request without making the user do anything.
+    function fetchGate(url, attempt) {
+      attempt = attempt || 1;
+      var controller = new AbortController();
+      var timer = setTimeout(function () { controller.abort(); }, 9000);
+      return fetch(url, { signal: controller.signal })
+        .then(function (r) { clearTimeout(timer); return r.json(); })
+        .catch(function (err) {
+          clearTimeout(timer);
+          if (attempt < 2) {
+            return fetchGate(url, attempt + 1);
+          }
+          throw err;
+        });
+    }
+
     function unlock(code) {
       // Persist for the browser; main.html reads the same key
       try { localStorage.setItem(STORAGE_KEY, code); } catch (_) {}
@@ -2261,8 +2300,7 @@
 
     function tryAutoUnlock(code) {
       // Re-validate silently — if the code was burned since last visit, lock again.
-      fetch(GATE_URL + '?action=validateAccess&code=' + encodeURIComponent(code))
-        .then(function (r) { return r.json(); })
+      fetchGate(GATE_URL + '?action=validateAccess&code=' + encodeURIComponent(code))
         .then(function (data) {
           if (data && data.status === 'valid') {
             unlock(code);
@@ -2296,11 +2334,10 @@
         return;
       }
       submitEl.disabled = true;
-      submitEl.textContent = 'CHECKING…';
+      submitEl.innerHTML = '<span class="igate-spinner" aria-hidden="true"></span>CHECKING…';
       setFeedback('Verifying your code…', 'checking');
 
-      fetch(GATE_URL + '?action=validateAccess&code=' + encodeURIComponent(code))
-        .then(function (r) { return r.json(); })
+      fetchGate(GATE_URL + '?action=validateAccess&code=' + encodeURIComponent(code))
         .then(function (data) {
           if (data && data.status === 'valid') {
             setFeedback('Welcome.', 'success');
@@ -2316,7 +2353,12 @@
           }
         })
         .catch(function () {
-          setFeedback('Connection issue. Refresh and try again.');
+          feedback.textContent = 'Connection issue. Tap to retry.';
+          feedback.className = 'igate-feedback retry-link';
+          feedback.onclick = function () {
+            feedback.onclick = null;
+            formEl.requestSubmit ? formEl.requestSubmit() : formEl.dispatchEvent(new Event('submit', { cancelable: true }));
+          };
         })
         .then(function () {
           submitEl.disabled = false;
@@ -3448,10 +3490,15 @@
   startLiveTick();
 
   // ── Bootstrap ──
-  fetchTiers().then(() => {
-    renderTiers();
-  });
-  fetchConfig();
+  // Slight delay so these don't compete for bandwidth with the access-gate
+  // check firing at the very top of the page load (especially on slow
+  // connections, where the unlock check should get priority).
+  setTimeout(function () {
+    fetchTiers().then(() => {
+      renderTiers();
+    });
+    fetchConfig();
+  }, 400);
 
   // Render defaults immediately so the page never looks empty
   setTimeout(() => {
