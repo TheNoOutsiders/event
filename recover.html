@@ -411,7 +411,7 @@
     />
     <div class="field-hint">Phone is fastest match · email also works · TNO-XXXX as fallback</div>
 
-    <button type="button" class="submit-btn" id="searchBtn">LOOKUP ↘</button>
+    <button type="button" class="submit-btn" id="searchBtn">LOOKUP ↘︎</button>
 
     <div class="status" id="statusMsg"></div>
   </div>
@@ -462,9 +462,9 @@
 
   // Event display config — same values main.html uses for the ticket stub
   var EVENT_DISPLAY = {
-    venue: 'Phoenix Convention Hall',
+    venue: 'Phoenix Convention Center',
     doorsOpen: '07:45 PM',
-    eventDate: new Date('2026-10-08T19:30:00')
+    eventDate: new Date('2026-10-15T19:30:00')
   };
 
   var searchInput = document.getElementById('searchInput');
@@ -499,7 +499,7 @@
     if (loading) {
       searchBtn.innerHTML = '<span class="spinner"></span>LOOKING UP…';
     } else {
-      searchBtn.textContent = 'LOOKUP ↘';
+      searchBtn.textContent = 'LOOKUP ↘︎';
     }
   }
 
