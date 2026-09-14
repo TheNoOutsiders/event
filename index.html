@@ -4,16 +4,16 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>The No Outsiders — Choose Your Experience</title>
-<meta name="description" content="One room. No outsiders. An immersive night of EDM meets Bollywood — Dhaka, October 8, 2026." />
+<meta name="description" content="One room. No outsiders. An immersive night of EDM meets Bollywood — Dhaka, October 15, 2026." />
 <meta property="og:title" content="The No Outsiders — Choose Your Experience" />
-<meta property="og:description" content="An immersive night of EDM meets Bollywood. Dhaka, October 8, 2026." />
+<meta property="og:description" content="An immersive night of EDM meets Bollywood. Dhaka, October 15, 2026." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="https://thenooutsiders.github.io/event/poster.jpeg" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="The No Outsiders — Choose Your Experience" />
-<meta name="twitter:description" content="An immersive night of EDM meets Bollywood. Dhaka, October 8, 2026." />
+<meta name="twitter:description" content="An immersive night of EDM meets Bollywood. Dhaka, October 15, 2026." />
 <meta name="twitter:image" content="https://thenooutsiders.github.io/event/poster.jpeg" />
 <link rel="icon" type="image/png" href="logo.png" />
 
@@ -1026,7 +1026,7 @@
     align-items: center;
     justify-content: center;
     gap: 16px;
-    margin-bottom: 22px;
+    margin-bottom: 10px;
     color: var(--gold);
   }
   .hero-rule-line {
@@ -1058,7 +1058,7 @@
     letter-spacing: 10px;
     line-height: 0.95;
     margin: 0 0 28px;
-    background: linear-gradient(180deg, #fff 0%, #ece0e1 30%, #ccb0b2 60%, #721820 100%);
+    background: linear-gradient(180deg, #fff 0%, #9e222c 12%, #5a1319 40%, #0e0606 85%, #0e0606 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -2197,7 +2197,7 @@
     <div class="igate-info">
       <span>Phoenix Convention Center</span>
       <span class="igate-info-dot"></span>
-      <span>Oct 8 · 2026</span>
+      <span>Oct 15 · 2026</span>
     </div>
     <form class="igate-form" id="indexGateForm" autocomplete="off">
       <div class="igate-input-wrap">
@@ -2212,7 +2212,7 @@
           spellcheck="false"
         />
       </div>
-      <button type="submit" class="igate-submit" id="indexGateSubmit">UNLOCK ↘</button>
+      <button type="submit" class="igate-submit" id="indexGateSubmit">UNLOCK ↘︎</button>
       <div class="igate-feedback" id="indexGateFeedback"></div>
     </form>
     <div class="igate-footer">
@@ -2320,7 +2320,7 @@
         })
         .then(function () {
           submitEl.disabled = false;
-          submitEl.textContent = 'UNLOCK ↘';
+          submitEl.textContent = 'UNLOCK ↘︎';
         });
     });
   })();
@@ -2365,7 +2365,7 @@
 
     <div class="confirm-actions">
       <button type="button" class="confirm-btn confirm-cancel" data-confirm-cancel>Cancel</button>
-      <button type="button" class="confirm-btn confirm-go" id="confirmGo">Yes, Continue →</button>
+      <button type="button" class="confirm-btn confirm-go" id="confirmGo">Yes, Continue →︎</button>
     </div>
   </div>
 </div>
@@ -2394,10 +2394,6 @@
     <div class="hero-eyebrow">A PRIVATE COLLECTIVE PRESENTS</div>
 
     <div class="hero-headline">THE NO OUTSIDERS</div>
-
-    <div class="hero-tagline" id="heroTagline">
-      Bollywood breaks meet underground beats. Dhaka's most exclusive night returns. October 8.
-    </div>
 
     <div class="hero-meta">
       <div class="hero-meta-item">
@@ -2491,7 +2487,7 @@
         <div class="venue-name" id="venueName">Phoenix Convention Center</div>
         <div class="venue-address" id="venueAddress">408 Tejgaon I/A, Dhaka 1206</div>
         <a href="https://www.google.com/maps/place/Phoenix+Convention+Center/@23.760179,90.3960258,17z/data=!3m1!4b1!4m6!3m5!1s0x3755b9000b385a13:0xca58c9d133771ed6!8m2!3d23.760179!4d90.3960258!16s%2Fg%2F11mdwfjcnn?entry=ttu&g_ep=EgoyMDI2MDgzMC4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" class="venue-cta">
-          <span class="venue-cta-icon">↗</span>
+          <span class="venue-cta-icon">↗︎</span>
           <span>OPEN IN GOOGLE MAPS</span>
         </a>
         <div class="venue-helper">
@@ -3242,9 +3238,9 @@
     doorsOpen: '5:30 PM',
     doorsClose: '6:30 PM',
     venueName: 'Phoenix Convention Center',
-    venueAddress: 'Dhaka, Bangladesh',
+    venueAddress: '408 Tejgaon I/A, Dhaka 1206',
     mapUrl: 'https://maps.app.goo.gl/t6Uk6hjjPuvQa2U38',
-    tagline: "Bollywood breaks meet underground beats. Dhaka's most exclusive night returns. October 8.",
+    tagline: "Bollywood breaks meet underground beats. Dhaka's most exclusive night returns. October 15.",
     capacity: 400
   };
 
@@ -3396,7 +3392,7 @@
   const FAKE_START_PERCENT   = 0;           // ← where the bar sits today
   const FAKE_END_PERCENT     = 95;          // ← where it lands on event day (never 100%)
   const FAKE_START_DATE      = '2026-09-02'; // ← today (start of climb)
-  const FAKE_EVENT_DATE      = '2026-10-08'; // ← event day (end of climb)
+  const FAKE_EVENT_DATE      = '2026-10-15'; // ← event day (end of climb)
   const LIVE_TICK_INTERVAL_MS = 1800000;     // 30 min — subtle "someone just bought" feel
   const LIVE_TICK_HARD_CAP_PERCENT = 99;     // never reach 100%
 
