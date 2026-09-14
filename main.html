@@ -1203,12 +1203,12 @@
       text-transform: uppercase;
       line-height: 1;
       background: linear-gradient(180deg,
-        #0e0606 0%,
-        #5a1319 12%,
-        #9e222c 22%,
-        #5a1319 35%,
-        #0e0606 55%,
-        #0e0606 100%
+        #4a1a1d 0%,
+        #b0333d 15%,
+        #e0483d 30%,
+        #b0333d 48%,
+        #721820 68%,
+        #4a1a1d 100%
       ) !important;
       -webkit-background-clip: text !important;
       background-clip: text !important;
@@ -2138,10 +2138,10 @@
       line-height: 1;
       background: linear-gradient(180deg,
         #ffffff 0%,
-        #9e222c 12%,
-        #5a1319 40%,
-        #0e0606 85%,
-        #0e0606 100%
+        #e0483d 20%,
+        #b0333d 45%,
+        #721820 70%,
+        #4a1a1d 100%
       );
       -webkit-background-clip: text;
       background-clip: text;
@@ -2747,7 +2747,7 @@
       <div class="event-strip-meta">
         <span class="event-strip-meta-item" id="eventStripDate">OCT 15 · 2026</span>
         <span class="event-strip-meta-divider">·</span>
-        <span class="event-strip-meta-item" id="eventStripDoors">7:45 PM</span>
+        <span class="event-strip-meta-item" id="eventStripDoors">7 to 10pm</span>
         <span class="event-strip-meta-divider">·</span>
         <span class="event-strip-meta-item" id="venueDisplay">Phoenix Convention Center</span>
       </div>
@@ -2992,7 +2992,7 @@
           <div class="tier-panel-section-label">✦ After you book</div>
           <ul class="tier-panel-perks">
             <li><span class="tp-perk-icon">◆</span>Instant confirmation with QR ticket</li>
-            <li><span class="tp-perk-icon">◆</span>Doors open at <span id="tpDoors">5:30 PM</span> and close at <span id="tpDoorsClose">6:30 PM</span></li>
+            <li><span class="tp-perk-icon">◆</span>Doors open at <span id="tpDoors">5:30 PM</span> and close at <span id="tpDoorsClose">7:00 PM</span></li>
             <li><span class="tp-perk-icon">◆</span>Bring valid ID matching your booking name</li>
             <li><span class="tp-perk-icon">◆</span>Show your QR at the door for entry</li>
           </ul>
@@ -3140,7 +3140,7 @@
       spotsText: 'Only 150 priority spots remaining tonight',
       maxTickets: 10,
       doorsOpen: '5:30 PM',
-      doorsClose: '6:30 PM',
+      doorsClose: '7:00 PM',
       venue: 'Phoenix Convention Center',
       location: 'Phoenix Convention Center, 408 Tejgaon I/A, Dhaka 1206, Bangladesh',
       eventDate: new Date('2026-10-15T19:30:00')
@@ -3947,7 +3947,9 @@
       setText('locationDisplay',   EVENT_CONFIG.location || '—');
 
       // New event strip elements (compact header replacing the old hero panel)
-      setText('eventStripDoors',   EVENT_CONFIG.doorsOpen);
+      // eventStripDoors is a fixed label ("7 to 10pm"), intentionally not
+      // tied to EVENT_CONFIG.doorsOpen — that field drives the "Doors open
+      // at X and close at Y" sentence elsewhere instead.
       if (EVENT_CONFIG.eventDate instanceof Date && !isNaN(EVENT_CONFIG.eventDate)) {
         const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
         const d = EVENT_CONFIG.eventDate;
